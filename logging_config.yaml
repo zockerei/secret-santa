@@ -1,0 +1,32 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  basic:
+    format: '[{asctime}] [{levelname:<8}] {name}: {message}'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    style: '{'
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: brief
+      stream: ext://sys.stdout
+
+    file:
+      class: "logging.FileHandler",
+      formatter: "basic",
+      filename: "logging.log",
+      encoding: "utf-8",
+      mode: "w"
+
+loggers:
+  main:
+    level: INFO
+    handlers: [file, console]
+    propagate: no
+
+  sql:
+    level: INFO
+    handlers: [file, console]
+    propagate: no
