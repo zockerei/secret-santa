@@ -7,26 +7,21 @@ formatters:
     datefmt: '%Y-%m-%d %H:%M:%S'
     style: '{'
 
-  handlers:
-    console:
-      class: logging.StreamHandler
-      formatter: brief
-      stream: ext://sys.stdout
+handlers:
+  file:
+    class: logging.FileHandler
+    formatter: basic
+    filename: logger.log
+    encoding: utf-8
+    mode: w
 
-    file:
-      class: "logging.FileHandler",
-      formatter: "basic",
-      filename: "logging.log",
-      encoding: "utf-8",
-      mode: "w"
+  console:
+    class: logging.StreamHandler
+    formatter: basic
+    stream: ext://sys.stdout
 
 loggers:
   main:
-    level: INFO
+    level: DEBUG
     handlers: [file, console]
-    propagate: no
-
-  sql:
-    level: INFO
-    handlers: [file, console]
-    propagate: no
+    propagate: False
