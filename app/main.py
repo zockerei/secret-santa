@@ -17,7 +17,7 @@ sql_statements = sql.SqlStatements()
 sql_statements.create_tables()
 
 # Logging setup
-with open('logging_config.yaml', 'r') as config_file:
+with open('../logging_config.yaml', 'r') as config_file:
     logging_config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(logging_config)
 
