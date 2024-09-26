@@ -25,3 +25,8 @@ loggers:
     level: DEBUG
     handlers: [file, console]
     propagate: False
+
+  sql:
+    level: DEBUG
+    handlers: [file, console]
+    propagate: False
