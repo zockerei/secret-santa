@@ -14,7 +14,7 @@ class SqlStatements:
     # sqlite connection
     try:
         _sql_logger.debug('Setting up sql connection')
-        _sqlite_connection = sqlite3.connect('../instance/secret_santa.db')
+        _sqlite_connection = sqlite3.connect('secret_santa.db')
         cursor = _sqlite_connection.cursor()
         _sql_logger.info('Setup of sql connection complete')
     except sqlite3.Error as error:
