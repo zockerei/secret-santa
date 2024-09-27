@@ -1,5 +1,5 @@
 .idea/
 sqlite3.exe
 logger.log
-secret_santa.db
+instance/secret_santa.db
 __pycache__/
