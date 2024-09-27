@@ -1,5 +1,5 @@
 .idea/
-sqlite3.exe
-logger.log
+resources/sqlite3.exe
+logging/logger.log
 instance/secret_santa.db
 __pycache__/
