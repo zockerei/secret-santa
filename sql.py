@@ -7,96 +7,120 @@ class SqlStatements:
     """
     Class containing SQL statements and methods
     """
-    # logging setup
-    _sql_logger = logging.getLogger('sql')
+    # Logging setup
+    _sql_logger = logging.getLogger(__name__)
     _sql_logger.info('Logging setup complete')
 
-    # sqlite connection
-    try:
-        _sql_logger.debug('Setting up sql connection')
-        _sqlite_connection = sqlite3.connect('secret_santa.db')
-        cursor = _sqlite_connection.cursor()
-        _sql_logger.info('Setup of sql connection complete')
-    except sqlite3.Error as error:
-        _sql_logger.error(f'Connection to database failed: {error}')
+    def __init__(self, db_path):
+        """
+        Initialize the SqlStatements object with the path to the database.
 
-    @staticmethod
+        Parameters:
+            db_path (str): Path to the SQLite database file.
+        """
+        self.db_path = db_path
+        self._sqlite_connection = None
+        self.cursor = None
+
+    def _connect(self):
+        """
+        Establishes a connection to the SQLite database and sets up the cursor.
+        """
+        try:
+            self._sqlite_connection = sqlite3.connect(self.db_path)
+            self.cursor = self._sqlite_connection.cursor()
+            self._sql_logger.debug(f'Connected to database at {self.db_path}')
+        except sqlite3.Error as error:
+            self._sql_logger.error(f'Failed to connect to database: {error}')
+            raise error
+
+    def _disconnect(self):
+        """
+        Closes the SQLite connection and cursor.
+        """
+        if self.cursor:
+            self.cursor.close()
+        if self._sqlite_connection:
+            self._sqlite_connection.close()
+            self._sql_logger.debug('Disconnected from database')
+
     def _execute_query(
+            self,
             query: str,
             success_message: str = 'Success',
             error_message: str = 'Error',
             params: Optional[Dict[str, Any]] = None,
-            fetch_one: bool = False,
+            fetch_one: bool = False
     ) -> Optional[List[Tuple]]:
         """
-        Execute a SQL query and return the result.
+        Execute a SQL query and return the result if applicable.
 
         Parameters:
             query (str): The SQL query to execute.
-            success_message (str, optional): Success message to log. Defaults to 'Success'.
-            error_message (str, optional): Error message to log. Defaults to 'Error'.
-            params (Dict[str, Any], optional): Parameters for the query as a dictionary of parameter names
-                and values. Defaults to None.
-            fetch_one (bool, optional): Whether to fetch only one result. Defaults to False.
+            success_message (str): Message to log upon successful execution.
+            error_message (str): Message to log if an error occurs.
+            params (Optional[Dict[str, Any]]): Dictionary of parameters to pass to the query.
+            fetch_one (bool): Whether to fetch only one result (True) or all results (False).
 
         Returns:
-            Optional[List[Tuple]]: A list of tuples containing the result of the query, or None if an error occurred.
+            Optional[List[Tuple]]: Result of the query if applicable, or None if an error occurs.
         """
         try:
-            with SqlStatements._sqlite_connection:
-                if params:
-                    SqlStatements.cursor.execute(query, params)
-                else:
-                    SqlStatements.cursor.execute(query)
+            self._connect()
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
 
-                if fetch_one:
-                    result = SqlStatements.cursor.fetchone()
-                else:
-                    result = SqlStatements.cursor.fetchall()
+            if fetch_one:
+                result = self.cursor.fetchone()
+            else:
+                result = self.cursor.fetchall()
 
-                SqlStatements._sql_logger.info(success_message)
-                if result:
-                    SqlStatements._sql_logger.debug(f'Result: {result}')
-                return result
+            self._sqlite_connection.commit()
+            self._sql_logger.info(success_message)
+            if result:
+                self._sql_logger.debug(f'Result: {result}')
+            return result
 
         except sqlite3.Error as error:
-            SqlStatements._sql_logger.error(f'{error_message}: {error}')
+            self._sql_logger.error(f'{error_message}: {error}')
             return None
 
-    @staticmethod
-    def create_tables():
+        finally:
+            self._disconnect()
+
+    def create_tables(self):
         """
         Create tables for the Person and Assignment database.
         """
-
-        # Create Person table
         person_table_script = """
-            create table if not exists Person (
-                id integer primary key autoincrement,
-                name text unique not null
-            );"""
-        SqlStatements._execute_query(
+            CREATE TABLE IF NOT EXISTS Person (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL
+            );
+        """
+        self._execute_query(
             person_table_script,
             'Person table created',
             'Failed to create Person table'
         )
 
-        # Create Assignment table
         receiver_table_script = """
-            create table if not exists receiver (
-                id integer primary key autoincrement,
-                person_id integer not null,
-                receiver_name text not null,
-                foreign key (person_id) references Person(id)
-            );"""
-        SqlStatements._execute_query(
+            CREATE TABLE IF NOT EXISTS receiver (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                person_id INTEGER NOT NULL,
+                receiver_name TEXT NOT NULL,
+                FOREIGN KEY (person_id) REFERENCES Person(id)
+            );
+        """
+        self._execute_query(
             receiver_table_script,
-            'Assignment table created',
-            'Failed to create Assignment table'
+            'Receiver table created',
+            'Failed to create receiver table'
         )
 
-    @staticmethod
-    def add_name(name: str):
+    def add_member(self, name: str):
         """
         Add a person's name to the Person table.
 
@@ -104,56 +128,97 @@ class SqlStatements:
             name (str): The name of the person to add.
         """
         insert_query = """
-            insert into Person (name) 
-            values (:name)
+            INSERT INTO Person (name) 
+            VALUES (:name)
         """
-        SqlStatements._execute_query(
+        self._execute_query(
             insert_query,
             f'Name "{name}" added to Person table',
             f'Failed to add name "{name}"',
             {'name': name}
         )
 
-    @staticmethod
-    def add_receiver(person_id: int, receiver_name: str):
+    def add_receiver(self, person_id: int, receiver_name: str):
         """
-        Add the past year's receiver's name to the receiver table.
+        Add a receiver's name to the receiver table for a specific person.
 
         Parameters:
-            person_id (int): The ID of the person.
-            receiver_name (str): The name of the person they were assigned in the previous year.
+            person_id (int): The ID of the person in the Person table.
+            receiver_name (str): The name of the receiver to add for the person.
         """
         insert_query = """
-            insert into receiver (person_id, receiver_name) 
-            values (:person_id, :receiver_name)
+            INSERT INTO receiver (person_id, receiver_name) 
+            VALUES (:person_id, :receiver_name)
         """
-        SqlStatements._execute_query(
+        self._execute_query(
             insert_query,
             f'Receiver "{receiver_name}" added for person with ID {person_id}',
             f'Failed to add receiver "{receiver_name}" for person with ID {person_id}',
             {'person_id': person_id, 'receiver_name': receiver_name}
         )
 
-    @staticmethod
-    def get_all_participants() -> list | None:
+    def remove_member(self, person_id: int):
+        """
+        Remove a member from the Person table and associated receivers.
+
+        Parameters:
+            person_id (int): The ID of the person to remove.
+        """
+        # Remove associated receivers first to maintain referential integrity
+        delete_receivers_query = """
+            delete from receiver where person_id = :person_id
+        """
+        self._execute_query(
+            delete_receivers_query,
+            f'Removed receivers for person_id {person_id}',
+            f'Failed to remove receivers for person_id {person_id}',
+            {'person_id': person_id}
+        )
+
+        # Now remove the member from the Person table
+        delete_person_query = """
+            delete from Person where id = :person_id
+        """
+        self._execute_query(
+            delete_person_query,
+            f'Removed person with ID {person_id} from Person table',
+            f'Failed to remove person with ID {person_id}',
+            {'person_id': person_id}
+        )
+
+    def remove_receiver(self, person_id: int, receiver_name: str):
+        """
+        Remove a specific receiver for a given person from the receiver table.
+
+        Parameters:
+            person_id (int): The ID of the person whose receiver should be removed.
+            receiver_name (str): The name of the receiver to remove.
+        """
+        delete_receiver_query = """
+            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name
+        """
+        self._execute_query(
+            delete_receiver_query,
+            f'Removed receiver "{receiver_name}" for person_id {person_id}',
+            f'Failed to remove receiver "{receiver_name}" for person_id {person_id}',
+            {'person_id': person_id, 'receiver_name': receiver_name}
+        )
+
+    def get_all_participants(self) -> Optional[List[Tuple[int, str]]]:
         """
         Fetch all participants from the Person table.
 
         Returns:
-            list: A list of tuples where each tuple contains the ID and name of a participant.
+            Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a person.
         """
-        query = "select id, name from Person"
-
-        participants = SqlStatements._execute_query(
+        query = "SELECT id, name FROM Person"
+        return self._execute_query(
             query,
             'Fetched participants',
             'Failed to fetch participants'
         )
 
-        return participants
-
-    @staticmethod
-    def get_past_receivers_for_person(person_id: int) -> List[str]:
+    def get_past_receivers_for_person(self, person_id: int) -> List[str]:
         """
         Fetch past receivers for a specific person from the receiver table.
 
@@ -161,55 +226,52 @@ class SqlStatements:
             person_id (int): The ID of the person to fetch receivers for.
 
         Returns:
-            List[str]: A list of past receiver names for the given person.
+            List[str]: A list of receiver names associated with the given person ID.
         """
         query = """
             select receiver_name from receiver
             where person_id = :person_id
         """
-        past_receivers = SqlStatements._execute_query(
+        past_receivers = self._execute_query(
             query,
-            f"Fetched past receivers for person_id {person_id}",
+            f'Fetched past receivers for person_id {person_id}',
             f'Failed to fetch past receivers for person_id {person_id}',
             {'person_id': person_id}
         )
         return [row[0] for row in past_receivers] if past_receivers else []
 
-    @staticmethod
-    def get_participants_count() -> tuple:
+    def get_participants_count(self) -> int:
         """
         Count the number of participants in the Person table.
 
         Returns:
-            int: The number of participants.
+            int: The total number of participants in the Person table.
         """
         query = "select count(*) from Person"
-        count = SqlStatements._execute_query(
+        count = self._execute_query(
             query,
-            f'Checked participants count',
-            f'Failed to get participants count',
+            'Checked participants count',
+            'Failed to get participants count',
             fetch_one=True
         )
-        return count[0]
+        return count[0] if count else 0
 
-    @staticmethod
-    def get_person_id_by_name(name: str) -> tuple:
+    def get_person_id_by_name(self, name: str) -> Optional[int]:
         """
         Fetch the ID of a person by their name from the Person table.
 
         Parameters:
-            name (str): The name of the person to fetch the ID for.
+            name (str): The name of the person to look up.
 
         Returns:
-            Optional[int]: The ID of the person, or None if not found.
+            Optional[int]: The ID of the person if found, or None if not found.
         """
         query = "select id from Person where name = :name"
-        person_id = SqlStatements._execute_query(
+        person_id = self._execute_query(
             query,
-            f"Fetched person_id for {name}",
-            f'Fetching of person_id',
+            f'Fetched person_id for {name}',
+            'Failed to fetch person_id',
             {'name': name},
-            True
+            fetch_one=True
         )
-
-        return person_id[0]
+        return person_id[0] if person_id else None
