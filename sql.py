@@ -12,6 +12,12 @@ class SqlStatements:
     _sql_logger.info('Logging setup complete')
 
     def __init__(self, db_path):
+        """
+        Initialize the SqlStatements object with the path to the database.
+
+        Parameters:
+            db_path (str): Path to the SQLite database file.
+        """
         self.db_path = db_path
         self._sqlite_connection = None
         self.cursor = None
@@ -47,7 +53,17 @@ class SqlStatements:
             fetch_one: bool = False
     ) -> Optional[List[Tuple]]:
         """
-        Execute a SQL query and return the result.
+        Execute a SQL query and return the result if applicable.
+
+        Parameters:
+            query (str): The SQL query to execute.
+            success_message (str): Message to log upon successful execution.
+            error_message (str): Message to log if an error occurs.
+            params (Optional[Dict[str, Any]]): Dictionary of parameters to pass to the query.
+            fetch_one (bool): Whether to fetch only one result (True) or all results (False).
+
+        Returns:
+            Optional[List[Tuple]]: Result of the query if applicable, or None if an error occurs.
         """
         try:
             self._connect()
@@ -104,9 +120,12 @@ class SqlStatements:
             'Failed to create receiver table'
         )
 
-    def add_name(self, name: str):
+    def add_member(self, name: str):
         """
         Add a person's name to the Person table.
+
+        Parameters:
+            name (str): The name of the person to add.
         """
         insert_query = """
             INSERT INTO Person (name) 
@@ -121,7 +140,11 @@ class SqlStatements:
 
     def add_receiver(self, person_id: int, receiver_name: str):
         """
-        Add the past year's receiver's name to the receiver table.
+        Add a receiver's name to the receiver table for a specific person.
+
+        Parameters:
+            person_id (int): The ID of the person in the Person table.
+            receiver_name (str): The name of the receiver to add for the person.
         """
         insert_query = """
             INSERT INTO receiver (person_id, receiver_name) 
@@ -134,9 +157,59 @@ class SqlStatements:
             {'person_id': person_id, 'receiver_name': receiver_name}
         )
 
+    def remove_member(self, person_id: int):
+        """
+        Remove a member from the Person table and associated receivers.
+
+        Parameters:
+            person_id (int): The ID of the person to remove.
+        """
+        # Remove associated receivers first to maintain referential integrity
+        delete_receivers_query = """
+            delete from receiver where person_id = :person_id
+        """
+        self._execute_query(
+            delete_receivers_query,
+            f'Removed receivers for person_id {person_id}',
+            f'Failed to remove receivers for person_id {person_id}',
+            {'person_id': person_id}
+        )
+
+        # Now remove the member from the Person table
+        delete_person_query = """
+            delete from Person where id = :person_id
+        """
+        self._execute_query(
+            delete_person_query,
+            f'Removed person with ID {person_id} from Person table',
+            f'Failed to remove person with ID {person_id}',
+            {'person_id': person_id}
+        )
+
+    def remove_receiver(self, person_id: int, receiver_name: str):
+        """
+        Remove a specific receiver for a given person from the receiver table.
+
+        Parameters:
+            person_id (int): The ID of the person whose receiver should be removed.
+            receiver_name (str): The name of the receiver to remove.
+        """
+        delete_receiver_query = """
+            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name
+        """
+        self._execute_query(
+            delete_receiver_query,
+            f'Removed receiver "{receiver_name}" for person_id {person_id}',
+            f'Failed to remove receiver "{receiver_name}" for person_id {person_id}',
+            {'person_id': person_id, 'receiver_name': receiver_name}
+        )
+
     def get_all_participants(self) -> Optional[List[Tuple[int, str]]]:
         """
         Fetch all participants from the Person table.
+
+        Returns:
+            Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a person.
         """
         query = "SELECT id, name FROM Person"
         return self._execute_query(
@@ -148,10 +221,16 @@ class SqlStatements:
     def get_past_receivers_for_person(self, person_id: int) -> List[str]:
         """
         Fetch past receivers for a specific person from the receiver table.
+
+        Parameters:
+            person_id (int): The ID of the person to fetch receivers for.
+
+        Returns:
+            List[str]: A list of receiver names associated with the given person ID.
         """
         query = """
-            SELECT receiver_name FROM receiver
-            WHERE person_id = :person_id
+            select receiver_name from receiver
+            where person_id = :person_id
         """
         past_receivers = self._execute_query(
             query,
@@ -164,8 +243,11 @@ class SqlStatements:
     def get_participants_count(self) -> int:
         """
         Count the number of participants in the Person table.
+
+        Returns:
+            int: The total number of participants in the Person table.
         """
-        query = "SELECT COUNT(*) FROM Person"
+        query = "select count(*) from Person"
         count = self._execute_query(
             query,
             'Checked participants count',
@@ -177,8 +259,14 @@ class SqlStatements:
     def get_person_id_by_name(self, name: str) -> Optional[int]:
         """
         Fetch the ID of a person by their name from the Person table.
+
+        Parameters:
+            name (str): The name of the person to look up.
+
+        Returns:
+            Optional[int]: The ID of the person if found, or None if not found.
         """
-        query = "SELECT id FROM Person WHERE name = :name"
+        query = "select id from Person where name = :name"
         person_id = self._execute_query(
             query,
             f'Fetched person_id for {name}',

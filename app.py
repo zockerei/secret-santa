@@ -32,15 +32,32 @@ sql_statements = sql.SqlStatements(db_path)
 
 @app.route('/')
 def index():
+    """
+    Render the homepage that displays the list of all participants.
+
+    This function fetches all participants from the database and renders the index.html template to display them.
+
+    Returns:
+        str: The rendered HTML content for the homepage.
+    """
     participants = sql_statements.get_all_participants()
     return render_template('index.html', participants=participants)
 
 
 @app.route('/add_member', methods=['GET', 'POST'])
 def add_member():
+    """
+    Handle the 'Add Member' form.
+
+    This function allows users to add a new member to the database via a form. If the request method is POST,
+    the function extracts the member's name from the form and adds it to the database, then redirects to the index page.
+
+    Returns:
+        str: If GET, renders the 'add_member.html' form. If POST, redirects to the homepage.
+    """
     if request.method == 'POST':
         name = request.form['name']
-        sql_statements.add_name(name)
+        sql_statements.add_member(name)
         return redirect(url_for('index'))
     return render_template('add_member.html')
 
@@ -48,6 +65,15 @@ def add_member():
 # Route for admin to start a new round
 @app.route('/start_new_run')
 def start_new_run():
+    """
+    Start a new Secret Santa round.
+
+    This function fetches the past Secret Santa assignments from the database, generates new assignments,
+    stores the new assignments in the database, and renders the result page to display the new pairings.
+
+    Returns:
+        str: The rendered HTML content displaying the new Secret Santa assignments.
+    """
     # Fetch past assignments from the database
     past_receiver = logic.fetch_past_receiver(sql_statements)
 
