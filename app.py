@@ -35,7 +35,7 @@ def index():
     """
     Render the homepage that displays the list of all participants.
 
-    This function fetches all participants from the database and renders the index.html template to display them.
+    Fetches all participants from the database and renders the index.html template to display them.
 
     Returns:
         str: The rendered HTML content for the homepage.
@@ -49,7 +49,7 @@ def add_member():
     """
     Handle the 'Add Member' form.
 
-    This function allows users to add a new member to the database via a form. If the request method is POST,
+    Allows users to add a new member to the database via a form. If the request method is POST,
     the function extracts the member's name from the form and adds it to the database, then redirects to the index page.
 
     Returns:
@@ -62,13 +62,33 @@ def add_member():
     return render_template('add_member.html')
 
 
-# Route for admin to start a new round
+@app.route('/scoreboard')
+def scoreboard():
+    """
+    View to display the scoreboard of all participants and their past receivers.
+
+    Fetches all participants and their past receivers from the database and renders the scoreboard.html
+    template to display the data.
+
+    Returns:
+        str: The rendered HTML content displaying the scoreboard of participants and their past receivers.
+    """
+    participants = sql_statements.get_all_participants()
+    scoreboard_data = {}
+
+    for person_id, name in participants:
+        receivers = sql_statements.get_past_receivers_for_person(person_id)
+        scoreboard_data[name] = receivers
+
+    return render_template('scoreboard.html', scoreboard=scoreboard_data)
+
+
 @app.route('/start_new_run')
 def start_new_run():
     """
     Start a new Secret Santa round.
 
-    This function fetches the past Secret Santa assignments from the database, generates new assignments,
+    Fetches the past Secret Santa assignments from the database, generates new assignments,
     stores the new assignments in the database, and renders the result page to display the new pairings.
 
     Returns:

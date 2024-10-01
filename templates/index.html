@@ -10,13 +10,17 @@
 
 <h2>Participants</h2>
 <ul>
-{% for participant in participants %}
+    {% for participant in participants %}
     <li>{{ participant[1] }}</li>
-{% endfor %}
+    {% endfor %}
 </ul>
 
 <h2>Start a New Run</h2>
 <form action="{{ url_for('start_new_run') }}">
     <button type="submit">Generate New Assignments</button>
 </form>
+
+<h2>View Past Participants and Receivers</h2>
+<a href="{{ url_for('scoreboard') }}">View Scoreboard</a>
+
 {% endblock %}

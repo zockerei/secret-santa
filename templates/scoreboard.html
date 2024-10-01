@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Scoreboard</h1>
+
+<h2>Participants and Their Past Receivers</h2>
+<ul>
+    {% for participant, receivers in scoreboard.items() %}
+    <li>
+        <strong>{{ participant }}:</strong>
+        <ul>
+            {% for receiver in receivers %}
+            <li>{{ receiver }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('index') }}">Back to Home</a>
+{% endblock %}
