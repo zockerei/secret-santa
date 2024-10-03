@@ -33,6 +33,13 @@ sql_statements = sql.SqlStatements(db_path)
 # Ensure tables are created when the app starts
 sql_statements.create_tables()
 
+# Check if an admin user exists; if not, create one
+if sql_statements.get_participants_count() == 0:  # No participants exist
+    admin_name = "admin"  # You can choose to set this as a constant
+    admin_password = "admin123"  # Default password, change this as needed
+    sql_statements.add_participant(admin_name, admin_password, role="admin")
+    _app_logger.info(f'Admin user created with username: {admin_name}')
+
 
 @app.route('/')
 def index():
@@ -91,7 +98,7 @@ def login():
         password = request.form['password']
 
         # Verify credentials
-        if sql_statements.verify_member(name, password):
+        if sql_statements.verify_participant(name, password):
             session['user'] = name
             session['role'] = sql_statements.get_role(name)  # Fetch and store the user's role
             return redirect(url_for('index'))
@@ -131,66 +138,98 @@ def admin_dashboard():
     return "Admin Dashboard"
 
 
-@app.route('/admin/manage_members')
+@app.route('/admin/manage_participants')
 @login_required(role='admin')
-def manage_members():
+def manage_participants():
     """
-    Render the 'Manage Members' page for administrators.
+    Render the 'Manage Participants' page for administrators.
 
-    This route allows an admin to add, edit, or remove members from the system. The page displays all participants
+    This route allows an admin to add, edit, or remove participants from the system. The page displays all participants
     for easy management.
 
     Returns:
-        str: The rendered HTML content for managing members.
+        str: The rendered HTML content for managing participants.
     """
     participants = sql_statements.get_all_participants()
-    return render_template('manage_members.html', participants=participants)
+    return render_template('manage_participants.html', participants=participants)
 
 
-@app.route('/add_member', methods=['GET', 'POST'])
-def add_member():
+@app.route('/edit_participant/<int:id>', methods=['GET', 'POST'])
+@login_required(role='admin')
+def edit_participant(id):
     """
-    Handle the 'Add Member' form.
+    Handle editing a participant's details.
 
-    Allows users to add a new member to the database via a form. If the request method is POST,
-    the function extracts the member's name from the form and adds it to the database, then redirects to the index page.
+    If the request method is POST, it updates the participant's name and password in the database.
+    If the request method is GET, it retrieves the participant's details for pre-filling the form.
+
+    Parameters:
+        id (int): The ID of the participant to be edited.
 
     Returns:
-        str: If GET, renders the 'add_member.html' form. If POST, redirects to the homepage.
+        str: The rendered HTML content for editing the participant.
     """
     if request.method == 'POST':
         name = request.form['name']
-        sql_statements.add_member(name)
-        return redirect(url_for('index'))
-    return render_template('add_member.html')
+        password = request.form['password']
+        sql_statements.remove_participant(id)  # Remove existing participant
+        sql_statements.add_participant(name, password)  # Add updated participant
+        flash(f'Participant "{name}" updated successfully.')  # Show success message
+        return redirect(url_for('manage_participants'))
+
+    # GET request: Fetch current participant details
+    participant = sql_statements.get_person_id_by_name(id)
+    return render_template('edit_participant.html', participant=participant)
 
 
-@app.route('/remove_member/<int:person_id>', methods=['POST'])
-def remove_member(person_id):
+@app.route('/add_participant', methods=['GET', 'POST'])
+@login_required(role='admin')  # Ensure only admin can add participants
+def add_participant():
     """
-    Remove a member from the participants list.
+    Handle the 'Add Participant' form.
 
-    This function deletes a member from the database by their ID.
-
-    Parameters:
-        person_id (int): The ID of the member to be removed.
+    Allows users to add a new participant to the database via a form. If the request method is POST,
+    the function extracts the participant's name and password from the form and adds it to the database,
+    then redirects to the index page.
 
     Returns:
-        redirect: Redirects to the home page after removing the member.
+        str: If GET, renders the 'add_participant.html' form. If POST, redirects to the homepage.
     """
-    sql_statements.remove_member(person_id)
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']  # Get the password from the form
+        sql_statements.add_participant(name, password)  # Pass the password to the method
+        flash(f'Participant "{name}" added successfully.')  # Show success message
+        return redirect(url_for('index'))
+    return render_template('add_participant.html')
+
+
+@app.route('/remove_participant/<int:person_id>', methods=['POST'])
+def remove_participant(person_id):
+    """
+    Remove a participant from the participants list.
+
+    This function deletes a participant from the database by their ID.
+
+    Parameters:
+        person_id (int): The ID of the participant to be removed.
+
+    Returns:
+        redirect: Redirects to the home page after removing the participant.
+    """
+    sql_statements.remove_participant(person_id)
     return redirect(url_for('index'))
 
 
 @app.route('/add_receiver/<int:person_id>', methods=['POST'])
 def add_receiver(person_id):
     """
-    Add a past receiver for a specific person.
+    Add a past receiver for a specific participant.
 
-    This function adds a past receiver to the database for a given person.
+    This function adds a past receiver to the database for a given participant.
 
     Parameters:
-        person_id (int): The ID of the person for whom to add a past receiver.
+        person_id (int): The ID of the participant for whom to add a past receiver.
 
     Returns:
         redirect: Redirects to the scoreboard after adding the receiver.
@@ -203,12 +242,12 @@ def add_receiver(person_id):
 @app.route('/remove_receiver/<int:person_id>/<string:receiver_name>', methods=['POST'])
 def remove_receiver(person_id, receiver_name):
     """
-    Remove a past receiver for a specific person.
+    Remove a past receiver for a specific participant.
 
-    This function removes a specific past receiver from the database for a given person.
+    This function removes a specific past receiver from the database for a given participant.
 
     Parameters:
-        person_id (int): The ID of the person from whom to remove a past receiver.
+        person_id (int): The ID of the participant from whom to remove a past receiver.
         receiver_name (str): The name of the receiver to remove.
 
     Returns:
@@ -235,7 +274,7 @@ def scoreboard():
     past_receivers = {}
     if participants:
         past_receivers = {
-            name: sql_statements.get_past_receivers_for_person(person_id) or []
+            name: sql_statements.get_past_receivers_for_participant(person_id) or []
             for person_id, name in participants
         }
 
