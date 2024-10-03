@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 from typing import Optional, List, Tuple, Dict, Any
+import bcrypt
 
 
 class SqlStatements:
@@ -95,9 +96,11 @@ class SqlStatements:
         Create tables for the Person and Assignment database.
         """
         person_table_script = """
-            CREATE TABLE IF NOT EXISTS Person (
+            CREATE TABLE IF NOT EXISTS Participant (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE NOT NULL
+                name TEXT NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL -- "admin" or "member"
             );
         """
         self._execute_query(
@@ -120,22 +123,25 @@ class SqlStatements:
             'Failed to create receiver table'
         )
 
-    def add_member(self, name: str):
+    def add_member(self, name: str, password: str, role: str = 'member'):
         """
-        Add a person's name to the Person table.
+        Add a member to the participants table.
 
         Parameters:
-            name (str): The name of the person to add.
+            name (str): The name of the member to add.
+            password (str): The plain-text password to hash and store.
+            role (str): The role of the member, either 'admin' or 'member'. Default is 'member'.
         """
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         insert_query = """
-            INSERT INTO Person (name) 
-            VALUES (:name)
+            INSERT INTO participants (name, password, role)
+            VALUES (:name, :password, :role)
         """
         self._execute_query(
             insert_query,
-            f'Name "{name}" added to Person table',
-            f'Failed to add name "{name}"',
-            {'name': name}
+            f'Added member "{name}" with role "{role}"',
+            f'Failed to add member "{name}"',
+            {'name': name, 'password': hashed, 'role': role}
         )
 
     def add_receiver(self, person_id: int, receiver_name: str):
@@ -203,6 +209,53 @@ class SqlStatements:
             f'Failed to remove receiver "{receiver_name}" for person_id {person_id}',
             {'person_id': person_id, 'receiver_name': receiver_name}
         )
+
+    def verify_member(self, name: str, password: str) -> bool:
+        """
+        Verify if a member's name and password match a record in the participants table.
+
+        Parameters:
+            name (str): The name of the member.
+            password (str): The plain-text password to verify.
+
+        Returns:
+            bool: True if the password matches, False otherwise.
+        """
+        query = """
+            SELECT password FROM participants WHERE name = :name
+        """
+        result = self._execute_query(
+            query,
+            f'Password fetched for member "{name}"',
+            f'Failed to fetch password for member "{name}"',
+            {'name': name},
+            fetch_one=True
+        )
+        if result and bcrypt.checkpw(password.encode('utf-8'), result[0]):
+            return True
+        return False
+
+    def get_role(self, name: str) -> Optional[str]:
+        """
+        Get the role (admin or member) for a given member by name.
+
+        Parameters:
+            name (str): The name of the member.
+
+        Returns:
+            Optional[str]: The role of the member if found, or None if not found.
+        """
+        query = """
+            SELECT role FROM participants WHERE name = :name
+        """
+        result = self._execute_query(
+            query,
+            f'Role fetched for member "{name}"',
+            f'Failed to fetch role for member "{name}"',
+            {'name': name},
+            fetch_one=True
+        )
+        return result[0] if result else None
 
     def get_all_participants(self) -> Optional[List[Tuple[int, str]]]:
         """

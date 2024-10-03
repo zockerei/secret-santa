@@ -1,6 +1,7 @@
 import os
+from functools import wraps
 import yaml
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, session, redirect, url_for, request, render_template, flash
 import logic
 import logging.config
 import sql
@@ -49,6 +50,101 @@ def index():
         participants = []
 
     return render_template('index.html', participants=participants)
+
+
+def login_required(role=None):
+    """
+    A decorator to ensure that the user is logged in and has the appropriate role.
+
+    Parameters:
+        role (Optional[str]): The role required to access the route. If None, any logged-in user can access.
+
+    Returns:
+        function: The wrapped function that checks the user's login status and role before proceeding.
+    """
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if 'user' not in session:
+                return redirect(url_for('login'))
+            if role and session.get('role') != role:
+                return "Unauthorized", 403
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    Handle the login functionality.
+
+    If the request method is POST, it checks the provided credentials (name and password). If the credentials
+    are valid, the user is logged in and their role is stored in the session.
+
+    Returns:
+        str: If GET, renders the login page. If POST and the credentials are valid, redirects to the homepage.
+             Otherwise, shows a login failure message and redisplays the login form.
+    """
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+
+        # Verify credentials
+        if sql_statements.verify_member(name, password):
+            session['user'] = name
+            session['role'] = sql_statements.get_role(name)  # Fetch and store the user's role
+            return redirect(url_for('index'))
+        else:
+            flash('Login failed. Check your name and password.')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    """
+    Log the user out by clearing their session data.
+
+    Removes the 'user' and 'role' keys from the session and redirects to the login page.
+
+    Returns:
+        redirect: Redirects the user to the login page after logging them out.
+    """
+    session.pop('user', None)
+    session.pop('role', None)
+    return redirect(url_for('login'))
+
+
+@app.route('/admin')
+@login_required(role='admin')
+def admin_dashboard():
+    """
+    Display the admin dashboard.
+
+    This route is only accessible to users with the 'admin' role. If the user is not an admin, they will receive
+    a 403 unauthorized response.
+
+    Returns:
+        str: The rendered content for the admin dashboard or a 403 error if unauthorized.
+    """
+    return "Admin Dashboard"
+
+
+@app.route('/admin/manage_members')
+@login_required(role='admin')
+def manage_members():
+    """
+    Render the 'Manage Members' page for administrators.
+
+    This route allows an admin to add, edit, or remove members from the system. The page displays all participants
+    for easy management.
+
+    Returns:
+        str: The rendered HTML content for managing members.
+    """
+    participants = sql_statements.get_all_participants()
+    return render_template('manage_members.html', participants=participants)
 
 
 @app.route('/add_member', methods=['GET', 'POST'])
