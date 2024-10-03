@@ -112,6 +112,7 @@ class SqlStatements:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 person_id INTEGER NOT NULL,
                 receiver_name TEXT NOT NULL,
+                year INTEGER NOT NULL,
                 FOREIGN KEY (person_id) REFERENCES Participant(id)
             );
         """
@@ -142,23 +143,24 @@ class SqlStatements:
             {'name': name, 'password': hashed, 'role': role}
         )
 
-    def add_receiver(self, person_id: int, receiver_name: str):
+    def add_receiver(self, person_id: int, receiver_name: str, year: int):
         """
         Add a receiver's name to the receiver table for a specific participant.
 
         Parameters:
             person_id (int): The ID of the participant in the Participant table.
             receiver_name (str): The name of the receiver to add for the participant.
+            year (int): The year for the assignment.
         """
         insert_query = """
-            INSERT INTO receiver (person_id, receiver_name) 
-            VALUES (:person_id, :receiver_name)
+            INSERT INTO receiver (person_id, receiver_name, year) 
+            VALUES (:person_id, :receiver_name, :year)
         """
         self._execute_query(
             insert_query,
-            f'Receiver "{receiver_name}" added for participant with ID {person_id}',
-            f'Failed to add receiver "{receiver_name}" for participant with ID {person_id}',
-            {'person_id': person_id, 'receiver_name': receiver_name}
+            f'Receiver "{receiver_name}" added for participant with ID {person_id} for year {year}',
+            f'Failed to add receiver "{receiver_name}" for participant with ID {person_id} for year {year}',
+            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
         )
 
     def remove_participant(self, person_id: int):
@@ -190,22 +192,23 @@ class SqlStatements:
             {'person_id': person_id}
         )
 
-    def remove_receiver(self, person_id: int, receiver_name: str):
+    def remove_receiver(self, person_id: int, receiver_name: str, year: int):
         """
         Remove a specific receiver for a given participant from the receiver table.
 
         Parameters:
             person_id (int): The ID of the participant whose receiver should be removed.
             receiver_name (str): The name of the receiver to remove.
+            year (int): The year of the receiver assignment.
         """
         delete_receiver_query = """
-            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name
+            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name AND year = :year
         """
         self._execute_query(
             delete_receiver_query,
-            f'Removed receiver "{receiver_name}" for participant_id {person_id}',
-            f'Failed to remove receiver "{receiver_name}" for participant_id {person_id}',
-            {'person_id': person_id, 'receiver_name': receiver_name}
+            f'Removed receiver "{receiver_name}" for participant_id {person_id} for year {year}',
+            f'Failed to remove receiver "{receiver_name}" for participant_id {person_id} for year {year}',
+            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
         )
 
     def verify_participant(self, name: str, password: str) -> bool:
@@ -269,7 +272,7 @@ class SqlStatements:
             'Failed to fetch participants'
         )
 
-    def get_past_receivers_for_participant(self, person_id: int) -> List[str]:
+    def get_receivers_for_participant(self, person_id: int) -> List[str]:
         """
         Fetch past receivers for a specific participant from the receiver table.
 
@@ -307,7 +310,7 @@ class SqlStatements:
         )
         return count[0] if count else 0
 
-    def get_person_id_by_name(self, name: str) -> Optional[int]:
+    def get_participant_id(self, name: str) -> Optional[int]:
         """
         Fetch the ID of a participant by their name from the Participant table.
 

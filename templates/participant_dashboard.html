@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Participant Dashboard</h1>
+<h2>Your Past Receivers</h2>
+<ul>
+    {% for receiver in past_receivers %}
+        <li>{{ receiver.name }} (Year: {{ receiver.year }})</li>
+    {% endfor %}
+</ul>
+
+<h2>This Year's Receiver</h2>
+<p>
+    {% if this_year_receiver %}
+        You are receiving from {{ this_year_receiver.name }}.
+    {% else %}
+        You have not yet been assigned a receiver this year.
+    {% endif %}
+</p>
+
+<h2>Logout</h2>
+<a href="{{ url_for('logout') }}">Logout</a>
+{% endblock %}

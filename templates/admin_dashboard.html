@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<h2>Add Participant</h2>
+<form action="{{ url_for('add_participant') }}" method="POST">
+    <input type="text" name="name" placeholder="Enter name" required>
+    <input type="password" name="password" placeholder="Enter password" required>
+    <button type="submit">Add Participant</button>
+</form>
+
+<h2>Manage Participants</h2>
+<ul>
+    {% for participant in participants %}
+        <li>{{ participant[1] }} (Role: {{ participant[2] }})
+            <a href="{{ url_for('edit_participant', id=participant[0]) }}">Edit</a> |
+            <a href="{{ url_for('remove_participant', person_id=participant[0]) }}">Remove</a>
+        </li>
+    {% endfor %}
+</ul>
+
+<h2>Edit Participant</h2>
+{% if edit_participant %}
+    <form action="{{ url_for('edit_participant', id=edit_participant[0]) }}" method="POST">
+        <input type="text" name="name" value="{{ edit_participant[1] }}" required>
+        <input type="password" name="password" placeholder="Enter new password" required>
+        <button type="submit">Update Participant</button>
+    </form>
+{% endif %}
+
+<h2>New Secret Santa Assignments</h2>
+{% if assignments %}
+    <ul>
+    {% for giver, recipient in assignments.items() %}
+        <li>{{ giver }} → {{ recipient }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+<h2>Scoreboard: Past Participants and Receivers</h2>
+<ul>
+    {% for participant, receivers in participants.items() %}
+        <li>
+            <strong>{{ participant }}</strong>
+            <ul>
+                {% for receiver in receivers %}
+                    <li>
+                        {{ receiver }}
+                        <form action="{{ url_for('remove_receiver', person_id=participants_ids[participant], receiver_name=receiver) }}" method="POST" style="display:inline;">
+                            <button type="submit">Remove</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <form action="{{ url_for('add_receiver', person_id=participants_ids[participant]) }}" method="POST">
+                <input type="text" name="receiver_name" placeholder="Add past receiver" required>
+                <button type="submit">Add Receiver</button>
+            </form>
+        </li>
+    {% endfor %}
+</ul>
+
+<h2>Start a New Run</h2>
+<form action="{{ url_for('start_new_run') }}">
+    <button type="submit">Generate New Assignments</button>
+</form>
+
+{% endblock %}
