@@ -62,6 +62,23 @@ def add_member():
     return render_template('add_member.html')
 
 
+@app.route('/remove_member/<int:person_id>', methods=['POST'])
+def remove_member(person_id):
+    """
+    Remove a member from the participants list.
+
+    This function deletes a member from the database by their ID.
+
+    Parameters:
+        person_id (int): The ID of the member to be removed.
+
+    Returns:
+        redirect: Redirects to the home page after removing the member.
+    """
+    sql_statements.remove_member(person_id)
+    return redirect(url_for('index'))
+
+
 @app.route('/scoreboard')
 def scoreboard():
     """
