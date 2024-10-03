@@ -29,6 +29,9 @@ db_path = os.path.join(app.instance_path, 'secret_santa.db')
 # Initialize SQLStatements with the correct path
 sql_statements = sql.SqlStatements(db_path)
 
+# Ensure tables are created when the app starts
+sql_statements.create_tables()
+
 
 @app.route('/')
 def index():
@@ -41,6 +44,10 @@ def index():
         str: The rendered HTML content for the homepage.
     """
     participants = sql_statements.get_all_participants()
+
+    if participants is None:  # Fallback in case no participants exist
+        participants = []
+
     return render_template('index.html', participants=participants)
 
 
@@ -79,25 +86,67 @@ def remove_member(person_id):
     return redirect(url_for('index'))
 
 
+@app.route('/add_receiver/<int:person_id>', methods=['POST'])
+def add_receiver(person_id):
+    """
+    Add a past receiver for a specific person.
+
+    This function adds a past receiver to the database for a given person.
+
+    Parameters:
+        person_id (int): The ID of the person for whom to add a past receiver.
+
+    Returns:
+        redirect: Redirects to the scoreboard after adding the receiver.
+    """
+    receiver_name = request.form['receiver_name']
+    sql_statements.add_receiver(person_id, receiver_name)
+    return redirect(url_for('scoreboard'))
+
+
+@app.route('/remove_receiver/<int:person_id>/<string:receiver_name>', methods=['POST'])
+def remove_receiver(person_id, receiver_name):
+    """
+    Remove a past receiver for a specific person.
+
+    This function removes a specific past receiver from the database for a given person.
+
+    Parameters:
+        person_id (int): The ID of the person from whom to remove a past receiver.
+        receiver_name (str): The name of the receiver to remove.
+
+    Returns:
+        redirect: Redirects to the scoreboard after removing the receiver.
+    """
+    sql_statements.remove_receiver(person_id, receiver_name)
+    return redirect(url_for('scoreboard'))
+
+
 @app.route('/scoreboard')
 def scoreboard():
     """
-    View to display the scoreboard of all participants and their past receivers.
+    Display the scoreboard with all past participants and their receivers.
 
-    Fetches all participants and their past receivers from the database and renders the scoreboard.html
-    template to display the data.
+    This function fetches all participants and their past receivers, then renders the scoreboard.
+    If there are no participants, an empty scoreboard will be shown.
 
     Returns:
-        str: The rendered HTML content displaying the scoreboard of participants and their past receivers.
+        str: The rendered HTML content of the scoreboard.
     """
-    participants = sql_statements.get_all_participants()
-    scoreboard_data = {}
+    participants = sql_statements.get_all_participants() or []
 
-    for person_id, name in participants:
-        receivers = sql_statements.get_past_receivers_for_person(person_id)
-        scoreboard_data[name] = receivers
+    # Create past_receivers only if participants exist
+    past_receivers = {}
+    if participants:
+        past_receivers = {
+            name: sql_statements.get_past_receivers_for_person(person_id) or []
+            for person_id, name in participants
+        }
 
-    return render_template('scoreboard.html', scoreboard=scoreboard_data)
+    # Create a dictionary mapping names to their IDs for form actions
+    participants_ids = {name: person_id for person_id, name in participants} if participants else {}
+
+    return render_template('scoreboard.html', participants=past_receivers, participants_ids=participants_ids)
 
 
 @app.route('/start_new_run')
