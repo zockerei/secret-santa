@@ -88,7 +88,7 @@ def start_new_run():
     """
     Start a new Secret Santa round.
 
-    Fetches the past Secret Santa assignments from the database, generates new assignments,
+    This function fetches the past Secret Santa assignments from the database, generates new assignments,
     stores the new assignments in the database, and renders the result page to display the new pairings.
 
     Returns:
@@ -103,6 +103,7 @@ def start_new_run():
     # Store the new assignments in the database
     logic.store_new_receiver(new_receiver, sql_statements)
 
+    # Render the result page with the new assignments
     return render_template('result.html', assignments=new_receiver)
 
 
