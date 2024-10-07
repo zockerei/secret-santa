@@ -1,6 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
 <h1>Admin Dashboard</h1>
 
 <!-- Logout Button -->
@@ -26,7 +36,6 @@
         </li>
     {% endfor %}
 </ul>
-
 
 <h2>New Secret Santa Assignments</h2>
 {% if assignments %}
