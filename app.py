@@ -1,6 +1,8 @@
 import os
+import secrets
+from functools import wraps
 import yaml
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, session, redirect, url_for, request, render_template, flash
 import logic
 import logging.config
 import sql
@@ -15,11 +17,11 @@ with open(
     logging_config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(logging_config)
 
-# Logging setup
 _app_logger = logging.getLogger(__name__)
 _app_logger.info('Logging setup complete')
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
 _flask_logger = logging.getLogger('flask')
 
@@ -32,145 +34,185 @@ sql_statements = sql.SqlStatements(db_path)
 # Ensure tables are created when the app starts
 sql_statements.create_tables()
 
+# Check if an admin user exists; if not, create one
+if sql_statements.get_participants_count() == 0:
+    admin_name = "santa"
+    admin_password = "admin123"  # Default password, change this as needed
+    sql_statements.add_participant(admin_name, admin_password, role="admin")
+    _app_logger.info(f'Admin user created with username: {admin_name}')
+
 
 @app.route('/')
-def index():
+def home():
     """
-    Render the homepage that displays the list of all participants.
+    Redirect to the login page.
+    """
+    return redirect(url_for('login'))
 
-    Fetches all participants from the database and renders the index.html template to display them.
 
-    Returns:
-        str: The rendered HTML content for the homepage.
+@app.route('/login', methods=['GET'])
+def login():
+    """
+    Render the login page.
+    """
+    if 'user' in session:
+        if session.get('role') == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return redirect(url_for('participant_dashboard'))
+    return render_template('login.html')
+
+
+@app.route('/login', methods=['POST'])
+def handle_login():
+    """
+    Handle login functionality.
+    """
+    name = request.form['name']
+    password = request.form['password']
+
+    # Verify credentials
+    if sql_statements.verify_participant(name, password):
+        session['user'] = name
+        session['role'] = sql_statements.get_role(name)  # Fetch and store the user's role
+        if session['role'] == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return redirect(url_for('participant_dashboard'))
+    else:
+        flash('Login failed. Check your name and password.')
+        return redirect(url_for('login'))
+
+
+def login_required(role=None):
+    """
+    A decorator to ensure that the user is logged in and has the appropriate role.
+    """
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if 'user' not in session:
+                return redirect(url_for('login'))
+            if role and session.get('role') != role:
+                return "Unauthorized", 403
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    """
+    Log the user out by clearing their session data.
+    """
+    session.pop('user', None)
+    session.pop('role', None)
+    return redirect(url_for('login'))
+
+
+@app.route('/admin_dashboard')
+@login_required(role='admin')
+def admin_dashboard():
+    """
+    Display the admin dashboard.
     """
     participants = sql_statements.get_all_participants()
+    participants_ids = {participant[1]: participant[0] for participant in participants}  # Map names to IDs
+    scoreboard = {
+        participant[1]: sql_statements.get_receivers_for_participant(participant[0]) or []
+        for participant in participants
+    }
+    return render_template('admin_dashboard.html', participants=participants, participants_ids=participants_ids, scoreboard=scoreboard)
 
-    if participants is None:  # Fallback in case no participants exist
-        participants = []
 
-    return render_template('index.html', participants=participants)
-
-
-@app.route('/add_member', methods=['GET', 'POST'])
-def add_member():
+@app.route('/participant_dashboard')
+@login_required(role='participant')
+def participant_dashboard():
     """
-    Handle the 'Add Member' form.
+    Display the participant dashboard.
+    """
+    user = session['user']
+    participant_id = sql_statements.get_participant_id(user)  # Method to fetch ID based on username
+    past_receivers = sql_statements.get_receivers_for_participant(participant_id)  # Fetch all past receivers
 
-    Allows users to add a new member to the database via a form. If the request method is POST,
-    the function extracts the member's name from the form and adds it to the database, then redirects to the index page.
+    return render_template('participant_dashboard.html', past_receivers=past_receivers)
 
-    Returns:
-        str: If GET, renders the 'add_member.html' form. If POST, redirects to the homepage.
+
+@app.route('/add_participant', methods=['POST'])
+@login_required(role='admin')
+def add_participant():
+    """
+    Handle adding a new participant.
+    """
+    name = request.form['name']
+    password = request.form['password']
+    sql_statements.add_participant(name, password)  # Add the new participant
+    flash(f'Participant "{name}" added successfully.')
+    return redirect(url_for('admin_dashboard'))  # Redirect back to admin dashboard
+
+
+@app.route('/edit_participant/<int:id>', methods=['GET', 'POST'])
+@login_required(role='admin')
+def edit_participant(id):
+    """
+    Handle editing a participant's details.
     """
     if request.method == 'POST':
         name = request.form['name']
-        sql_statements.add_member(name)
-        return redirect(url_for('index'))
-    return render_template('add_member.html')
+        password = request.form['password']
+        role = request.form['role']  # Assuming you allow changing roles
+        sql_statements.update_participant(id, name, password, role)
+        flash(f'Participant "{name}" updated successfully.')
+        return redirect(url_for('admin_dashboard'))
+    else:
+        participant = sql_statements.get_participant_by_id(id)
+        return render_template('edit_participant.html', participant=participant)
 
 
-@app.route('/remove_member/<int:person_id>', methods=['POST'])
-def remove_member(person_id):
+@app.route('/remove_participant/<int:person_id>', methods=['POST'])
+@login_required(role='admin')
+def remove_participant(person_id):
     """
-    Remove a member from the participants list.
-
-    This function deletes a member from the database by their ID.
-
-    Parameters:
-        person_id (int): The ID of the member to be removed.
-
-    Returns:
-        redirect: Redirects to the home page after removing the member.
+    Remove a participant from the participants list.
     """
-    sql_statements.remove_member(person_id)
-    return redirect(url_for('index'))
+    sql_statements.remove_participant(person_id)
+    flash('Participant removed successfully.')
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/add_receiver/<int:person_id>', methods=['POST'])
+@login_required(role='admin')
 def add_receiver(person_id):
     """
-    Add a past receiver for a specific person.
-
-    This function adds a past receiver to the database for a given person.
-
-    Parameters:
-        person_id (int): The ID of the person for whom to add a past receiver.
-
-    Returns:
-        redirect: Redirects to the scoreboard after adding the receiver.
+    Add a past receiver for a specific participant, along with the year.
     """
     receiver_name = request.form['receiver_name']
-    sql_statements.add_receiver(person_id, receiver_name)
-    return redirect(url_for('scoreboard'))
+    year = request.form['year']  # Capture the year from the form
+    sql_statements.add_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    flash(f'Receiver "{receiver_name}" added for year {year}.')
+    return redirect(url_for('admin_dashboard'))
 
 
-@app.route('/remove_receiver/<int:person_id>/<string:receiver_name>', methods=['POST'])
-def remove_receiver(person_id, receiver_name):
+@app.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
+@login_required(role='admin')
+def remove_receiver(person_id, receiver_name, year):
     """
-    Remove a past receiver for a specific person.
-
-    This function removes a specific past receiver from the database for a given person.
-
-    Parameters:
-        person_id (int): The ID of the person from whom to remove a past receiver.
-        receiver_name (str): The name of the receiver to remove.
-
-    Returns:
-        redirect: Redirects to the scoreboard after removing the receiver.
+    Remove a past receiver for a specific participant, based on the year.
     """
-    sql_statements.remove_receiver(person_id, receiver_name)
-    return redirect(url_for('scoreboard'))
-
-
-@app.route('/scoreboard')
-def scoreboard():
-    """
-    Display the scoreboard with all past participants and their receivers.
-
-    This function fetches all participants and their past receivers, then renders the scoreboard.
-    If there are no participants, an empty scoreboard will be shown.
-
-    Returns:
-        str: The rendered HTML content of the scoreboard.
-    """
-    participants = sql_statements.get_all_participants() or []
-
-    # Create past_receivers only if participants exist
-    past_receivers = {}
-    if participants:
-        past_receivers = {
-            name: sql_statements.get_past_receivers_for_person(person_id) or []
-            for person_id, name in participants
-        }
-
-    # Create a dictionary mapping names to their IDs for form actions
-    participants_ids = {name: person_id for person_id, name in participants} if participants else {}
-
-    return render_template('scoreboard.html', participants=past_receivers, participants_ids=participants_ids)
+    sql_statements.remove_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    flash(f'Receiver "{receiver_name}" for year {year} removed successfully.')
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/start_new_run')
 def start_new_run():
     """
     Start a new Secret Santa round.
-
-    This function fetches the past Secret Santa assignments from the database, generates new assignments,
-    stores the new assignments in the database, and renders the result page to display the new pairings.
-
-    Returns:
-        str: The rendered HTML content displaying the new Secret Santa assignments.
     """
-    # Fetch past assignments from the database
     past_receiver = logic.fetch_past_receiver(sql_statements)
-
-    # Generate new Secret Santa assignments
     new_receiver = logic.generate_secret_santa(past_receiver)
-
-    # Store the new assignments in the database
     logic.store_new_receiver(new_receiver, sql_statements)
-
-    # Render the result page with the new assignments
-    return render_template('result.html', assignments=new_receiver)
+    return render_template('admin_dashboard.html', assignments=new_receiver)
 
 
 if __name__ == '__main__':

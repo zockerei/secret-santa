@@ -1,11 +1,12 @@
 import logging
 import sqlite3
 from typing import Optional, List, Tuple, Dict, Any
+import bcrypt
 
 
 class SqlStatements:
     """
-    Class containing SQL statements and methods
+    Class containing SQL statements and methods.
     """
     # Logging setup
     _sql_logger = logging.getLogger(__name__)
@@ -91,27 +92,28 @@ class SqlStatements:
             self._disconnect()
 
     def create_tables(self):
-        """
-        Create tables for the Person and Assignment database.
-        """
-        person_table_script = """
-            CREATE TABLE IF NOT EXISTS Person (
+        """ Create tables for the Participant and receiver database. """
+        participant_table_script = """
+            CREATE TABLE IF NOT EXISTS Participant (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE NOT NULL
+                name TEXT NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL -- "admin" or "participant"
             );
         """
         self._execute_query(
-            person_table_script,
-            'Person table created',
-            'Failed to create Person table'
+            participant_table_script,
+            'Participant table created',
+            'Failed to create Participant table'
         )
 
         receiver_table_script = """
-            CREATE TABLE IF NOT EXISTS receiver (
+            CREATE TABLE IF NOT EXISTS Receiver (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 person_id INTEGER NOT NULL,
                 receiver_name TEXT NOT NULL,
-                FOREIGN KEY (person_id) REFERENCES Person(id)
+                year INTEGER NOT NULL,
+                FOREIGN KEY (person_id) REFERENCES Participant(id)
             );
         """
         self._execute_query(
@@ -120,134 +122,178 @@ class SqlStatements:
             'Failed to create receiver table'
         )
 
-    def add_member(self, name: str):
+    def add_participant(self, name: str, password: str, role: str = 'participant'):
         """
-        Add a person's name to the Person table.
+        Add a participant to the participants table.
 
         Parameters:
-            name (str): The name of the person to add.
+            name (str): The name of the participant to add.
+            password (str): The plain-text password to hash and store.
+            role (str): The role of the participant, either 'admin' or 'participant'. Default is 'participant'.
         """
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         insert_query = """
-            INSERT INTO Person (name) 
-            VALUES (:name)
+            INSERT INTO Participant (name, password, role)
+            VALUES (:name, :password, :role)
         """
         self._execute_query(
             insert_query,
-            f'Name "{name}" added to Person table',
-            f'Failed to add name "{name}"',
-            {'name': name}
+            f'Added participant "{name}" with role "{role}"',
+            f'Failed to add participant "{name}"',
+            {'name': name, 'password': hashed, 'role': role}
         )
 
-    def add_receiver(self, person_id: int, receiver_name: str):
+    def add_receiver(self, person_id: int, receiver_name: str, year: int):
         """
-        Add a receiver's name to the receiver table for a specific person.
+        Add a receiver's name to the receiver table for a specific participant.
 
         Parameters:
-            person_id (int): The ID of the person in the Person table.
-            receiver_name (str): The name of the receiver to add for the person.
+            person_id (int): The ID of the participant in the Participant table.
+            receiver_name (str): The name of the receiver to add for the participant.
+            year (int): The year for the assignment.
         """
         insert_query = """
-            INSERT INTO receiver (person_id, receiver_name) 
-            VALUES (:person_id, :receiver_name)
+            INSERT INTO receiver (person_id, receiver_name, year) 
+            VALUES (:person_id, :receiver_name, :year)
         """
         self._execute_query(
             insert_query,
-            f'Receiver "{receiver_name}" added for person with ID {person_id}',
-            f'Failed to add receiver "{receiver_name}" for person with ID {person_id}',
-            {'person_id': person_id, 'receiver_name': receiver_name}
+            f'Receiver "{receiver_name}" added for participant with ID {person_id} for year {year}',
+            f'Failed to add receiver "{receiver_name}" for participant with ID {person_id} for year {year}',
+            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
         )
 
-    def remove_member(self, person_id: int):
+    def remove_participant(self, person_id: int):
         """
-        Remove a member from the Person table and associated receivers.
+        Remove a participant from the Participant table and associated receivers.
 
         Parameters:
-            person_id (int): The ID of the person to remove.
+            person_id (int): The ID of the participant to remove.
         """
         # Remove associated receivers first to maintain referential integrity
         delete_receivers_query = """
-            delete from receiver where person_id = :person_id
+            DELETE FROM receiver WHERE person_id = :person_id
         """
         self._execute_query(
             delete_receivers_query,
-            f'Removed receivers for person_id {person_id}',
-            f'Failed to remove receivers for person_id {person_id}',
+            f'Removed receivers for participant_id {person_id}',
+            f'Failed to remove receivers for participant_id {person_id}',
             {'person_id': person_id}
         )
 
-        # Now remove the member from the Person table
+        # Now remove the participant from the Participant table
         delete_person_query = """
-            delete from Person where id = :person_id
+            DELETE FROM Participant WHERE id = :person_id
         """
         self._execute_query(
             delete_person_query,
-            f'Removed person with ID {person_id} from Person table',
-            f'Failed to remove person with ID {person_id}',
+            f'Removed participant with ID {person_id} from Participant table',
+            f'Failed to remove participant with ID {person_id}',
             {'person_id': person_id}
         )
 
-    def remove_receiver(self, person_id: int, receiver_name: str):
+    def remove_receiver(self, person_id: int, receiver_name: str, year: int):
         """
-        Remove a specific receiver for a given person from the receiver table.
+        Remove a specific receiver for a given participant from the receiver table.
 
         Parameters:
-            person_id (int): The ID of the person whose receiver should be removed.
+            person_id (int): The ID of the participant whose receiver should be removed.
             receiver_name (str): The name of the receiver to remove.
+            year (int): The year of the receiver assignment.
         """
         delete_receiver_query = """
-            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name
+            DELETE FROM receiver WHERE person_id = :person_id AND receiver_name = :receiver_name AND year = :year
         """
         self._execute_query(
             delete_receiver_query,
-            f'Removed receiver "{receiver_name}" for person_id {person_id}',
-            f'Failed to remove receiver "{receiver_name}" for person_id {person_id}',
-            {'person_id': person_id, 'receiver_name': receiver_name}
+            f'Removed receiver "{receiver_name}" for participant_id {person_id} for year {year}',
+            f'Failed to remove receiver "{receiver_name}" for participant_id {person_id} for year {year}',
+            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
         )
+
+    def verify_participant(self, name: str, password: str) -> bool:
+        """
+        Verify if a participant's name and password match a record in the participants table.
+
+        Parameters:
+            name (str): The name of the participant.
+            password (str): The plain-text password to verify.
+
+        Returns:
+            bool: True if the password matches, False otherwise.
+        """
+        query = """
+            SELECT password FROM Participant WHERE name = :name
+        """
+        result = self._execute_query(
+            query,
+            f'Password fetched for participant "{name}"',
+            f'Failed to fetch password for participant "{name}"',
+            {'name': name},
+            fetch_one=True
+        )
+        if result and bcrypt.checkpw(password.encode('utf-8'), result[0]):
+            return True
+        return False
+
+    def get_role(self, name: str) -> Optional[str]:
+        """
+        Get the role (admin or participant) for a given participant by name.
+
+        Parameters:
+            name (str): The name of the participant.
+
+        Returns:
+            Optional[str]: The role of the participant if found, or None if not found.
+        """
+        query = """
+            SELECT role FROM Participant WHERE name = :name
+        """
+        result = self._execute_query(
+            query,
+            f'Role fetched for participant "{name}"',
+            f'Failed to fetch role for participant "{name}"',
+            {'name': name},
+            fetch_one=True
+        )
+        return result[0] if result else None
 
     def get_all_participants(self) -> Optional[List[Tuple[int, str]]]:
         """
-        Fetch all participants from the Person table.
+        Fetch all participants from the Participant table.
 
         Returns:
-            Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a person.
+            Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a participant.
         """
-        query = "SELECT id, name FROM Person"
+        query = "SELECT id, name, role FROM Participant"
         return self._execute_query(
             query,
             'Fetched participants',
             'Failed to fetch participants'
         )
 
-    def get_past_receivers_for_person(self, person_id: int) -> List[str]:
+    def get_receivers_for_participant(self, person_id: int) -> list[tuple] | None:
         """
-        Fetch past receivers for a specific person from the receiver table.
-
-        Parameters:
-            person_id (int): The ID of the person to fetch receivers for.
-
-        Returns:
-            List[str]: A list of receiver names associated with the given person ID.
+        Fetch all past receivers for a participant, including the year.
         """
         query = """
-            select receiver_name from receiver
-            where person_id = :person_id
+            SELECT receiver_name, year FROM Receiver WHERE id = :person_id
         """
-        past_receivers = self._execute_query(
+        return self._execute_query(
             query,
-            f'Fetched past receivers for person_id {person_id}',
-            f'Failed to fetch past receivers for person_id {person_id}',
+            f'Fetched receivers for participant {person_id}',
+            f'Failed to fetch receivers for participant {person_id}',
             {'person_id': person_id}
         )
-        return [row[0] for row in past_receivers] if past_receivers else []
 
     def get_participants_count(self) -> int:
         """
-        Count the number of participants in the Person table.
+        Count the number of participants in the Participant table.
 
         Returns:
-            int: The total number of participants in the Person table.
+            int: The total number of participants in the Participant table.
         """
-        query = "select count(*) from Person"
+        query = "SELECT count(*) FROM Participant"
         count = self._execute_query(
             query,
             'Checked participants count',
@@ -256,17 +302,17 @@ class SqlStatements:
         )
         return count[0] if count else 0
 
-    def get_person_id_by_name(self, name: str) -> Optional[int]:
+    def get_participant_id(self, name: str) -> Optional[int]:
         """
-        Fetch the ID of a person by their name from the Person table.
+        Fetch the ID of a participant by their name from the Participant table.
 
         Parameters:
-            name (str): The name of the person to look up.
+            name (str): The name of the participant to look up.
 
         Returns:
-            Optional[int]: The ID of the person if found, or None if not found.
+            Optional[int]: The ID of the participant if found, or None if not found.
         """
-        query = "select id from Person where name = :name"
+        query = "SELECT id FROM Participant WHERE name = :name"
         person_id = self._execute_query(
             query,
             f'Fetched person_id for {name}',
@@ -275,3 +321,46 @@ class SqlStatements:
             fetch_one=True
         )
         return person_id[0] if person_id else None
+
+    def get_participant_by_id(self, person_id: int) -> Optional[Tuple[int, str, str]]:
+        """
+        Fetch a participant by their ID.
+
+        Parameters:
+            person_id (int): The persons id
+
+        Returns:
+            Optional[Tuple[int, str, str]]: A tuple containing the ID, name, and role of the participant.
+        """
+        query = "SELECT id, name, role FROM Participant WHERE id = :person_id"
+        result = self._execute_query(
+            query,
+            f'Fetched participant with ID {person_id}',
+            f'Failed to fetch participant with ID {person_id}',
+            {'person_id': person_id},
+            fetch_one=True
+        )
+        return result
+
+    def update_participant(self, person_id: int, name: str, password: str, role: str):
+        """
+        Update a participant's details in the database.
+
+        Parameters:
+            person_id (int): The ID of the participant to update.
+            name (str): The new name of the participant.
+            password (str): The new password of the participant.
+            role (str): The new role of the participant.
+        """
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        update_query = """
+            UPDATE Participant
+            SET name = :name, password = :password, role = :role
+            WHERE id = :person_id
+        """
+        self._execute_query(
+            update_query,
+            f'Updated participant "{name}" with ID {person_id}',
+            f'Failed to update participant with ID {person_id}',
+            {'name': name, 'password': hashed, 'role': role, 'person_id': person_id}
+        )
