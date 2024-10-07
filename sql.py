@@ -96,7 +96,7 @@ class SqlStatements:
         participant_table_script = """
             CREATE TABLE IF NOT EXISTS Participant (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
+                name TEXT NOT NULL UNIQUE COLLATE NOCASE,  -- Ensure unique and case-insensitive
                 password TEXT NOT NULL,
                 role TEXT NOT NULL -- "admin" or "participant"
             );
@@ -131,6 +131,11 @@ class SqlStatements:
             password (str): The plain-text password to hash and store.
             role (str): The role of the participant, either 'admin' or 'participant'. Default is 'participant'.
         """
+        # Check if the participant already exists (case insensitive)
+        existing_participant = self.get_participant_id(name)
+        if existing_participant:
+            raise ValueError(f"Participant '{name}' already exists.")
+
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         insert_query = """
             INSERT INTO Participant (name, password, role)

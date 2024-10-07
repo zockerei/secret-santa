@@ -146,8 +146,11 @@ def add_participant():
     """
     name = request.form['name']
     password = request.form['password']
-    sql_statements.add_participant(name, password)  # Add the new participant
-    flash(f'Participant "{name}" added successfully.')
+    try:
+        sql_statements.add_participant(name, password)  # Attempt to add the new participant
+        flash(f'Participant "{name}" added successfully.')
+    except ValueError as e:
+        flash(str(e))  # Show the error message to the user
     return redirect(url_for('admin_dashboard'))  # Redirect back to admin dashboard
 
 
