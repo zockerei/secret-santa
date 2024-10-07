@@ -42,6 +42,14 @@ if sql_statements.get_participants_count() == 0:
     _app_logger.info(f'Admin user created with username: {admin_name}')
 
 
+@app.route('/')
+def home():
+    """
+    Redirect to the login page.
+    """
+    return redirect(url_for('login'))
+
+
 @app.route('/login', methods=['GET'])
 def login():
     """
@@ -92,7 +100,7 @@ def login_required(role=None):
     return wrapper
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     """
     Log the user out by clearing their session data.
@@ -109,7 +117,12 @@ def admin_dashboard():
     Display the admin dashboard.
     """
     participants = sql_statements.get_all_participants()
-    return render_template('admin_dashboard.html', participants=participants)
+    participants_ids = {participant[1]: participant[0] for participant in participants}  # Map names to IDs
+    scoreboard = {
+        participant[1]: sql_statements.get_receivers_for_participant(participant[0]) or []
+        for participant in participants
+    }
+    return render_template('admin_dashboard.html', participants=participants, participants_ids=participants_ids, scoreboard=scoreboard)
 
 
 @app.route('/participant_dashboard')
@@ -122,7 +135,7 @@ def participant_dashboard():
     participant_id = sql_statements.get_participant_id(user)  # Method to fetch ID based on username
     past_receivers = sql_statements.get_receivers_for_participant(participant_id)  # Fetch all past receivers
 
-    return render_template('participant_dashboard.html', past_receivers=past_receivers, this_year_receiver=this_year_receiver)
+    return render_template('participant_dashboard.html', past_receivers=past_receivers)
 
 
 @app.route('/add_participant', methods=['POST'])
@@ -138,6 +151,24 @@ def add_participant():
     return redirect(url_for('admin_dashboard'))  # Redirect back to admin dashboard
 
 
+@app.route('/edit_participant/<int:id>', methods=['GET', 'POST'])
+@login_required(role='admin')
+def edit_participant(id):
+    """
+    Handle editing a participant's details.
+    """
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+        role = request.form['role']  # Assuming you allow changing roles
+        sql_statements.update_participant(id, name, password, role)
+        flash(f'Participant "{name}" updated successfully.')
+        return redirect(url_for('admin_dashboard'))
+    else:
+        participant = sql_statements.get_participant_by_id(id)
+        return render_template('edit_participant.html', participant=participant)
+
+
 @app.route('/remove_participant/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
 def remove_participant(person_id):
@@ -150,26 +181,27 @@ def remove_participant(person_id):
 
 
 @app.route('/add_receiver/<int:person_id>', methods=['POST'])
-@login_required(role='participant')
+@login_required(role='admin')
 def add_receiver(person_id):
     """
-    Add a past receiver for a specific participant.
+    Add a past receiver for a specific participant, along with the year.
     """
     receiver_name = request.form['receiver_name']
-    sql_statements.add_receiver(person_id, receiver_name)
-    flash('Receiver added successfully.')
-    return redirect(url_for('participant_dashboard'))
+    year = request.form['year']  # Capture the year from the form
+    sql_statements.add_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    flash(f'Receiver "{receiver_name}" added for year {year}.')
+    return redirect(url_for('admin_dashboard'))
 
 
-@app.route('/remove_receiver/<int:person_id>/<string:receiver_name>', methods=['POST'])
-@login_required(role='participant')
-def remove_receiver(person_id, receiver_name):
+@app.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
+@login_required(role='admin')
+def remove_receiver(person_id, receiver_name, year):
     """
-    Remove a past receiver for a specific participant.
+    Remove a past receiver for a specific participant, based on the year.
     """
-    sql_statements.remove_receiver(person_id, receiver_name)
-    flash('Receiver removed successfully.')
-    return redirect(url_for('participant_dashboard'))
+    sql_statements.remove_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    flash(f'Receiver "{receiver_name}" for year {year} removed successfully.')
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/start_new_run')

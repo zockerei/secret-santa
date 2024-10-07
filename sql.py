@@ -108,7 +108,7 @@ class SqlStatements:
         )
 
         receiver_table_script = """
-            CREATE TABLE IF NOT EXISTS receiver (
+            CREATE TABLE IF NOT EXISTS Receiver (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 person_id INTEGER NOT NULL,
                 receiver_name TEXT NOT NULL,
@@ -265,34 +265,26 @@ class SqlStatements:
         Returns:
             Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a participant.
         """
-        query = "SELECT id, name FROM Participant"
+        query = "SELECT id, name, role FROM Participant"
         return self._execute_query(
             query,
             'Fetched participants',
             'Failed to fetch participants'
         )
 
-    def get_receivers_for_participant(self, person_id: int) -> List[str]:
+    def get_receivers_for_participant(self, person_id: int) -> list[tuple] | None:
         """
-        Fetch past receivers for a specific participant from the receiver table.
-
-        Parameters:
-            person_id (int): The ID of the participant to fetch receivers for.
-
-        Returns:
-            List[str]: A list of receiver names associated with the given participant ID.
+        Fetch all past receivers for a participant, including the year.
         """
         query = """
-            SELECT receiver_name FROM receiver
-            WHERE person_id = :person_id
+            SELECT receiver_name, year FROM Receiver WHERE id = :person_id
         """
-        past_receivers = self._execute_query(
+        return self._execute_query(
             query,
-            f'Fetched past receivers for participant_id {person_id}',
-            f'Failed to fetch past receivers for participant_id {person_id}',
+            f'Fetched receivers for participant {person_id}',
+            f'Failed to fetch receivers for participant {person_id}',
             {'person_id': person_id}
         )
-        return [row[0] for row in past_receivers] if past_receivers else []
 
     def get_participants_count(self) -> int:
         """
@@ -329,3 +321,46 @@ class SqlStatements:
             fetch_one=True
         )
         return person_id[0] if person_id else None
+
+    def get_participant_by_id(self, person_id: int) -> Optional[Tuple[int, str, str]]:
+        """
+        Fetch a participant by their ID.
+
+        Parameters:
+            person_id (int): The persons id
+
+        Returns:
+            Optional[Tuple[int, str, str]]: A tuple containing the ID, name, and role of the participant.
+        """
+        query = "SELECT id, name, role FROM Participant WHERE id = :person_id"
+        result = self._execute_query(
+            query,
+            f'Fetched participant with ID {person_id}',
+            f'Failed to fetch participant with ID {person_id}',
+            {'person_id': person_id},
+            fetch_one=True
+        )
+        return result
+
+    def update_participant(self, person_id: int, name: str, password: str, role: str):
+        """
+        Update a participant's details in the database.
+
+        Parameters:
+            person_id (int): The ID of the participant to update.
+            name (str): The new name of the participant.
+            password (str): The new password of the participant.
+            role (str): The new role of the participant.
+        """
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        update_query = """
+            UPDATE Participant
+            SET name = :name, password = :password, role = :role
+            WHERE id = :person_id
+        """
+        self._execute_query(
+            update_query,
+            f'Updated participant "{name}" with ID {person_id}',
+            f'Failed to update participant with ID {person_id}',
+            {'name': name, 'password': hashed, 'role': role, 'person_id': person_id}
+        )
