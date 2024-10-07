@@ -74,7 +74,8 @@
 </ul>
 
 <h2>Start a New Run</h2>
-<form action="{{ url_for('start_new_run') }}">
+<form action="{{ url_for('start_new_run') }}" method="POST">
+    <input type="number" name="year" placeholder="Enter year" required>
     <button type="submit">Generate New Assignments</button>
 </form>
 

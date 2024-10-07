@@ -73,13 +73,13 @@ def fetch_past_receiver(sql_statements) -> dict:
     """
     participants = sql_statements.get_all_participants()
     past_assignments = {}
-    for person_id, name in participants:
-        receivers = sql_statements.get_past_receivers_for_person(person_id)
+    for person_id, name, year in participants:
+        receivers = sql_statements.get_receivers_for_participant(person_id)
         past_assignments[name] = receivers
     return past_assignments
 
 
-def store_new_receiver(receiver: dict, sql_statements):
+def store_new_receiver(receiver: dict, sql_statements, year: int):
     """
     Store new Secret Santa assignments into the database.
 
@@ -88,6 +88,7 @@ def store_new_receiver(receiver: dict, sql_statements):
     Parameters:
         receiver (dict): A dictionary where the keys are the givers and the values are the recipients.
         sql_statements: An instance of SqlStatements used to interact with the database.
+        year (int): The year of the Secret Santa assignment.
     """
     participants = sql_statements.get_all_participants()
     participant_dict = {name: person_id for person_id, name in participants}
@@ -95,8 +96,8 @@ def store_new_receiver(receiver: dict, sql_statements):
     # Store the new assignments in the database
     for giver, recipient in receiver.items():
         giver_id = participant_dict[giver]
-        sql_statements.add_receiver(giver_id, recipient)
+        sql_statements.add_receiver(giver_id, recipient, year)  # Ensure to pass year to this method
 
     # Log the new Secret Santa assignments
     for giver, recipient in receiver.items():
-        _logic_logger.info(f'{giver} -> {recipient}')
+        _logic_logger.info(f'{giver} -> {recipient} for year {year}')

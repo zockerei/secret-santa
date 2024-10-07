@@ -207,14 +207,19 @@ def remove_receiver(person_id, receiver_name, year):
     return redirect(url_for('admin_dashboard'))
 
 
-@app.route('/start_new_run')
+@app.route('/start_new_run', methods=['POST'])
+@login_required(role='admin')
 def start_new_run():
     """
     Start a new Secret Santa round.
     """
+    year = request.form['year']  # Capture the year from the form
     past_receiver = logic.fetch_past_receiver(sql_statements)
     new_receiver = logic.generate_secret_santa(past_receiver)
-    logic.store_new_receiver(new_receiver, sql_statements)
+
+    # Store the new receivers along with the year
+    logic.store_new_receiver(new_receiver, sql_statements, year)  # Pass year to storage function
+
     return render_template('admin_dashboard.html', assignments=new_receiver)
 
 
