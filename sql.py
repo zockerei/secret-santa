@@ -241,6 +241,28 @@ class SqlStatements:
             return True
         return False
 
+    def is_participant(self, receiver_name: str) -> bool:
+        """
+        Check if a receiver is an existing participant in the system.
+
+        Parameters:
+            receiver_name (str): The name of the receiver.
+
+        Returns:
+            bool: True if the receiver is a participant, False otherwise.
+        """
+        query = """
+            SELECT 1 FROM Participant WHERE name = :receiver_name LIMIT 1
+        """
+        result = self._execute_query(
+            query,
+            success_message=f'Checked if "{receiver_name}" is a participant',
+            error_message=f'Failed to check if "{receiver_name}" is a participant',
+            params={'receiver_name': receiver_name},
+            fetch_one=True
+        )
+        return result is not None
+
     def get_role(self, name: str) -> Optional[str]:
         """
         Get the role (admin or participant) for a given participant by name.
@@ -282,7 +304,7 @@ class SqlStatements:
         Fetch all past receivers for a participant, including the year.
         """
         query = """
-            SELECT receiver_name, year FROM Receiver WHERE id = :person_id
+            SELECT receiver_name, year FROM Receiver WHERE person_id = :person_id
         """
         return self._execute_query(
             query,

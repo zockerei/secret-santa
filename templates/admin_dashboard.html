@@ -55,7 +55,7 @@
                 {% for receiver, year in receivers %}
                     <li>
                         {{ receiver }} ({{ year }})
-                        <form action="{{ url_for('remove_receiver', person_id=participants_ids[participant_name], receiver_name=receiver, year=year) }}" method="POST" style="display:inline;">
+                        <form action="{{ url_for('remove_receiver', person_id=participants_ids[participant_name], receiver_name=receiver, year=year) }}" method="POST">
                             <button type="submit">Remove</button>
                         </form>
                     </li>
