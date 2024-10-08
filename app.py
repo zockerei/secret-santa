@@ -190,8 +190,22 @@ def add_receiver(person_id):
     Add a past receiver for a specific participant, along with the year.
     """
     receiver_name = request.form['receiver_name']
-    year = request.form['year']  # Capture the year from the form
-    sql_statements.add_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    year = request.form['year']
+
+    # First, check if the receiver exists as a participant
+    receiver_exists = sql_statements.is_participant(receiver_name, person_id)
+    if not receiver_exists:
+        flash(f'Error: Receiver "{receiver_name}" is the participant or doesnt exist.')
+        return redirect(url_for('admin_dashboard'))
+
+    # Check if the person already has a receiver for that year
+    duplicate_receiver = sql_statements.check_duplicate_receiver(person_id, year)
+    if duplicate_receiver:
+        flash(f'Error: A receiver for year {year} is already assigned.')
+        return redirect(url_for('admin_dashboard'))
+
+    # If both checks pass, add the receiver
+    sql_statements.add_receiver(person_id, receiver_name, year)
     flash(f'Receiver "{receiver_name}" added for year {year}.')
     return redirect(url_for('admin_dashboard'))
 
