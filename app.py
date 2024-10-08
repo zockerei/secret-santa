@@ -190,8 +190,22 @@ def add_receiver(person_id):
     Add a past receiver for a specific participant, along with the year.
     """
     receiver_name = request.form['receiver_name']
-    year = request.form['year']  # Capture the year from the form
-    sql_statements.add_receiver(person_id, receiver_name, year)  # Pass year to SQL function
+    year = request.form['year']
+
+    # First, check if the receiver exists as a participant
+    receiver_exists = sql_statements.is_participant(receiver_name, person_id)
+    if not receiver_exists:
+        flash(f'Error: Receiver "{receiver_name}" is the participant or doesnt exist.')
+        return redirect(url_for('admin_dashboard'))
+
+    # Check if the person already has a receiver for that year
+    duplicate_receiver = sql_statements.check_duplicate_receiver(person_id, year)
+    if duplicate_receiver:
+        flash(f'Error: A receiver for year {year} is already assigned.')
+        return redirect(url_for('admin_dashboard'))
+
+    # If both checks pass, add the receiver
+    sql_statements.add_receiver(person_id, receiver_name, year)
     flash(f'Receiver "{receiver_name}" added for year {year}.')
     return redirect(url_for('admin_dashboard'))
 
@@ -207,15 +221,51 @@ def remove_receiver(person_id, receiver_name, year):
     return redirect(url_for('admin_dashboard'))
 
 
-@app.route('/start_new_run')
+@app.route('/start_new_run', methods=['POST'])
+@login_required(role='admin')
 def start_new_run():
     """
     Start a new Secret Santa round.
     """
+    year = request.form['year']  # Capture the year from the form
+
+    # Fetch participants and create a mapping of participant names to IDs
+    participants = sql_statements.get_all_participants()
+    participants_ids = {participant[1]: participant[0] for participant in participants}
+
+    # Check if any participant already has a receiver for this year
+    for participant_name, participant_id in participants_ids.items():
+        if sql_statements.check_duplicate_receiver(participant_id, year):
+            flash(f"Participant '{participant_name}' already has a receiver for the year {year}. No new round can be started.", "warning")
+            return redirect(url_for('admin_dashboard'))  # Return early if any participant has a receiver
+
+    # Fetch the past receivers (including previous years)
     past_receiver = logic.fetch_past_receiver(sql_statements)
+
+    # Generate new assignments for the current year
     new_receiver = logic.generate_secret_santa(past_receiver)
-    logic.store_new_receiver(new_receiver, sql_statements)
-    return render_template('admin_dashboard.html', assignments=new_receiver)
+
+    # Store the new receivers along with the year
+    logic.store_new_receiver(new_receiver, sql_statements, year)  # Pass year to storage function
+
+    # Initialize scoreboard with past receivers data
+    updated_scoreboard = {}
+
+    # Fetch past receivers for each participant, including the current year
+    for participant_name, participant_id in participants_ids.items():
+        # Fetch all past receivers (including the new one if it exists)
+        past_receivers = sql_statements.get_receivers_for_participant(participant_id)
+
+        # Add past receivers to the scoreboard
+        if past_receivers:
+            for receiver_name, receiver_year in past_receivers:
+                if participant_name not in updated_scoreboard:
+                    updated_scoreboard[participant_name] = []
+                updated_scoreboard[participant_name].append((receiver_name, receiver_year))
+
+    # Pass the assignments and updated scoreboard to the template
+    return render_template('admin_dashboard.html', assignments=new_receiver, scoreboard=updated_scoreboard,
+                           participants_ids=participants_ids)
 
 
 if __name__ == '__main__':
