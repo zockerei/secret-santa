@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import secrets
 from functools import wraps
@@ -134,13 +135,28 @@ def admin_dashboard():
 @login_required(role='participant')
 def participant_dashboard():
     """
-    Display the participant dashboard.
+    Display the participant dashboard with past receivers and the current year's receiver.
     """
     user = session['user']
-    participant_id = sql_statements.get_participant_id(user)  # Method to fetch ID based on username
+    participant_id = sql_statements.get_participant_id(user)  # Fetch ID based on username
     past_receivers = sql_statements.get_receivers_for_participant(participant_id)  # Fetch all past receivers
 
-    return render_template('participant_dashboard.html', past_receivers=past_receivers)
+    # Identify the current year
+    current_year = datetime.now().year
+
+    # Get the receiver for the current year, if any
+    current_receiver = None
+    for receiver in past_receivers:
+        if receiver[1] == current_year:
+            current_receiver = receiver
+            break
+
+    return render_template(
+        'participant_dashboard.html',
+        past_receivers=past_receivers,
+        current_receiver=current_receiver,
+        current_year=current_year
+    )
 
 
 @app.route('/add_participant', methods=['POST'])
@@ -271,9 +287,12 @@ def start_new_run():
                 updated_scoreboard[participant_name].append((receiver_name, receiver_year))
 
     # Pass the assignments and updated scoreboard to the template
-    return render_template('admin_dashboard.html', assignments=new_receiver, scoreboard=updated_scoreboard,
-                           participants_ids=participants_ids)
-
+    return render_template(
+        'admin_dashboard.html',
+        assignments=new_receiver,
+        scoreboard=updated_scoreboard,
+        participants_ids=participants_ids
+    )
 
 
 if __name__ == '__main__':
