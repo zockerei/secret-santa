@@ -1,3 +1,4 @@
+import datetime
 import logging
 import sqlite3
 from typing import Optional, List, Tuple, Dict, Any
@@ -349,6 +350,30 @@ class SqlStatements:
             fetch_one=True
         )
         return count[0] if count else 0
+
+    def get_current_receiver(self, person_id: int) -> Optional[Tuple[str, int]]:
+        """
+        Fetch the receiver for the participant for the current year.
+
+        Parameters:
+            person_id (int): The ID of the participant in the Participant table.
+
+        Returns:
+            Optional[Tuple[str, int]]: The receiver's name and year if found, or None if not found.
+        """
+        current_year = datetime.datetime.now().year  # Get the current year
+        query = """
+            SELECT receiver_name, year FROM Receiver
+            WHERE person_id = :person_id AND year = :current_year
+        """
+        result = self._execute_query(
+            query,
+            f'Fetched current receiver for participant {person_id} for year {current_year}',
+            f'Failed to fetch current receiver for participant {person_id} for year {current_year}',
+            {'person_id': person_id, 'current_year': current_year},
+            fetch_one=True
+        )
+        return result
 
     def get_participant_id(self, name: str) -> Optional[int]:
         """
