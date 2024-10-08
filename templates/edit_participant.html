@@ -9,12 +9,6 @@
     <label for="password">New Password:</label>
     <input type="password" name="password" placeholder="Enter new password" required>
 
-    <label for="role">Role:</label>
-    <select name="role">
-        <option value="participant" {% if participant[2] == 'participant' %}selected{% endif %}>Participant</option>
-        <option value="admin" {% if participant[2] == 'admin' %}selected{% endif %}>Admin</option>
-    </select>
-
     <button type="submit">Update Participant</button>
 </form>
 {% endblock %}

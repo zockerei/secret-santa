@@ -122,7 +122,12 @@ def admin_dashboard():
         participant[1]: sql_statements.get_receivers_for_participant(participant[0]) or []
         for participant in participants
     }
-    return render_template('admin_dashboard.html', participants=participants, participants_ids=participants_ids, scoreboard=scoreboard)
+    return render_template(
+        'admin_dashboard.html',
+        participants=participants,
+        participants_ids=participants_ids,
+        scoreboard=scoreboard
+    )
 
 
 @app.route('/participant_dashboard')
@@ -163,8 +168,7 @@ def edit_participant(id):
     if request.method == 'POST':
         name = request.form['name']
         password = request.form['password']
-        role = request.form['role']  # Assuming you allow changing roles
-        sql_statements.update_participant(id, name, password, role)
+        sql_statements.update_participant(id, name, password)
         flash(f'Participant "{name}" updated successfully.')
         return redirect(url_for('admin_dashboard'))
     else:
@@ -229,14 +233,17 @@ def start_new_run():
     """
     year = request.form['year']  # Capture the year from the form
 
-    # Fetch participants and create a mapping of participant names to IDs
-    participants = sql_statements.get_all_participants()
+    # Fetch all participants except admins
+    participants = [p for p in sql_statements.get_all_participants() if p[2] != 'admin']
+
+    # Create a mapping of participant names to IDs
     participants_ids = {participant[1]: participant[0] for participant in participants}
 
     # Check if any participant already has a receiver for this year
     for participant_name, participant_id in participants_ids.items():
         if sql_statements.check_duplicate_receiver(participant_id, year):
-            flash(f"Participant '{participant_name}' already has a receiver for the year {year}. No new round can be started.", "warning")
+            flash(f"""Participant '{participant_name}' already has a receiver for the year {year}.
+            No new round can be started.""", "warning")
             return redirect(url_for('admin_dashboard'))  # Return early if any participant has a receiver
 
     # Fetch the past receivers (including previous years)
@@ -266,6 +273,7 @@ def start_new_run():
     # Pass the assignments and updated scoreboard to the template
     return render_template('admin_dashboard.html', assignments=new_receiver, scoreboard=updated_scoreboard,
                            participants_ids=participants_ids)
+
 
 
 if __name__ == '__main__':
