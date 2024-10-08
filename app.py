@@ -228,13 +228,31 @@ def start_new_run():
     Start a new Secret Santa round.
     """
     year = request.form['year']  # Capture the year from the form
+
+    # Fetch the past receivers
     past_receiver = logic.fetch_past_receiver(sql_statements)
+
+    # Fetch participants and create a mapping of participant names to IDs
+    participants = sql_statements.get_all_participants()
+    participants_ids = {participant[1]: participant[0] for participant in participants}
+
+    # Generate new assignments
     new_receiver = logic.generate_secret_santa(past_receiver)
 
     # Store the new receivers along with the year
     logic.store_new_receiver(new_receiver, sql_statements, year)  # Pass year to storage function
 
-    return render_template('admin_dashboard.html', assignments=new_receiver)
+    # Update the scoreboard after new assignments have been made
+    updated_scoreboard = {}
+    for giver, recipient in new_receiver.items():
+        # Update the scoreboard with the new assignments
+        if giver not in updated_scoreboard:
+            updated_scoreboard[giver] = []
+        updated_scoreboard[giver].append((recipient, year))
+
+    # Pass the assignments and updated scoreboard to the template
+    return render_template('admin_dashboard.html', assignments=new_receiver, scoreboard=updated_scoreboard,
+                           participants_ids=participants_ids)
 
 
 if __name__ == '__main__':
