@@ -131,7 +131,7 @@ class SqlStatements:
             password (str): The plain-text password to hash and store.
             role (str): The role of the participant, either 'admin' or 'participant'. Default is 'participant'.
         """
-        # Check if the participant already exists (case insensitive)
+        # Check if the participant already exists (case-insensitive)
         existing_participant = self.get_participant_id(name)
         if existing_participant:
             raise ValueError(f"Participant '{name}' already exists.")
@@ -241,27 +241,48 @@ class SqlStatements:
             return True
         return False
 
-    def is_participant(self, receiver_name: str) -> bool:
+    def is_participant(self, receiver_name: str, person_id: int) -> bool:
         """
-        Check if a receiver is an existing participant in the system.
+        Check if a receiver is an existing participant in the system and ensure that
+        the participant is not adding themselves as the receiver.
 
         Parameters:
             receiver_name (str): The name of the receiver.
+            person_id (int): The ID of the participant trying to add the receiver.
 
         Returns:
-            bool: True if the receiver is a participant, False otherwise.
+            bool: True if the receiver exists and is not the same as the participant, False otherwise.
         """
         query = """
-            SELECT 1 FROM Participant WHERE name = :receiver_name LIMIT 1
+            SELECT 1 FROM Participant WHERE name = :receiver_name AND id != :person_id LIMIT 1
         """
         result = self._execute_query(
             query,
-            success_message=f'Checked if "{receiver_name}" is a participant',
-            error_message=f'Failed to check if "{receiver_name}" is a participant',
-            params={'receiver_name': receiver_name},
+            success_message=f'Checked if "{receiver_name}" is a participant and not the same as the participant',
+            error_message=f'Failed to check if "{receiver_name}" is a participant or is the same as the participant',
+            params={'receiver_name': receiver_name, 'person_id': person_id},
             fetch_one=True
         )
+
+        # If the result is None, either the receiver doesn't exist or is the same as the participant
         return result is not None
+
+    def check_duplicate_receiver(self, person_id: int, year: int) -> bool:
+        """
+        Check if a receiver for the given person_id already exists for the specified year.
+        """
+        query = """
+            SELECT COUNT(*) FROM Receiver WHERE person_id = :person_id AND year = :year
+        """
+        result = self._execute_query(
+            query,
+            f'Checked for duplicate receiver for person_id {person_id} and year {year}',
+            f'Error checking for duplicate receiver for person_id {person_id} and year {year}',
+            {'person_id': person_id, 'year': year},
+            fetch_one=True
+        )
+
+        return result[0] if result[0] > 0 else False
 
     def get_role(self, name: str) -> Optional[str]:
         """
