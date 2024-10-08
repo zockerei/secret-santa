@@ -313,7 +313,7 @@ class SqlStatements:
         Returns:
             Optional[List[Tuple[int, str]]]: A list of tuples where each tuple contains the ID and name of a participant.
         """
-        query = "SELECT id, name, role FROM Participant"
+        query = "SELECT id, name, role FROM Participant where role != 'admin'"
         return self._execute_query(
             query,
             'Fetched participants',
@@ -390,7 +390,7 @@ class SqlStatements:
         )
         return result
 
-    def update_participant(self, person_id: int, name: str, password: str, role: str):
+    def update_participant(self, person_id: int, name: str, password: str):
         """
         Update a participant's details in the database.
 
@@ -398,17 +398,16 @@ class SqlStatements:
             person_id (int): The ID of the participant to update.
             name (str): The new name of the participant.
             password (str): The new password of the participant.
-            role (str): The new role of the participant.
         """
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         update_query = """
             UPDATE Participant
-            SET name = :name, password = :password, role = :role
+            SET name = :name, password = :password
             WHERE id = :person_id
         """
         self._execute_query(
             update_query,
             f'Updated participant "{name}" with ID {person_id}',
             f'Failed to update participant with ID {person_id}',
-            {'name': name, 'password': hashed, 'role': role, 'person_id': person_id}
+            {'name': name, 'password': hashed, 'person_id': person_id}
         )
