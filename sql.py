@@ -99,7 +99,7 @@ class SqlStatements:
         """
         try:
             with sqlite3.connect(self.db_path) as conn:
-                conn.row_factory = sqlite3.Row  # Enables name-based access
+                conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
                 cursor.execute(query, params or {})
                 result = cursor.fetchone() if fetch_one else cursor.fetchall()
@@ -140,31 +140,25 @@ class SqlStatements:
             'Failed to create Receiver table'
         )
 
-    def add_participant(self, name: str, password: str, role: Role = Role.PARTICIPANT):
+    def add_participant(self, name: str, password: str, role: str = "participant"):
         """
-        Add a participant to the participants table.
+        Add a new participant to the database with a hashed password.
 
         Parameters:
-            name (str): The name of the participant to add.
-            password (str): The plain-text password to hash and store.
-            role (Role): The role of the participant, either Role.ADMIN or Role.PARTICIPANT.
-            Default is Role.PARTICIPANT.
+            name (str): The name of the participant.
+            password (str): The plain-text password of the participant.
+            role (str): The role of the participant (default is 'participant').
         """
-        # Check if the participant already exists (case-insensitive)
-        existing_participant = self.get_participant_id(name)
-        if existing_participant:
-            raise ValueError(f"Participant '{name}' already exists.")
-
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')  # Convert to string
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')  # Decode to string
         insert_query = """
             INSERT INTO Participant (name, password, role)
             VALUES (:name, :password, :role)
         """
         self._execute_query(
             insert_query,
-            f'Added participant "{name}" with role "{role.value}"',
-            f'Failed to add participant "{name}"',
-            {'name': name, 'password': hashed, 'role': role.value}
+            f'Participant "{name}" added with role {role}',
+            f'Failed to add receiver "{name}" with role {role}',
+            {'name': name, 'password': hashed, 'role': role}
         )
 
     def add_receiver(self, person_id: int, receiver_name: str, year: int):
@@ -247,14 +241,16 @@ class SqlStatements:
         """
         result = self._execute_query(
             query,
-            f'Password fetched for participant "{name}"',
-            f'Failed to fetch password for participant "{name}"',
+            'Fetched password for participant',
+            'Failed to fetch password for participant',
             {'name': name},
             fetch_one=True
         )
         if result and result['password']:
-            stored_password = result['password']  # This is a string
-            return bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8'))
+            stored_password = result['password']  # This should be bytes or str based on storage
+            if isinstance(stored_password, str):
+                stored_password = stored_password.encode('utf-8')  # Encode to bytes if stored as string
+            return bcrypt.checkpw(password.encode('utf-8'), stored_password)
         return False
 
     def is_participant(self, receiver_name: str, person_id: int) -> bool:
@@ -312,31 +308,31 @@ class SqlStatements:
 
     def get_role(self, name: str) -> Optional[Role]:
         """
-        Get the role (admin or participant) for a given participant by name.
+        Get the role of a participant by name.
 
         Parameters:
             name (str): The name of the participant.
 
         Returns:
-            Optional[Role]: The role of the participant if found, or None if not found.
+            Optional[Role]: The role of the participant if found, else None.
         """
         query = """
             SELECT role FROM Participant WHERE name = :name
         """
-        try:
-            result = self._execute_query(
-                query,
-                f'Role fetched for participant "{name}"',
-                f'Failed to fetch role for participant "{name}"',
-                {'name': name},
-                fetch_one=True
-            )
-            if result:
-                role_str = result['role']
-                return Role(role_str) if role_str in Role.value2member_map_ else None
-            return None
-        except DatabaseError:
-            return None
+        result = self._execute_query(
+            query,
+            f'Fetched role for participant "{name}".',
+            f'Failed to fetch role for participant "{name}".',
+            {'name': name},
+            fetch_one=True
+        )
+        if result and result['role']:
+            role_str = result['role']
+            try:
+                return Role(role_str)
+            except ValueError:
+                self._sql_logger.error(f'Invalid role "{role_str}" for participant "{name}".')
+        return None
 
     def get_all_participants(self) -> Optional[List[Dict[str, Any]]]:
         """
@@ -355,10 +351,10 @@ class SqlStatements:
                 {'admin_role': Role.ADMIN.value}
             )
             if results:
-                return self._convert_rows_to_dicts(results)
-            return None
+                return [dict(row) for row in results]
+            return []
         except DatabaseError:
-            return None
+            return []
 
     def get_receivers_for_participant(self, person_id: int) -> Optional[List[Dict[str, Any]]]:
         """

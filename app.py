@@ -9,14 +9,16 @@ from typing import Optional
 import logic
 import sql
 from sql import DatabaseError, Role
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Flask application
 app = Flask(__name__)
 
 # Secret Key Management
-# It's recommended to set the secret key via environment variables for security
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(16))
-
 
 # Logging Setup
 def setup_logging():
@@ -31,7 +33,6 @@ def setup_logging():
     with open(logging_config_path, 'r') as config_file:
         logging_config = yaml.safe_load(config_file.read())
         logging.config.dictConfig(logging_config)
-
 
 setup_logging()
 
@@ -59,19 +60,29 @@ except DatabaseError as database_error:
 
 # Check if an admin user exists; if not, create one
 try:
-    if sql_statements.get_participants_count() == 0:
-        admin_name = "santa"
-        admin_password = "admin123"  # **Important:** Change this default password immediately
-        sql_statements.add_participant(admin_name, admin_password, role=Role.ADMIN)
-        _app_logger.info(f'Admin user created with username: {admin_name}')
+    participant_count = sql_statements.get_participants_count()
+    _app_logger.debug(f'Participant count: {participant_count}')
+    if participant_count == 0:
+        admin_name = os.environ.get('ADMIN_NAME', 'santa')  # Get admin name from .env
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')  # Get admin password from .env
+        sql_statements.add_participant(admin_name, admin_password, Role.ADMIN.value)
+except ValueError as ve:
+    _app_logger.warning(f'Admin user already exists: {ve}')
 except DatabaseError as database_error:
     _app_logger.error(f'Error creating admin user: {database_error}')
+
 
 
 # Helper Decorator for Role-Based Access Control
 def login_required(role: Optional[Role] = None):
     """
     Decorator to ensure that the user is logged in and has the appropriate role.
+
+    Parameters:
+        role (Optional[str]): The required role to access the route.
+
+    Returns:
+        function: The decorated view function.
     """
 
     def decorator(fn):
@@ -214,9 +225,9 @@ def add_new_participant():
         sql_statements.add_participant(name, password)
         _app_logger.info(f'Added new participant "{name}".')
         flash(f'Participant "{name}" added successfully.', 'success')
-    except ValueError as ve:
-        flash(str(ve), 'warning')
-        _app_logger.warning(f'Attempted to add duplicate participant "{name}": {ve}')
+    except ValueError as verr:
+        flash(str(verr), 'warning')
+        _app_logger.warning(f'Attempted to add duplicate participant "{name}": {verr}')
     except DatabaseError as db_err:
         flash('Failed to add participant. Please try again later.', 'danger')
         _app_logger.error(f'Error adding participant "{name}": {db_err}')
