@@ -1,8 +1,8 @@
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul>
-      {% for message in messages %}
-        <li>{{ message }}</li>
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
       {% endfor %}
     </ul>
   {% endif %}
@@ -10,7 +10,7 @@
 
 <h2>Login</h2>
 <form action="{{ url_for('login') }}" method="POST">
-    <input type="text" name="name" placeholder="Enter name" required>
+    <input type="text" name="name" placeholder="Enter name" required oninput="this.value = this.value.toLowerCase()">
     <input type="password" name="password" placeholder="Enter password" required>
     <button type="submit">Login</button>
 </form>

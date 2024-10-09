@@ -4,295 +4,401 @@ import secrets
 from functools import wraps
 import yaml
 from flask import Flask, session, redirect, url_for, request, render_template, flash
-import logic
 import logging.config
+from typing import Optional
+import logic
 import sql
+from sql import DatabaseError, Role
+from dotenv import load_dotenv
 
-# Logging setup
-with open(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'logging',
-            'logging_config.yaml'
-        ), 'r') as config_file:
-    logging_config = yaml.safe_load(config_file.read())
-    logging.config.dictConfig(logging_config)
+# Load environment variables from .env file
+load_dotenv()
 
+# Initialize Flask application
+app = Flask(__name__)
+
+# Secret Key Management
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(16))
+
+# Logging Setup
+def setup_logging():
+    """
+    Configure logging for the Flask application using a YAML configuration file.
+    """
+    logging_config_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'logging',
+        'logging_config.yaml'
+    )
+    with open(logging_config_path, 'r') as config_file:
+        logging_config = yaml.safe_load(config_file.read())
+        logging.config.dictConfig(logging_config)
+
+setup_logging()
+
+# Get loggers
 _app_logger = logging.getLogger(__name__)
 _app_logger.info('Logging setup complete')
 
-app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
-
 _flask_logger = logging.getLogger('flask')
 
-# Use Flask's instance_path to get the correct path to the database file
+# Database Setup
 db_path = os.path.join(app.instance_path, 'secret_santa.db')
 
-# Initialize SQLStatements with the correct path
+# Ensure the instance path exists
+os.makedirs(app.instance_path, exist_ok=True)
+
+# Initialize SQLStatements
 sql_statements = sql.SqlStatements(db_path)
 
-# Ensure tables are created when the app starts
-sql_statements.create_tables()
+try:
+    # Ensure tables are created when the app starts
+    sql_statements.create_tables()
+    _app_logger.info('Database tables ensured.')
+except DatabaseError as database_error:
+    _app_logger.error(f'Error ensuring database tables: {database_error}')
 
 # Check if an admin user exists; if not, create one
-if sql_statements.get_participants_count() == 0:
-    admin_name = "santa"
-    admin_password = "admin123"  # Default password, change this as needed
-    sql_statements.add_participant(admin_name, admin_password, role="admin")
-    _app_logger.info(f'Admin user created with username: {admin_name}')
+try:
+    participant_count = sql_statements.get_participants_count()
+    _app_logger.debug(f'Participant count: {participant_count}')
+    if participant_count == 0:
+        admin_name = os.environ.get('ADMIN_NAME', 'santa')  # Get admin name from .env
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')  # Get admin password from .env
+        sql_statements.add_participant(admin_name, admin_password, Role.ADMIN.value)
+except ValueError as ve:
+    _app_logger.warning(f'Admin user already exists: {ve}')
+except DatabaseError as database_error:
+    _app_logger.error(f'Error creating admin user: {database_error}')
 
+
+
+# Helper Decorator for Role-Based Access Control
+def login_required(role: Optional[Role] = None):
+    """
+    Decorator to ensure that the user is logged in and has the appropriate role.
+
+    Parameters:
+        role (Optional[str]): The required role to access the route.
+
+    Returns:
+        function: The decorated view function.
+    """
+
+    def decorator(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if 'user' not in session:
+                flash('Please log in to access this page.', 'warning')
+                return redirect(url_for('login'))
+            if role and session.get('role') != role.value:
+                _app_logger.warning(f'Unauthorized access attempt by user "{session.get("user")}".')
+                flash('You do not have permission to access this page.', 'danger')
+                return redirect(url_for('login'))
+            return fn(*args, **kwargs)
+
+        return decorated_view
+
+    return decorator
+
+
+# Routes
 
 @app.route('/')
 def home():
-    """
-    Redirect to the login page.
-    """
+    """Redirect to the login page."""
     return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET'])
 def login():
-    """
-    Render the login page.
-    """
+    """Render the login page."""
     if 'user' in session:
-        if session.get('role') == 'admin':
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return redirect(url_for('participant_dashboard'))
+        return redirect(url_for(f"{session['role']}_dashboard"))
     return render_template('login.html')
 
 
 @app.route('/login', methods=['POST'])
 def handle_login():
-    """
-    Handle login functionality.
-    """
-    name = request.form['name']
-    password = request.form['password']
+    """Handle login functionality."""
+    name = request.form.get('name', '').strip()
+    password = request.form.get('password', '').strip()
 
-    # Verify credentials
-    if sql_statements.verify_participant(name, password):
-        session['user'] = name
-        session['role'] = sql_statements.get_role(name)  # Fetch and store the user's role
-        if session['role'] == 'admin':
-            return redirect(url_for('admin_dashboard'))
+    if not name or not password:
+        flash('Please enter both name and password.', 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        if sql_statements.verify_participant(name, password):
+            role = sql_statements.get_role(name)
+            if role is None:
+                flash('User role not found. Contact administrator.', 'danger')
+                _app_logger.error(f'User "{name}" has no role assigned.')
+                return redirect(url_for('login'))
+            session['user'] = name
+            session['role'] = role.value
+            _app_logger.info(f'User "{name}" logged in as "{role.value}".')
+            return redirect(url_for(f'{role.value}_dashboard'))
         else:
-            return redirect(url_for('participant_dashboard'))
-    else:
-        flash('Login failed. Check your name and password.')
+            flash('Login failed. Check your name and password.', 'danger')
+            return redirect(url_for('login'))
+    except DatabaseError as db_err:
+        flash('An error occurred during login. Please try again later.', 'danger')
+        _app_logger.error(f'Login error for user "{name}": {db_err}')
         return redirect(url_for('login'))
 
 
-def login_required(role=None):
-    """
-    A decorator to ensure that the user is logged in and has the appropriate role.
-    """
-    def wrapper(fn):
-        @wraps(fn)
-        def decorated_view(*args, **kwargs):
-            if 'user' not in session:
-                return redirect(url_for('login'))
-            if role and session.get('role') != role:
-                return "Unauthorized", 403
-            return fn(*args, **kwargs)
-        return decorated_view
-    return wrapper
-
-
 @app.route('/logout', methods=['POST'])
+@login_required()
 def logout():
-    """
-    Log the user out by clearing their session data.
-    """
-    session.pop('user', None)
-    session.pop('role', None)
+    """Log the user out by clearing their session data."""
+    user = session.pop('user', None)
+    _app_logger.info(f'User "{user}" logged out.')
+    flash('You have been logged out successfully.', 'info')
     return redirect(url_for('login'))
 
 
 @app.route('/admin_dashboard')
-@login_required(role='admin')
+@login_required(role=Role.ADMIN)
 def admin_dashboard():
-    """
-    Display the admin dashboard.
-    """
-    participants = sql_statements.get_all_participants()
-    participants_ids = {participant[1]: participant[0] for participant in participants}  # Map names to IDs
-    scoreboard = {
-        participant[1]: sql_statements.get_receivers_for_participant(participant[0]) or []
-        for participant in participants
-    }
-    return render_template(
-        'admin_dashboard.html',
-        participants=participants,
-        participants_ids=participants_ids,
-        scoreboard=scoreboard
-    )
+    """Display the admin dashboard."""
+    try:
+        participants = sql_statements.get_all_participants()
+        scoreboard = {}
+        if participants:
+            for participant in participants:
+                person_id = participant['id']
+                participant_name = participant['name']
+                receivers = sql_statements.get_receivers_for_participant(person_id)
+                scoreboard[participant_name] = receivers if receivers else []
+        return render_template(
+            'admin_dashboard.html',
+            participants=participants,
+            scoreboard=scoreboard
+        )
+    except DatabaseError as db_err:
+        flash('Failed to load admin dashboard. Please try again later.', 'danger')
+        _app_logger.error(f'Error loading admin dashboard: {db_err}')
+        return redirect(url_for('login'))
 
 
 @app.route('/participant_dashboard')
-@login_required(role='participant')
+@login_required(role=Role.PARTICIPANT)
 def participant_dashboard():
-    """
-    Display the participant dashboard with past receivers and the current year's receiver.
-    """
-    user = session['user']
-    participant_id = sql_statements.get_participant_id(user)  # Fetch ID based on username
-    past_receivers = sql_statements.get_receivers_for_participant(participant_id)  # Fetch all past receivers
+    """Display the participant dashboard with past receivers and the current year's receiver."""
+    user = session.get('user')
+    try:
+        participant_id = sql_statements.get_participant_id(user)
+        if participant_id is None:
+            flash('Participant not found. Contact administrator.', 'danger')
+            _app_logger.error(f'Participant "{user}" not found in the database.')
+            return redirect(url_for('logout'))
 
-    # Identify the current year
-    current_year = datetime.now().year
+        past_receivers = sql_statements.get_receivers_for_participant(participant_id) or []
+        current_year = datetime.now().year
+        current_receiver = next((r for r in past_receivers if r['year'] == current_year), None)
 
-    # Get the receiver for the current year, if any
-    current_receiver = None
-    for receiver in past_receivers:
-        if receiver[1] == current_year:
-            current_receiver = receiver
-            break
-
-    return render_template(
-        'participant_dashboard.html',
-        past_receivers=past_receivers,
-        current_receiver=current_receiver,
-        current_year=current_year
-    )
+        return render_template(
+            'participant_dashboard.html',
+            past_receivers=past_receivers,
+            current_receiver=current_receiver,
+            current_year=current_year
+        )
+    except DatabaseError as db_err:
+        flash('Failed to load participant dashboard. Please try again later.', 'danger')
+        _app_logger.error(f'Error loading participant dashboard for user "{user}": {db_err}')
+        return redirect(url_for('logout'))
 
 
 @app.route('/add_participant', methods=['POST'])
-@login_required(role='admin')
-def add_participant():
-    """
-    Handle adding a new participant.
-    """
-    name = request.form['name']
-    password = request.form['password']
-    try:
-        sql_statements.add_participant(name, password)  # Attempt to add the new participant
-        flash(f'Participant "{name}" added successfully.')
-    except ValueError as e:
-        flash(str(e))  # Show the error message to the user
-    return redirect(url_for('admin_dashboard'))  # Redirect back to admin dashboard
+@login_required(role=Role.ADMIN)
+def add_new_participant():
+    """Handle adding a new participant."""
+    name = request.form.get('name', '').strip()
+    password = request.form.get('password', '').strip()
 
-
-@app.route('/edit_participant/<int:id>', methods=['GET', 'POST'])
-@login_required(role='admin')
-def edit_participant(id):
-    """
-    Handle editing a participant's details.
-    """
-    if request.method == 'POST':
-        name = request.form['name']
-        password = request.form['password']
-        sql_statements.update_participant(id, name, password)
-        flash(f'Participant "{name}" updated successfully.')
+    if not name or not password:
+        flash('Name and password are required to add a participant.', 'warning')
         return redirect(url_for('admin_dashboard'))
+
+    try:
+        sql_statements.add_participant(name, password)
+        _app_logger.info(f'Added new participant "{name}".')
+        flash(f'Participant "{name}" added successfully.', 'success')
+    except ValueError as verr:
+        flash(str(verr), 'warning')
+        _app_logger.warning(f'Attempted to add duplicate participant "{name}": {verr}')
+    except DatabaseError as db_err:
+        flash('Failed to add participant. Please try again later.', 'danger')
+        _app_logger.error(f'Error adding participant "{name}": {db_err}')
+
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
+@login_required(role=Role.ADMIN)
+def edit_participant(participant_id):
+    """Handle editing a participant's details."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        password = request.form.get('password', '').strip()
+
+        if not name or not password:
+            flash('Name and password are required to update a participant.', 'warning')
+            return redirect(url_for('edit_participant', participant_id=participant_id))
+
+        try:
+            sql_statements.update_participant(participant_id, name, password)
+            _app_logger.info(f'Participant ID "{participant_id}" updated to name "{name}".')
+            flash(f'Participant "{name}" updated successfully.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        except DatabaseError as db_err:
+            flash('Failed to update participant. Please try again later.', 'danger')
+            _app_logger.error(f'Error updating participant ID "{participant_id}": {db_err}')
+            return redirect(url_for('admin_dashboard'))
     else:
-        participant = sql_statements.get_participant_by_id(id)
-        return render_template('edit_participant.html', participant=participant)
+        try:
+            participant = sql_statements.get_participant_by_id(participant_id)
+            if participant is None:
+                flash('Participant not found.', 'warning')
+                return redirect(url_for('admin_dashboard'))
+            return render_template('edit_participant.html', participant=participant)
+        except DatabaseError as db_err:
+            flash('Failed to load participant details. Please try again later.', 'danger')
+            _app_logger.error(f'Error fetching participant ID "{participant_id}": {db_err}')
+            return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/remove_participant/<int:person_id>', methods=['POST'])
-@login_required(role='admin')
+@login_required(role=Role.ADMIN)
 def remove_participant(person_id):
-    """
-    Remove a participant from the participants list.
-    """
-    sql_statements.remove_participant(person_id)
-    flash('Participant removed successfully.')
+    """Remove a participant from the participants list."""
+    try:
+        sql_statements.remove_participant(person_id)
+        _app_logger.info(f'Participant ID "{person_id}" removed.')
+        flash('Participant removed successfully.', 'success')
+    except DatabaseError as db_err:
+        flash('Failed to remove participant. Please try again later.', 'danger')
+        _app_logger.error(f'Error removing participant ID "{person_id}": {db_err}')
     return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/add_receiver/<int:person_id>', methods=['POST'])
-@login_required(role='admin')
+@login_required(role=Role.ADMIN)
 def add_receiver(person_id):
-    """
-    Add a past receiver for a specific participant, along with the year.
-    """
-    receiver_name = request.form['receiver_name']
-    year = request.form['year']
+    """Add a past receiver for a specific participant, along with the year."""
+    receiver_name = request.form.get('receiver_name', '').strip()
+    year_str = request.form.get('year', '').strip()
 
-    # First, check if the receiver exists as a participant
-    receiver_exists = sql_statements.is_participant(receiver_name, person_id)
-    if not receiver_exists:
-        flash(f'Error: Receiver "{receiver_name}" is the participant or doesnt exist.')
+    if not receiver_name or not year_str:
+        flash('Receiver name and year are required.', 'warning')
         return redirect(url_for('admin_dashboard'))
 
-    # Check if the person already has a receiver for that year
-    duplicate_receiver = sql_statements.check_duplicate_receiver(person_id, year)
-    if duplicate_receiver:
-        flash(f'Error: A receiver for year {year} is already assigned.')
+    try:
+        year = int(year_str)
+    except ValueError:
+        flash('Year must be a valid integer.', 'warning')
         return redirect(url_for('admin_dashboard'))
 
-    # If both checks pass, add the receiver
-    sql_statements.add_receiver(person_id, receiver_name, year)
-    flash(f'Receiver "{receiver_name}" added for year {year}.')
+    try:
+        # Check if the receiver exists and isn't the same person
+        if not sql_statements.is_participant(receiver_name, person_id):
+            flash(f'Error: Receiver "{receiver_name}" is the participant or does not exist.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+
+        # Check for duplicate receiver for the given year
+        if sql_statements.check_duplicate_receiver(person_id, year):
+            flash(f'Error: A receiver for year {year} is already assigned.', 'warning')
+            return redirect(url_for('admin_dashboard'))
+
+        # Add the receiver
+        sql_statements.add_receiver(person_id, receiver_name, year)
+        _app_logger.info(f'Added receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
+        flash(f'Receiver "{receiver_name}" added for year {year}.', 'success')
+    except DatabaseError as db_err:
+        flash('Failed to add receiver. Please try again later.', 'danger')
+        _app_logger.error(f'Error adding receiver "{receiver_name}" for participant ID "{person_id}": {db_err}')
+
     return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
-@login_required(role='admin')
+@login_required(role=Role.ADMIN)
 def remove_receiver(person_id, receiver_name, year):
-    """
-    Remove a past receiver for a specific participant, based on the year.
-    """
-    sql_statements.remove_receiver(person_id, receiver_name, year)  # Pass year to SQL function
-    flash(f'Receiver "{receiver_name}" for year {year} removed successfully.')
+    """Remove a past receiver for a specific participant, based on the year."""
+    try:
+        sql_statements.remove_receiver(person_id, receiver_name=receiver_name, year=year)
+        _app_logger.info(f'Removed receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
+        flash(f'Receiver "{receiver_name}" for year {year} removed successfully.', 'success')
+    except DatabaseError as db_err:
+        flash('Failed to remove receiver. Please try again later.', 'danger')
+        _app_logger.error(f'Error removing receiver "{receiver_name}" for participant ID "{person_id}": {db_err}')
+
     return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/start_new_run', methods=['POST'])
-@login_required(role='admin')
+@login_required(role=Role.ADMIN)
 def start_new_run():
-    """
-    Start a new Secret Santa round.
-    """
-    year = request.form['year']  # Capture the year from the form
+    """Start a new Secret Santa round."""
+    year_str = request.form.get('year', '').strip()
 
-    # Fetch all participants except admins
-    participants = [p for p in sql_statements.get_all_participants() if p[2] != 'admin']
+    if not year_str:
+        flash('Year is required to start a new run.', 'warning')
+        return redirect(url_for('admin_dashboard'))
 
-    # Create a mapping of participant names to IDs
-    participants_ids = {participant[1]: participant[0] for participant in participants}
+    try:
+        year = int(year_str)
+    except ValueError:
+        flash('Year must be a valid integer.', 'warning')
+        return redirect(url_for('admin_dashboard'))
 
-    # Check if any participant already has a receiver for this year
-    for participant_name, participant_id in participants_ids.items():
-        if sql_statements.check_duplicate_receiver(participant_id, year):
-            flash(f"""Participant '{participant_name}' already has a receiver for the year {year}.
-            No new round can be started.""", "warning")
-            return redirect(url_for('admin_dashboard'))  # Return early if any participant has a receiver
+    try:
+        participants = sql_statements.get_all_participants() or []
+        non_admin_participants = [p for p in participants if p['role'] != Role.ADMIN.value]
 
-    # Fetch the past receivers (including previous years)
-    past_receiver = logic.fetch_past_receiver(sql_statements)
+        if not non_admin_participants:
+            flash('No participants available to start a new run.', 'warning')
+            return redirect(url_for('admin_dashboard'))
 
-    # Generate new assignments for the current year
-    new_receiver = logic.generate_secret_santa(past_receiver)
+        # Check if any participant already has a receiver for the year
+        for participant in non_admin_participants:
+            person_id = participant['id']
+            if sql_statements.check_duplicate_receiver(person_id, year):
+                flash(f"Participant '{participant['name']}' already has a receiver for the year {year}.", "warning")
+                _app_logger.warning(f"Participant '{participant['name']}' already has a receiver for year {year}.")
+                return redirect(url_for('admin_dashboard'))
 
-    # Store the new receivers along with the year
-    logic.store_new_receiver(new_receiver, sql_statements, year)  # Pass year to storage function
+        # Fetch past receivers and generate new assignments using the 'logic' module
+        past_receiver = logic.fetch_past_receiver(sql_statements)
+        new_receiver = logic.generate_secret_santa(past_receiver)
+        logic.store_new_receiver(new_receiver, sql_statements, year)
 
-    # Initialize scoreboard with past receivers data
-    updated_scoreboard = {}
+        _app_logger.info(f'Secret Santa round started for year {year}.')
+        flash('New Secret Santa round started successfully.', 'success')
+    except DatabaseError as db_err:
+        flash('Failed to start a new run. Please try again later.', 'danger')
+        _app_logger.error(f'Error starting new Secret Santa run for year {year}: {db_err}')
+    except Exception as e:
+        flash('An unexpected error occurred. Please try again later.', 'danger')
+        _app_logger.error(f'Unexpected error during new run for year {year}: {e}')
 
-    # Fetch past receivers for each participant, including the current year
-    for participant_name, participant_id in participants_ids.items():
-        # Fetch all past receivers (including the new one if it exists)
-        past_receivers = sql_statements.get_receivers_for_participant(participant_id)
+    return redirect(url_for('admin_dashboard'))
 
-        # Add past receivers to the scoreboard
-        if past_receivers:
-            for receiver_name, receiver_year in past_receivers:
-                if participant_name not in updated_scoreboard:
-                    updated_scoreboard[participant_name] = []
-                updated_scoreboard[participant_name].append((receiver_name, receiver_year))
 
-    # Pass the assignments and updated scoreboard to the template
-    return render_template(
-        'admin_dashboard.html',
-        assignments=new_receiver,
-        scoreboard=updated_scoreboard,
-        participants_ids=participants_ids
-    )
+# Error Handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    """Render a custom 404 error page."""
+    _app_logger.error(f'Internal server error: {e}')
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    """Render a custom 500 error page."""
+    _app_logger.error(f'Internal server error: {e}')
+    return render_template('500.html'), 500
 
 
 if __name__ == '__main__':

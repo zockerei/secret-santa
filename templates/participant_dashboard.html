@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
 <h1>Participant Dashboard</h1>
 
 <!-- Current Receiver Section -->
 <h2>Current Receiver ({{ current_year }})</h2>
 {% if current_receiver %}
-    <p>Your current receiver is: <strong>{{ current_receiver[0] }}</strong></p>
+    <p>Your current receiver is: <strong>{{ current_receiver.receiver_name }}</strong></p>
 {% else %}
     <p>You do not have a receiver assigned for this year.</p>
 {% endif %}
@@ -15,9 +26,9 @@
 <h2>Past Receivers</h2>
 {% if past_receivers %}
     <ul>
-    {% for receiver in past_receivers %}
-        <li>{{ receiver[0] }} ({{ receiver[1] }})</li>
-    {% endfor %}
+        {% for receiver in past_receivers %}
+            <li>{{ receiver.receiver_name }} ({{ receiver.year }})</li>
+        {% endfor %}
     </ul>
 {% else %}
     <p>No past receivers found.</p>
