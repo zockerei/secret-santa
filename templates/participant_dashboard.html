@@ -14,7 +14,6 @@
 
 <h1>Participant Dashboard</h1>
 
-<!-- Current Receiver Section -->
 <h2>Current Receiver ({{ current_year }})</h2>
 {% if current_receiver %}
     <p>Your current receiver is: <strong>{{ current_receiver.receiver_name }}</strong></p>
@@ -33,6 +32,25 @@
 {% else %}
     <p>No past receivers found.</p>
 {% endif %}
+
+<h2>Write a Message for Your Future Receiver</h2>
+<form action="{{ url_for('add_message') }}" method="POST">
+    <textarea name="message_text" rows="5" cols="40" placeholder="Write your message here..." required></textarea><br>
+    <button type="submit">Submit Message</button>
+</form>
+
+<!-- Display existing messages -->
+<h2>Your Pending Messages</h2>
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li>{{ message.message_text }} (Written on {{ message.created_at }})</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No pending messages found.</p>
+{% endif %}
+
 
 <!-- Logout Button -->
 <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">

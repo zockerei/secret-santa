@@ -20,6 +20,7 @@ app = Flask(__name__)
 # Secret Key Management
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(16))
 
+
 # Logging Setup
 def setup_logging():
     """
@@ -33,6 +34,7 @@ def setup_logging():
     with open(logging_config_path, 'r') as config_file:
         logging_config = yaml.safe_load(config_file.read())
         logging.config.dictConfig(logging_config)
+
 
 setup_logging()
 
@@ -188,26 +190,62 @@ def participant_dashboard():
     """Display the participant dashboard with past receivers and the current year's receiver."""
     user = session.get('user')
     try:
+        # Get participant ID
         participant_id = sql_statements.get_participant_id(user)
         if participant_id is None:
             flash('Participant not found. Contact administrator.', 'danger')
             _app_logger.error(f'Participant "{user}" not found in the database.')
             return redirect(url_for('logout'))
 
+        # Fetch past receivers and current year receiver
         past_receivers = sql_statements.get_receivers_for_participant(participant_id) or []
         current_year = datetime.now().year
         current_receiver = next((r for r in past_receivers if r['year'] == current_year), None)
+
+        # Fetch the message written for the next receiver (pending message)
+        pending_messages = sql_statements.get_messages_for_participant(participant_id)
+        next_receiver_message = pending_messages[0] if pending_messages else None
 
         return render_template(
             'participant_dashboard.html',
             past_receivers=past_receivers,
             current_receiver=current_receiver,
-            current_year=current_year
+            current_year=current_year,
+            next_receiver_message=next_receiver_message  # Pass the pending message to the template
         )
     except DatabaseError as db_err:
         flash('Failed to load participant dashboard. Please try again later.', 'danger')
         _app_logger.error(f'Error loading participant dashboard for user "{user}": {db_err}')
         return redirect(url_for('logout'))
+
+
+
+@app.route('/add_message', methods=['POST'])
+@login_required(role=Role.PARTICIPANT)
+def add_message():
+    """Handle message submission for a participant."""
+    user = session.get('user')
+    message_text = request.form.get('message_text')
+
+    if not message_text:
+        flash('Message text cannot be empty.', 'danger')
+        return redirect(url_for('participant_dashboard'))
+
+    try:
+        participant_id = sql_statements.get_participant_id(user)
+        if participant_id is None:
+            flash('Participant not found. Contact administrator.', 'danger')
+            return redirect(url_for('logout'))
+
+        # Insert the message into the database with receiver_id as NULL for now
+        sql_statements.add_message(participant_id, message_text)
+        flash('Message added successfully!', 'success')
+        return redirect(url_for('participant_dashboard'))
+
+    except DatabaseError as db_err:
+        flash('Failed to add message. Please try again later.', 'danger')
+        _app_logger.error(f'Error adding message for user "{user}": {db_err}')
+        return redirect(url_for('participant_dashboard'))
 
 
 @app.route('/add_participant', methods=['POST'])

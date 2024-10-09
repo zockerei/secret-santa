@@ -129,6 +129,22 @@ class SqlStatements:
                 FOREIGN KEY (person_id) REFERENCES Participant(id)
             );
         """
+        message_table_script = """
+            CREATE TABLE IF NOT EXISTS Message (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sender_id INTEGER NOT NULL,
+                receiver_id INTEGER,
+                message_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (sender_id) REFERENCES Participant(id),
+                FOREIGN KEY (receiver_id) REFERENCES Participant(id)
+            );
+        """
+        self._execute_query(
+            message_table_script,
+            'Message table created',
+            'Failed to create Message table'
+        )
         self._execute_query(
             participant_table_script,
             'Participant table created',
@@ -179,6 +195,51 @@ class SqlStatements:
             f'Receiver "{receiver_name}" added for participant with ID {person_id} for year {year}',
             f'Failed to add receiver "{receiver_name}" for participant with ID {person_id} for year {year}',
             {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
+        )
+
+    def add_message(self, sender_id: int, message_text: str):
+        """
+        Add a new message from a participant (sender) to the database. The receiver is not yet assigned.
+
+        Parameters:
+            sender_id (int): The ID of the participant writing the message.
+            message_text (str): The message text written by the participant.
+
+        Raises:
+            DatabaseError: If the query execution fails.
+        """
+        insert_query = """
+            INSERT INTO Message (sender_id, message_text)
+            VALUES (:sender_id, :message_text)
+        """
+        self._execute_query(
+            insert_query,
+            success_message='Message added to the database',
+            error_message='Failed to add message to the database',
+            params={'sender_id': sender_id, 'message_text': message_text}
+        )
+
+    def assign_message_to_receiver(self, sender_id: int, receiver_id: int):
+        """
+        Assign all pending messages written by a participant to a specific receiver.
+
+        Parameters:
+            sender_id (int): The ID of the participant who wrote the messages.
+            receiver_id (int): The ID of the assigned receiver.
+
+        Raises:
+            DatabaseError: If the query execution fails.
+        """
+        update_query = """
+            UPDATE Message
+            SET receiver_id = :receiver_id
+            WHERE sender_id = :sender_id AND receiver_id IS NULL
+        """
+        self._execute_query(
+            update_query,
+            success_message=f'Messages from participant {sender_id} assigned to receiver {receiver_id}',
+            error_message=f'Failed to assign messages from participant {sender_id} to receiver {receiver_id}',
+            params={'sender_id': sender_id, 'receiver_id': receiver_id}
         )
 
     def remove_participant(self, person_id: int):
@@ -305,6 +366,31 @@ class SqlStatements:
             return bool(result and result['count'] > 0)
         except DatabaseError:
             return False
+
+    def get_messages_for_participant(self, participant_id: int) -> List[sqlite3.Row]:
+        """
+        Retrieve all pending messages (without assigned receiver) written by the participant.
+
+        Parameters:
+            participant_id (int): The ID of the participant whose messages to retrieve.
+
+        Returns:
+            List[sqlite3.Row]: A list of messages written by the participant.
+
+        Raises:
+            DatabaseError: If the query execution fails.
+        """
+        select_query = """
+            SELECT message_text, created_at
+            FROM Message
+            WHERE sender_id = :sender_id AND receiver_id IS NULL
+        """
+        return self._execute_query(
+            select_query,
+            success_message=f'Fetched pending messages for participant {participant_id}',
+            error_message=f'Failed to fetch messages for participant {participant_id}',
+            params={'sender_id': participant_id}
+        )
 
     def get_role(self, name: str) -> Optional[Role]:
         """
