@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import DevelopementConfig
+from config import DevelopmentConfig
 
 app = Flask(__name__)
-app.config.from_object(DevelopementConfig)
+app.config.from_object(DevelopmentConfig)
 
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
@@ -21,6 +21,3 @@ app.register_blueprint(participant_blueprint, url_prefix='/participant')
 # Setup error handlers
 from .errors.errors import errors as errors_blueprint
 app.register_blueprint(errors_blueprint)
-
-# Import routes to register them with the app
-from app import routes

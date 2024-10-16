@@ -1,7 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, session, jsonify
 from . import participant
-from app import sql_statements, _app_logger
-from app.sql import DatabaseError
 from app.auth.routes import login_required
 from datetime import datetime
 

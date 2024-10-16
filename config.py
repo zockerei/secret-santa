@@ -6,7 +6,7 @@ class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'A SECRET KEY'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-class DevelopementConfig(BaseConfig):
+class DevelopmentConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEVELOPMENT_DATABASE_URI') or  \
         'sqlite:///' + os.path.join(app_dir, 'instance', 'secret_santa.db')

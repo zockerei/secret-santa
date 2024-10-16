@@ -1,19 +1,11 @@
-from datetime import datetime
 import os
 import secrets
-from functools import wraps
 import yaml
-from flask import Flask, session, redirect, url_for, request, render_template, flash, jsonify
+from flask import Flask, redirect, url_for
 import logging.config
-from typing import Optional
 from dotenv import load_dotenv
-from app.admin import admin as admin_blueprint
-from app.participant import participant as participant_blueprint
-from app.auth import auth as auth_blueprint  # Import the auth blueprint
-from app.decorators import login_required  # Import the decorator from the new file
-from app import db  # Import the db instance from your app
-from app.models import Participant  # Import your models
-from app.queries import add_participant, admin_exists  # Import necessary functions
+from app import db
+from app.queries import add_participant, admin_exists
 
 # Load environment variables from .env file
 load_dotenv()

@@ -1,9 +1,6 @@
-from flask import render_template, redirect, url_for, flash, request, session, jsonify
+from flask import render_template, redirect, url_for, flash, request
 from . import admin
-from app import sql_statements, _app_logger
-from app.sql import DatabaseError
 from app.auth.routes import login_required
-from datetime import datetime
 import app.logic as logic
 
 @admin.route('/admin_dashboard')
