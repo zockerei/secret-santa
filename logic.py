@@ -62,7 +62,7 @@ def fetch_past_receiver(sql_statements) -> dict:
         sql_statements (SqlStatements): Instance of SqlStatements to execute database queries.
 
     Returns:
-        dict: Mapping of participants' names to their list of past recipients.
+        dict: Mapping of participants' IDs to their list of past recipient IDs.
     """
     participants = sql_statements.get_all_participants()
 
@@ -75,19 +75,18 @@ def fetch_past_receiver(sql_statements) -> dict:
 
     for participant in participants:
         person_id = participant['id']
-        name = participant['name']
 
         # Fetch receivers for the participant
         receivers = sql_statements.get_receivers_for_participant(person_id)
 
         # Ensure receivers is not None, initialize with empty list if needed
         if receivers is None:
-            _logic_logger.debug(f'No receivers found for {name}, initializing empty list')
-            past_assignments[name] = []
+            _logic_logger.debug(f'No receivers found for participant ID {person_id}, initializing empty list')
+            past_assignments[person_id] = []
         else:
-            # Extract the receiver names
-            past_assignments[name] = [receiver['receiver_name'] for receiver in receivers]
-            _logic_logger.debug(f'Fetched receivers for {name}: {past_assignments[name]}')
+            # Extract the receiver IDs
+            past_assignments[person_id] = [receiver['receiver_id'] for receiver in receivers]
+            _logic_logger.debug(f'Fetched receivers for participant ID {person_id}: {past_assignments[person_id]}')
 
     return past_assignments
 
@@ -97,26 +96,11 @@ def store_new_receiver(receiver: dict, sql_statements, year: int):
     Stores the new Secret Santa assignments into the database for the specified year.
 
     Parameters:
-        receiver (dict): Mapping of givers to recipients (giver -> recipient).
+        receiver (dict): Mapping of givers' IDs to recipients' IDs (giver_id -> recipient_id).
         sql_statements (SqlStatements): Instance of SqlStatements for database interaction.
         year (int): The year of the Secret Santa assignment.
     """
-    participants = sql_statements.get_all_participants()
-    participant_dict = {participant['name']: participant['id'] for participant in participants}
-    _logic_logger.debug(f'{participant_dict}')
-
-    for giver, recipient in receiver.items():
-        giver_id = participant_dict.get(giver)
-        if giver_id is None:
-            _logic_logger.error(f'Giver {giver} not found in participant dictionary.')
-            raise ValueError(f"Giver {giver} not found in participant list.")
-
-        recipient_id = participant_dict.get(recipient)
-        if recipient_id is None:
-            _logic_logger.error(f'Recipient {recipient} not found in participant dictionary.')
-            raise ValueError(f"Recipient {recipient} not found in participant list.")
-
+    for giver_id, recipient_id in receiver.items():
         # Store the assignment
-        sql_statements.add_receiver(giver_id, recipient, year)
-        _logic_logger.info(f'Assignment stored: {giver} -> {recipient} for year {year}')
-
+        sql_statements.add_receiver(giver_id, recipient_id, year)
+        _logic_logger.info(f'Assignment stored: giver ID {giver_id} -> recipient ID {recipient_id} for year {year}')

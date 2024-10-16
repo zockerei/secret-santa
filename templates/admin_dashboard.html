@@ -60,7 +60,7 @@
 <ul>
     {% for participant in participants %}
         <li>
-            {{ participant.name }} (Role: {{ participant.role }})
+            {{ participant.name }}
             <a href="{{ url_for('edit_participant', participant_id=participant.id) }}">Edit</a> |
             <form action="{{ url_for('remove_participant', person_id=participant.id) }}" method="POST" style="display:inline;">
                 <button type="submit">Remove</button>

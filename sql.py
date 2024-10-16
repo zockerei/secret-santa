@@ -38,12 +38,6 @@ class DatabaseError(Exception):
         else:
             logger.error(self.message)
 
-
-class Role(Enum):
-    ADMIN = 'admin'
-    PARTICIPANT = 'participant'
-
-
 class SqlStatements:
     """
     Class containing SQL statements and methods to interact with the SQLite database.
@@ -111,49 +105,65 @@ class SqlStatements:
             raise DatabaseError(f'{error_message}: {error}') from error
 
     def create_tables(self):
-        """Create tables for the Participant and Receiver database."""
-        participant_table_script = """
-            CREATE TABLE IF NOT EXISTS Participant (
+        """Create tables for the Participants, Past Receivers, Messages, and Assignments database."""
+        participants_table_script = """
+            CREATE TABLE IF NOT EXISTS participants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                name TEXT UNIQUE NOT NULL, 
                 password TEXT NOT NULL,
-                role TEXT NOT NULL
+                wishlist TEXT,
+                admin BOOLEAN DEFAULT 0
             );
         """
-        receiver_table_script = """
-            CREATE TABLE IF NOT EXISTS Receiver (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                person_id INTEGER NOT NULL,
-                receiver_name TEXT NOT NULL,
+        past_receivers_table_script = """
+            CREATE TABLE IF NOT EXISTS past_receivers (
+                participant_id INTEGER NOT NULL,
+                receiver_id INTEGER NOT NULL,
                 year INTEGER NOT NULL,
-                FOREIGN KEY (person_id) REFERENCES Participant(id)
+                FOREIGN KEY (participant_id) REFERENCES participants(id),
+                FOREIGN KEY (receiver_id) REFERENCES participants(id)
             );
         """
-        message_table_script = """
-            CREATE TABLE IF NOT EXISTS Message (
+        messages_table_script = """
+            CREATE TABLE IF NOT EXISTS messages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sender_id INTEGER NOT NULL,
-                receiver_id INTEGER,
-                message_text TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (sender_id) REFERENCES Participant(id),
-                FOREIGN KEY (receiver_id) REFERENCES Participant(id)
+                participant_id INTEGER NOT NULL,
+                message TEXT NOT NULL,
+                year INTEGER NOT NULL,
+                FOREIGN KEY (participant_id) REFERENCES participants(id)
+            );
+        """
+        assignments_table_script = """
+            CREATE TABLE IF NOT EXISTS assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                giver_id INTEGER NOT NULL,
+                receiver_id INTEGER NOT NULL,
+                message_id INTEGER,
+                year INTEGER NOT NULL,
+                FOREIGN KEY (giver_id) REFERENCES participants(id),
+                FOREIGN KEY (receiver_id) REFERENCES participants(id),
+                FOREIGN KEY (message_id) REFERENCES messages(id)
             );
         """
         self._execute_query(
-            message_table_script,
-            'Message table created',
-            'Failed to create Message table'
+            participants_table_script,
+            'Participants table created',
+            'Failed to create Participants table'
         )
         self._execute_query(
-            participant_table_script,
-            'Participant table created',
-            'Failed to create Participant table'
+            past_receivers_table_script,
+            'Past Receivers table created',
+            'Failed to create Past Receivers table'
         )
         self._execute_query(
-            receiver_table_script,
-            'Receiver table created',
-            'Failed to create Receiver table'
+            messages_table_script,
+            'Messages table created',
+            'Failed to create Messages table'
+        )
+        self._execute_query(
+            assignments_table_script,
+            'Assignments table created',
+            'Failed to create Assignments table'
         )
 
     def add_participant(self, name: str, password: str, role: str = "participant"):
@@ -161,40 +171,40 @@ class SqlStatements:
         Add a new participant to the database with a hashed password.
 
         Parameters:
-            name (str): The name of the participant.
+            name (str): The name and username of the participant.
             password (str): The plain-text password of the participant.
             role (str): The role of the participant (default is 'participant').
         """
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')  # Decode to string
         insert_query = """
-            INSERT INTO Participant (name, password, role)
-            VALUES (:name, :password, :role)
+            INSERT INTO participants (name, password, admin)
+            VALUES (:name, :password, :admin)
         """
         self._execute_query(
             insert_query,
             f'Participant "{name}" added with role {role}',
-            f'Failed to add receiver "{name}" with role {role}',
-            {'name': name, 'password': hashed, 'role': role}
+            f'Failed to add participant "{name}" with role {role}',
+            {'name': name, 'password': hashed, 'admin': role == 'admin'}
         )
 
-    def add_receiver(self, person_id: int, receiver_name: str, year: int):
+    def add_receiver(self, participant_id: int, receiver_id: int, year: int):
         """
-        Add a receiver's name to the receiver table for a specific participant.
+        Add a receiver to the past_receivers table for a specific participant.
 
         Parameters:
-            person_id (int): The ID of the participant in the Participant table.
-            receiver_name (str): The name of the receiver to add for the participant.
+            participant_id (int): The ID of the participant in the participants table.
+            receiver_id (int): The ID of the receiver to add for the participant.
             year (int): The year for the assignment.
         """
         insert_query = """
-            INSERT INTO Receiver (person_id, receiver_name, year) 
-            VALUES (:person_id, :receiver_name, :year)
+            INSERT INTO past_receivers (participant_id, receiver_id, year) 
+            VALUES (:participant_id, :receiver_id, :year)
         """
         self._execute_query(
             insert_query,
-            f'Receiver "{receiver_name}" added for participant with ID {person_id} for year {year}',
-            f'Failed to add receiver "{receiver_name}" for participant with ID {person_id} for year {year}',
-            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
+            f'Receiver with ID {receiver_id} added for participant with ID {participant_id} for year {year}',
+            f'Failed to add receiver with ID {receiver_id} for participant with ID {participant_id} for year {year}',
+            {'participant_id': participant_id, 'receiver_id': receiver_id, 'year': year}
         )
 
     def add_message(self, sender_id: int, message_text: str):
@@ -242,26 +252,26 @@ class SqlStatements:
             params={'sender_id': sender_id, 'receiver_id': receiver_id}
         )
 
-    def remove_participant(self, person_id: int):
+    def remove_participant(self, participant_id: int):
         """
-        Remove a participant from the database along with their receivers.
+        Remove a participant from the database along with their past receivers.
 
         Parameters:
-            person_id (int): The ID of the participant to remove.
+            participant_id (int): The ID of the participant to remove.
         """
-        # Remove all receivers associated with the participant
+        # Remove all past receivers associated with the participant
         self._execute_query(
-            "DELETE FROM Receiver WHERE person_id = :person_id",
-            f'Removed receivers for participant {person_id}',
-            'Failed to remove receivers',
-            {'person_id': person_id}
+            "DELETE FROM past_receivers WHERE participant_id = :participant_id",
+            f'Removed past receivers for participant {participant_id}',
+            'Failed to remove past receivers',
+            {'participant_id': participant_id}
         )
         # Remove the participant
         self._execute_query(
-            "DELETE FROM Participant WHERE id = :person_id",
-            f'Removed participant {person_id}',
+            "DELETE FROM participants WHERE id = :participant_id",
+            f'Removed participant {participant_id}',
             'Failed to remove participant',
-            {'person_id': person_id}
+            {'participant_id': participant_id}
         )
 
     def remove_receiver(self, person_id: int, receiver_name: str, year: int):
@@ -274,9 +284,9 @@ class SqlStatements:
             year (int): The year of the receiver assignment.
         """
         query = """
-            DELETE FROM Receiver
-            WHERE person_id = :person_id
-            AND receiver_name = :receiver_name
+            DELETE FROM past_receivers
+            WHERE participant_id = :person_id
+            AND receiver_id = (SELECT id FROM participants WHERE name = :receiver_name)
             AND year = :year
         """
         self._execute_query(
@@ -298,7 +308,7 @@ class SqlStatements:
             bool: True if the password matches, False otherwise.
         """
         query = """
-            SELECT password FROM Participant WHERE name = :name
+            SELECT password FROM participants WHERE name = :name
         """
         result = self._execute_query(
             query,
@@ -311,7 +321,9 @@ class SqlStatements:
             stored_password = result['password']  # This should be bytes or str based on storage
             if isinstance(stored_password, str):
                 stored_password = stored_password.encode('utf-8')  # Encode to bytes if stored as string
-            return bcrypt.checkpw(password.encode('utf-8'), stored_password)
+            is_match = bcrypt.checkpw(password.encode('utf-8'), stored_password)
+            self._sql_logger.info(f'Password match for user "{name}": {is_match}')
+            return is_match
         return False
 
     def is_participant(self, receiver_name: str, person_id: int) -> bool:
@@ -382,17 +394,17 @@ class SqlStatements:
         """
         select_query = """
             SELECT message_text, created_at
-            FROM Message
-            WHERE sender_id = :sender_id AND receiver_id IS NULL
+            FROM assignments
+            WHERE giver_id = :giver_id AND receiver_id IS NULL
         """
         return self._execute_query(
             select_query,
             success_message=f'Fetched pending messages for participant {participant_id}',
             error_message=f'Failed to fetch messages for participant {participant_id}',
-            params={'sender_id': participant_id}
+            params={'giver_id': participant_id}
         )
 
-    def get_role(self, name: str) -> Optional[Role]:
+    def get_role(self, name: str) -> Optional[str]:
         """
         Get the role of a participant by name.
 
@@ -400,10 +412,10 @@ class SqlStatements:
             name (str): The name of the participant.
 
         Returns:
-            Optional[Role]: The role of the participant if found, else None.
+            Optional[str]: 'admin' if the participant is an admin, 'participant' otherwise.
         """
         query = """
-            SELECT role FROM Participant WHERE name = :name
+            SELECT admin FROM participants WHERE name = :name
         """
         result = self._execute_query(
             query,
@@ -412,29 +424,24 @@ class SqlStatements:
             {'name': name},
             fetch_one=True
         )
-        if result and result['role']:
-            role_str = result['role']
-            try:
-                return Role(role_str)
-            except ValueError:
-                self._sql_logger.error(f'Invalid role "{role_str}" for participant "{name}".')
+        if result is not None:
+            return 'admin' if result['admin'] else 'participant'
         return None
 
     def get_all_participants(self) -> Optional[List[Dict[str, Any]]]:
         """
-        Fetch all participants from the Participant table excluding admins.
+        Fetch all participants from the participants table excluding admins.
 
         Returns:
-            Optional[List[Dict[str, Any]]]: A list of dictionaries where each dictionary contains the ID,
-            name, and role of a participant.
+            Optional[List[Dict[str, Any]]]: A list of dictionaries where each dictionary contains the ID
+            and name of a participant.
         """
-        query = "SELECT id, name, role FROM Participant WHERE role != :admin_role"
+        query = "SELECT id, name FROM participants WHERE admin = 0"
         try:
             results = self._execute_query(
                 query,
                 'Fetched participants',
-                'Failed to fetch participants',
-                {'admin_role': Role.ADMIN.value}
+                'Failed to fetch participants'
             )
             if results:
                 return [dict(row) for row in results]
@@ -454,7 +461,10 @@ class SqlStatements:
             or None on failure.
         """
         query = """
-            SELECT receiver_name, year FROM Receiver WHERE person_id = :person_id
+            SELECT p.name AS receiver_name, pr.year
+            FROM past_receivers pr
+            JOIN participants p ON pr.receiver_id = p.id
+            WHERE pr.participant_id = :person_id
         """
         try:
             results = self._execute_query(
@@ -501,8 +511,10 @@ class SqlStatements:
         """
         current_year = datetime.datetime.now().year  # Get the current year
         query = """
-            SELECT receiver_name, year FROM Receiver
-            WHERE person_id = :person_id AND year = :current_year
+            SELECT p.name AS receiver_name, pr.year
+            FROM past_receivers pr
+            JOIN participants p ON pr.receiver_id = p.id
+            WHERE pr.participant_id = :person_id AND pr.year = :current_year
         """
         try:
             result = self._execute_query(
@@ -528,12 +540,12 @@ class SqlStatements:
         Returns:
             Optional[int]: The ID of the participant, or None if not found.
         """
-        query = "SELECT id FROM Participant WHERE name = :name"
+        query = "SELECT id FROM participants WHERE name = :name"
         try:
             result = self._execute_query(
                 query,
-                f'Fetched person_id for {name}',
-                'Failed to fetch person_id',
+                f'Fetched participant ID for {name}',
+                'Failed to fetch participant ID',
                 {'name': name},
                 fetch_one=True
             )
@@ -553,7 +565,7 @@ class SqlStatements:
         Returns:
             Optional[Dict[str, Any]]: A dictionary containing the participant's details or None if not found.
         """
-        query = "SELECT id, name, role FROM Participant WHERE id = :person_id"
+        query = "SELECT id, name, admin FROM participants WHERE id = :person_id"
         try:
             result = self._execute_query(
                 query,
@@ -568,27 +580,69 @@ class SqlStatements:
         except DatabaseError:
             return None
 
-    def update_participant(self, person_id: int, name: str, password: str):
+    def update_participant(self, participant_id: int, name: str, password: str):
         """
         Update a participant's details in the database.
 
         Parameters:
-            person_id (int): The ID of the participant to update.
-            name (str): The new name of the participant.
+            participant_id (int): The ID of the participant to update.
+            name (str): The new name and username of the participant.
             password (str): The new password of the participant.
         """
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')  # Convert to string
         update_query = """
-            UPDATE Participant
+            UPDATE participants
             SET name = :name, password = :password
-            WHERE id = :person_id
+            WHERE id = :participant_id
         """
         try:
             self._execute_query(
                 update_query,
-                f'Updated participant "{name}" with ID {person_id}',
-                f'Failed to update participant with ID {person_id}',
-                {'name': name, 'password': hashed, 'person_id': person_id}
+                f'Updated participant "{name}" with ID {participant_id}',
+                f'Failed to update participant with ID {participant_id}',
+                {'name': name, 'password': hashed, 'participant_id': participant_id}
+            )
+        except DatabaseError:
+            pass
+
+    def admin_exists(self) -> bool:
+        """
+        Check if an admin user exists in the participants table.
+
+        Returns:
+            bool: True if an admin exists, False otherwise.
+        """
+        query = "SELECT 1 FROM participants WHERE admin = 1 LIMIT 1"
+        try:
+            result = self._execute_query(
+                query,
+                'Checked for existing admin user',
+                'Failed to check for existing admin user',
+                fetch_one=True
+            )
+            return result is not None
+        except DatabaseError:
+            return False
+
+    def update_participant_name(self, participant_id: int, name: str):
+        """
+        Update a participant's name in the database.
+
+        Parameters:
+            participant_id (int): The ID of the participant to update.
+            name (str): The new name of the participant.
+        """
+        update_query = """
+            UPDATE participants
+            SET name = :name
+            WHERE id = :participant_id
+        """
+        try:
+            self._execute_query(
+                update_query,
+                f'Updated participant name to "{name}" with ID {participant_id}',
+                f'Failed to update participant name with ID {participant_id}',
+                {'name': name, 'participant_id': participant_id}
             )
         except DatabaseError:
             pass

@@ -16,7 +16,7 @@
 
 <h2>Current Receiver ({{ current_year }})</h2>
 {% if current_receiver %}
-    <p>Your current receiver is: <strong>{{ current_receiver.receiver_name }}</strong></p>
+    <p>Your current receiver is: <strong>{{ current_receiver.name }}</strong></p>
 {% else %}
     <p>You do not have a receiver assigned for this year.</p>
 {% endif %}
@@ -26,7 +26,7 @@
 {% if past_receivers %}
     <ul>
         {% for receiver in past_receivers %}
-            <li>{{ receiver.receiver_name }} ({{ receiver.year }})</li>
+            <li>{{ receiver.name }} ({{ receiver.year }})</li>
         {% endfor %}
     </ul>
 {% else %}
@@ -41,16 +41,15 @@
 
 <!-- Display existing messages -->
 <h2>Your Pending Messages</h2>
-{% if messages %}
+{% if pending_messages %}
     <ul>
-        {% for message in messages %}
+        {% for message in pending_messages %}
             <li>{{ message.message_text }} (Written on {{ message.created_at }})</li>
         {% endfor %}
     </ul>
 {% else %}
     <p>No pending messages found.</p>
 {% endif %}
-
 
 <!-- Logout Button -->
 <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
