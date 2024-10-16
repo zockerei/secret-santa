@@ -213,14 +213,24 @@ def participant_dashboard():
         current_receiver = next((r for r in past_receivers if r['year'] == current_year), None)
 
         # Fetch the messages written for the next receiver (pending messages)
-        pending_messages = sql_statements.get_messages_for_participant(participant_id)
+        pending_messages = sql_statements.get_messages_for_participant(participant_id, current_year)
+
+        # Fetch the message from the current receiver
+        current_receiver_message = None
+        if current_receiver:
+            current_receiver_id = sql_statements.get_participant_id(current_receiver['receiver_name'])
+            if current_receiver_id:
+                message = sql_statements.get_message_for_year(current_receiver_id, current_year)
+                if message:
+                    current_receiver_message = message['message']
 
         return render_template(
             'participant_dashboard.html',
             past_receivers=past_receivers,
             current_receiver=current_receiver,
             current_year=current_year,
-            pending_messages=pending_messages
+            pending_messages=pending_messages,
+            current_receiver_message=current_receiver_message
         )
     except DatabaseError as db_err:
         flash('Failed to load participant dashboard. Please try again later.', 'danger')
@@ -235,6 +245,7 @@ def add_message():
     """Handle message submission for a participant."""
     user = session.get('user')
     message_text = request.form.get('message_text')
+    current_year = datetime.now().year
 
     if not message_text:
         flash('Message text cannot be empty.', 'danger')
@@ -246,8 +257,14 @@ def add_message():
             flash('Participant not found. Contact administrator.', 'danger')
             return redirect(url_for('logout'))
 
-        # Insert the message into the database with receiver_id as NULL for now
-        sql_statements.add_message(participant_id, message_text)
+        # Check if a message already exists for this year
+        existing_message = sql_statements.get_message_for_year(participant_id, current_year)
+        if existing_message:
+            flash('You have already written a message for this year. You can edit the existing message instead.', 'warning')
+            return redirect(url_for('participant_dashboard'))
+
+        # Insert the message into the database with the current year
+        sql_statements.add_message(participant_id, message_text, current_year)
         flash('Message added successfully!', 'success')
         return redirect(url_for('participant_dashboard'))
 
@@ -256,6 +273,36 @@ def add_message():
         _app_logger.error(f'Error adding message for user "{user}": {db_err}')
         return redirect(url_for('participant_dashboard'))
 
+@app.route('/edit_message/<int:message_id>', methods=['GET', 'POST'])
+@login_required(role='participant')
+def edit_message(message_id):
+    user = session.get('user')
+    try:
+        participant_id = sql_statements.get_participant_id(user)
+        if participant_id is None:
+            flash('Participant not found. Contact administrator.', 'danger')
+            return redirect(url_for('logout'))
+
+        message = sql_statements.get_message_by_id(message_id, participant_id)
+        if message is None:
+            flash('Message not found or you do not have permission to edit it.', 'danger')
+            return redirect(url_for('participant_dashboard'))
+
+        if request.method == 'POST':
+            new_message_text = request.form.get('message_text')
+            if new_message_text:
+                sql_statements.update_message(message_id, new_message_text)
+                flash('Message updated successfully!', 'success')
+                return redirect(url_for('participant_dashboard'))
+            else:
+                flash('Message text cannot be empty.', 'danger')
+
+        return render_template('edit_message.html', message=message)
+
+    except DatabaseError as db_err:
+        flash('Failed to edit message. Please try again later.', 'danger')
+        _app_logger.error(f'Error editing message for user "{user}": {db_err}')
+        return redirect(url_for('participant_dashboard'))
 
 @app.route('/add_participant', methods=['POST'])
 @login_required(role='admin')
@@ -425,24 +472,31 @@ def start_new_run():
 
     try:
         participants = sql_statements.get_all_participants() or []
-        non_admin_participants = [p for p in participants if p['role'] != 'admin']  # Use 'admin' string directly
 
-        if not non_admin_participants:
+        if not participants:
             flash('No participants available to start a new run.', 'warning')
             return redirect(url_for('admin_dashboard'))
 
         # Check if any participant already has a receiver for the year
-        for participant in non_admin_participants:
+        for participant in participants:
             person_id = participant['id']
-            if sql_statements.check_duplicate_receiver(person_id, year):
+            current_receiver = sql_statements.get_current_receiver(person_id, year)
+            if current_receiver:
                 flash(f"Participant '{participant['name']}' already has a receiver for the year {year}.", "warning")
                 _app_logger.warning(f"Participant '{participant['name']}' already has a receiver for year {year}.")
                 return redirect(url_for('admin_dashboard'))
 
-        # Fetch past receivers and generate new assignments using the 'logic' module
-        past_receiver = logic.fetch_past_receiver(sql_statements)
-        new_receiver = logic.generate_secret_santa(past_receiver)
-        logic.store_new_receiver(new_receiver, sql_statements, year)
+        # Generate new assignments using the updated 'logic' module
+        new_assignments = logic.generate_secret_santa(participants, sql_statements)
+        
+        # Store new assignments
+        for giver_id, receiver_id in new_assignments:
+            # Get the message for the giver, if it exists
+            message = sql_statements.get_message_for_year(giver_id, year)
+            message_id = message['id'] if message else None
+            
+            # Assign the receiver and link the message if it exists
+            sql_statements.assign_receiver(giver_id, receiver_id, message_id, year)
 
         _app_logger.info(f'Secret Santa round started for year {year}.')
         flash('New Secret Santa round started successfully.', 'success')
@@ -469,6 +523,31 @@ def internal_server_error(e):
     """Render a custom 500 error page."""
     _app_logger.error(f'Internal server error: {e}')
     return render_template('500.html'), 500
+
+
+@app.route('/delete_message/<int:message_id>', methods=['POST'])
+@login_required(role='participant')
+def delete_message(message_id):
+    user = session.get('user')
+    try:
+        participant_id = sql_statements.get_participant_id(user)
+        if participant_id is None:
+            flash('Participant not found. Contact administrator.', 'danger')
+            return redirect(url_for('logout'))
+
+        message = sql_statements.get_message_by_id(message_id, participant_id)
+        if message is None:
+            flash('Message not found or you do not have permission to delete it.', 'danger')
+            return redirect(url_for('participant_dashboard'))
+
+        sql_statements.delete_message(message_id)
+        flash('Message deleted successfully!', 'success')
+        return redirect(url_for('participant_dashboard'))
+
+    except DatabaseError as db_err:
+        flash('Failed to delete message. Please try again later.', 'danger')
+        _app_logger.error(f'Error deleting message for user "{user}": {db_err}')
+        return redirect(url_for('participant_dashboard'))
 
 
 if __name__ == '__main__':

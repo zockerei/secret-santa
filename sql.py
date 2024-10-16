@@ -196,6 +196,24 @@ class SqlStatements:
             receiver_id (int): The ID of the receiver to add for the participant.
             year (int): The year for the assignment.
         """
+        # First, check if the receiver is already assigned to any participant for this year
+        check_query = """
+            SELECT participant_id FROM past_receivers 
+            WHERE receiver_id = :receiver_id AND year = :year
+        """
+        result = self._execute_query(
+            check_query,
+            f'Checked for existing assignment for receiver {receiver_id} in year {year}',
+            f'Failed to check for existing assignment for receiver {receiver_id} in year {year}',
+            {'receiver_id': receiver_id, 'year': year},
+            fetch_one=True
+        )
+
+        if result:
+            existing_participant_id = result['participant_id']
+            raise DatabaseError(f'Receiver {receiver_id} is already assigned to participant {existing_participant_id} for year {year}')
+
+        # If no existing assignment, proceed with insertion
         insert_query = """
             INSERT INTO past_receivers (participant_id, receiver_id, year) 
             VALUES (:participant_id, :receiver_id, :year)
@@ -207,49 +225,51 @@ class SqlStatements:
             {'participant_id': participant_id, 'receiver_id': receiver_id, 'year': year}
         )
 
-    def add_message(self, sender_id: int, message_text: str):
+    def add_message(self, participant_id: int, message_text: str, year: int):
         """
-        Add a new message from a participant (sender) to the database. The receiver is not yet assigned.
+        Add a new message from a participant to the database.
 
         Parameters:
-            sender_id (int): The ID of the participant writing the message.
+            participant_id (int): The ID of the participant writing the message.
             message_text (str): The message text written by the participant.
+            year (int): The year for the message.
 
         Raises:
             DatabaseError: If the query execution fails.
         """
         insert_query = """
-            INSERT INTO Message (sender_id, message_text)
-            VALUES (:sender_id, :message_text)
+            INSERT INTO messages (participant_id, message, year)
+            VALUES (:participant_id, :message, :year)
         """
         self._execute_query(
             insert_query,
             success_message='Message added to the database',
             error_message='Failed to add message to the database',
-            params={'sender_id': sender_id, 'message_text': message_text}
+            params={'participant_id': participant_id, 'message': message_text, 'year': year}
         )
 
-    def assign_message_to_receiver(self, sender_id: int, receiver_id: int):
+    def assign_receiver(self, giver_id: int, receiver_id: int, message_id: Optional[int], year: int):
         """
-        Assign all pending messages written by a participant to a specific receiver.
+        Create an assignment between a giver and a receiver.
 
         Parameters:
-            sender_id (int): The ID of the participant who wrote the messages.
-            receiver_id (int): The ID of the assigned receiver.
+            giver_id (int): The ID of the participant giving the gift.
+            receiver_id (int): The ID of the participant receiving the gift.
+            message_id (Optional[int]): The ID of the associated message, if any.
+            year (int): The year of the assignment.
 
         Raises:
             DatabaseError: If the query execution fails.
         """
-        update_query = """
-            UPDATE Message
-            SET receiver_id = :receiver_id
-            WHERE sender_id = :sender_id AND receiver_id IS NULL
+        insert_query = """
+            INSERT INTO assignments (giver_id, receiver_id, message_id, year)
+            VALUES (:giver_id, :receiver_id, :message_id, :year)
         """
         self._execute_query(
-            update_query,
-            success_message=f'Messages from participant {sender_id} assigned to receiver {receiver_id}',
-            error_message=f'Failed to assign messages from participant {sender_id} to receiver {receiver_id}',
-            params={'sender_id': sender_id, 'receiver_id': receiver_id}
+            insert_query,
+            success_message=f'Assignment created for giver {giver_id} and receiver {receiver_id}',
+            error_message=f'Failed to create assignment for giver {giver_id} and receiver {receiver_id}',
+            params={'giver_id': giver_id, 'receiver_id': receiver_id, 'message_id': message_id, 'year': year}
         )
 
     def remove_participant(self, participant_id: int):
@@ -276,23 +296,38 @@ class SqlStatements:
 
     def remove_receiver(self, person_id: int, receiver_name: str, year: int):
         """
-        Remove a specific receiver for a participant for a given year.
+        Remove a specific receiver for a participant for a given year from both past_receivers and assignments tables.
 
         Parameters:
             person_id (int): The ID of the participant.
             receiver_name (str): The name of the receiver to remove.
             year (int): The year of the receiver assignment.
         """
-        query = """
+        # First, try to remove from past_receivers table
+        query_past_receivers = """
             DELETE FROM past_receivers
             WHERE participant_id = :person_id
             AND receiver_id = (SELECT id FROM participants WHERE name = :receiver_name)
             AND year = :year
         """
         self._execute_query(
-            query,
-            f'Removed receiver "{receiver_name}" for participant {person_id} for year {year}',
-            'Failed to remove receiver',
+            query_past_receivers,
+            f'Attempted to remove receiver "{receiver_name}" for participant {person_id} for year {year} from past_receivers',
+            'Failed to remove receiver from past_receivers',
+            {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
+        )
+
+        # Then, try to remove from assignments table
+        query_assignments = """
+            DELETE FROM assignments
+            WHERE giver_id = :person_id
+            AND receiver_id = (SELECT id FROM participants WHERE name = :receiver_name)
+            AND year = :year
+        """
+        self._execute_query(
+            query_assignments,
+            f'Attempted to remove receiver "{receiver_name}" for participant {person_id} for year {year} from assignments',
+            'Failed to remove receiver from assignments',
             {'person_id': person_id, 'receiver_name': receiver_name, 'year': year}
         )
 
@@ -379,12 +414,13 @@ class SqlStatements:
         except DatabaseError:
             return False
 
-    def get_messages_for_participant(self, participant_id: int) -> List[sqlite3.Row]:
+    def get_messages_for_participant(self, participant_id: int, year: int) -> List[sqlite3.Row]:
         """
-        Retrieve all pending messages (without assigned receiver) written by the participant.
+        Retrieve all messages written by the participant for a specific year.
 
         Parameters:
             participant_id (int): The ID of the participant whose messages to retrieve.
+            year (int): The year for which to retrieve messages.
 
         Returns:
             List[sqlite3.Row]: A list of messages written by the participant.
@@ -393,15 +429,15 @@ class SqlStatements:
             DatabaseError: If the query execution fails.
         """
         select_query = """
-            SELECT message_text, created_at
-            FROM assignments
-            WHERE giver_id = :giver_id AND receiver_id IS NULL
+            SELECT id, message, year
+            FROM messages
+            WHERE participant_id = :participant_id AND year = :year
         """
         return self._execute_query(
             select_query,
-            success_message=f'Fetched pending messages for participant {participant_id}',
-            error_message=f'Failed to fetch messages for participant {participant_id}',
-            params={'giver_id': participant_id}
+            success_message=f'Fetched messages for participant {participant_id} for year {year}',
+            error_message=f'Failed to fetch messages for participant {participant_id} for year {year}',
+            params={'participant_id': participant_id, 'year': year}
         )
 
     def get_role(self, name: str) -> Optional[str]:
@@ -451,20 +487,18 @@ class SqlStatements:
 
     def get_receivers_for_participant(self, person_id: int) -> Optional[List[Dict[str, Any]]]:
         """
-        Fetch all past receivers for a participant, including the year.
-
-        Parameters:
-            person_id (int): The ID of the participant.
-
-        Returns:
-            Optional[List[Dict[str, Any]]]: A list of dictionaries containing receiver names and years,
-            or None on failure.
+        Fetch all past receivers for a participant, including the year, from both past_receivers and assignments tables.
         """
         query = """
             SELECT p.name AS receiver_name, pr.year
-            FROM past_receivers pr
+            FROM (
+                SELECT participant_id, receiver_id, year FROM past_receivers
+                UNION ALL
+                SELECT giver_id AS participant_id, receiver_id, year FROM assignments
+            ) pr
             JOIN participants p ON pr.receiver_id = p.id
             WHERE pr.participant_id = :person_id
+            ORDER BY pr.year DESC
         """
         try:
             results = self._execute_query(
@@ -498,30 +532,30 @@ class SqlStatements:
         except DatabaseError:
             return 0
 
-    def get_current_receiver(self, person_id: int) -> Optional[Dict[str, Any]]:
+    def get_current_receiver(self, giver_id: int, year: int) -> Optional[Dict[str, Any]]:
         """
-        Fetch the receiver for the participant for the current year.
+        Fetch the receiver for the participant for the specified year.
 
         Parameters:
-            person_id (int): The ID of the participant.
+            giver_id (int): The ID of the participant giving the gift.
+            year (int): The year to check for the assignment.
 
         Returns:
-            Optional[Dict[str, Any]]: A dictionary containing the receiver's name and year if found,
+            Optional[Dict[str, Any]]: A dictionary containing the receiver's details if found,
             or None if not found.
         """
-        current_year = datetime.datetime.now().year  # Get the current year
         query = """
-            SELECT p.name AS receiver_name, pr.year
-            FROM past_receivers pr
-            JOIN participants p ON pr.receiver_id = p.id
-            WHERE pr.participant_id = :person_id AND pr.year = :current_year
+            SELECT p.id, p.name, a.message_id
+            FROM assignments a
+            JOIN participants p ON a.receiver_id = p.id
+            WHERE a.giver_id = :giver_id AND a.year = :year
         """
         try:
             result = self._execute_query(
                 query,
-                f'Fetched current receiver for participant {person_id} for year {current_year}',
-                f'Failed to fetch current receiver for participant {person_id} for year {current_year}',
-                {'person_id': person_id, 'current_year': current_year},
+                f'Fetched current receiver for giver {giver_id} for year {year}',
+                f'Failed to fetch current receiver for giver {giver_id} for year {year}',
+                {'giver_id': giver_id, 'year': year},
                 fetch_one=True
             )
             if result:
@@ -646,3 +680,108 @@ class SqlStatements:
             )
         except DatabaseError:
             pass
+
+    def get_message_by_id(self, message_id: int, participant_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Fetch a message by its ID and participant ID.
+
+        Parameters:
+            message_id (int): The ID of the message.
+            participant_id (int): The ID of the participant who wrote the message.
+
+        Returns:
+            Optional[Dict[str, Any]]: A dictionary containing the message details or None if not found.
+        """
+        query = """
+            SELECT id, message, year
+            FROM messages
+            WHERE id = :message_id AND participant_id = :participant_id
+        """
+        try:
+            result = self._execute_query(
+                query,
+                f'Fetched message with ID {message_id} for participant {participant_id}',
+                f'Failed to fetch message with ID {message_id} for participant {participant_id}',
+                {'message_id': message_id, 'participant_id': participant_id},
+                fetch_one=True
+            )
+            if result:
+                return dict(result)
+            return None
+        except DatabaseError:
+            return None
+
+    def update_message(self, message_id: int, new_message_text: str):
+        """
+        Update a message's text in the database.
+
+        Parameters:
+            message_id (int): The ID of the message to update.
+            new_message_text (str): The new text for the message.
+        """
+        update_query = """
+            UPDATE messages
+            SET message = :new_message_text
+            WHERE id = :message_id
+        """
+        try:
+            self._execute_query(
+                update_query,
+                f'Updated message with ID {message_id}',
+                f'Failed to update message with ID {message_id}',
+                {'new_message_text': new_message_text, 'message_id': message_id}
+            )
+        except DatabaseError:
+            pass
+
+    def delete_message(self, message_id: int):
+        """
+        Delete a message from the database.
+
+        Parameters:
+            message_id (int): The ID of the message to delete.
+        """
+        delete_query = """
+            DELETE FROM messages
+            WHERE id = :message_id
+        """
+        try:
+            self._execute_query(
+                delete_query,
+                f'Deleted message with ID {message_id}',
+                f'Failed to delete message with ID {message_id}',
+                {'message_id': message_id}
+            )
+        except DatabaseError:
+            pass
+
+    def get_message_for_year(self, participant_id: int, year: int) -> Optional[Dict[str, Any]]:
+        """
+        Fetch a message for a specific participant and year.
+
+        Parameters:
+            participant_id (int): The ID of the participant.
+            year (int): The year for which to fetch the message.
+
+        Returns:
+            Optional[Dict[str, Any]]: A dictionary containing the message details or None if not found.
+        """
+        query = """
+            SELECT id, message, year
+            FROM messages
+            WHERE participant_id = :participant_id AND year = :year
+            LIMIT 1
+        """
+        try:
+            result = self._execute_query(
+                query,
+                f'Fetched message for participant {participant_id} and year {year}',
+                f'Failed to fetch message for participant {participant_id} and year {year}',
+                {'participant_id': participant_id, 'year': year},
+                fetch_one=True
+            )
+            if result:
+                return dict(result)
+            return None
+        except DatabaseError:
+            return None
