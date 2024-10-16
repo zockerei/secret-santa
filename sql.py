@@ -487,10 +487,10 @@ class SqlStatements:
 
     def get_receivers_for_participant(self, person_id: int) -> Optional[List[Dict[str, Any]]]:
         """
-        Fetch all past receivers for a participant, including the year, from both past_receivers and assignments tables.
+        Fetch all past receivers for a participant, including the year and receiver ID, from both past_receivers and assignments tables.
         """
         query = """
-            SELECT p.name AS receiver_name, pr.year
+            SELECT p.id AS receiver_id, p.name AS receiver_name, pr.year
             FROM (
                 SELECT participant_id, receiver_id, year FROM past_receivers
                 UNION ALL

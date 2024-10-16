@@ -3,7 +3,7 @@ import os
 import secrets
 from functools import wraps
 import yaml
-from flask import Flask, session, redirect, url_for, request, render_template, flash
+from flask import Flask, session, redirect, url_for, request, render_template, flash, jsonify
 import logging.config
 from typing import Optional
 import logic
@@ -549,6 +549,18 @@ def delete_message(message_id):
         _app_logger.error(f'Error deleting message for user "{user}": {db_err}')
         return redirect(url_for('participant_dashboard'))
 
+@app.route('/view_message/<int:receiver_id>/<int:year>')
+@login_required(role='participant')
+def view_message(receiver_id, year):
+    try:
+        message = sql_statements.get_message_for_year(receiver_id, year)
+        if message:
+            return jsonify({'message': message['message']})
+        else:
+            return jsonify({'message': None})
+    except DatabaseError as db_err:
+        _app_logger.error(f'Error fetching message for receiver {receiver_id} and year {year}: {db_err}')
+        return jsonify({'error': 'An error occurred while fetching the message'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -34,7 +34,10 @@
 {% if past_receivers %}
     <ul>
         {% for receiver in past_receivers %}
-            <li>{{ receiver.receiver_name }} ({{ receiver.year }})</li>
+            <li>
+                {{ receiver.receiver_name }} ({{ receiver.year }})
+                <button onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">View Message</button>
+            </li>
         {% endfor %}
     </ul>
 {% else %}
@@ -69,5 +72,95 @@
 <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
     <button type="submit">Logout</button>
 </form>
+
+<!-- Message Modal -->
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+    </div>
+</div>
+
+<!-- Add this script at the end of the file, before the closing </body> tag -->
+<script>
+// Get the modal
+var modal = document.getElementById("messageModal");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+function viewMessage(receiverId, year, receiverName) {
+    fetch(`/view_message/${receiverId}/${year}`)
+        .then(response => response.json())
+        .then(data => {
+            var modalTitle = document.getElementById("modalTitle");
+            var modalMessage = document.getElementById("modalMessage");
+            
+            modalTitle.textContent = `Message from ${receiverName} (${year})`;
+            
+            if (data.message) {
+                modalMessage.textContent = data.message;
+            } else {
+                modalMessage.textContent = 'No message found for this receiver.';
+            }
+            
+            modal.style.display = "block";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching the message.');
+        });
+}
+</script>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>
 
 {% endblock %}
