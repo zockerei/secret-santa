@@ -2,13 +2,14 @@
 
 {% block content %}
 <h1>Edit Participant</h1>
-<form action="{{ url_for('edit_participant', participant_id=participant['id']) }}" method="POST">
+<form method="POST">
     <label for="name">Name:</label>
-    <input type="text" name="name" value="{{ participant['name'] }}" required>
-
-    <label for="password">New Password:</label>
-    <input type="password" name="password" placeholder="Enter new password" required>
-
+    <input type="text" id="name" name="name" value="{{ participant.name }}" required>
+    <br>
+    <label for="password">New Password (leave blank to keep current password):</label>
+    <input type="password" id="password" name="password">
+    <br>
     <button type="submit">Update Participant</button>
 </form>
+<a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
 {% endblock %}

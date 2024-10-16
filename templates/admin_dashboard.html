@@ -60,9 +60,11 @@
 <ul>
     {% for participant in participants %}
         <li>
-            {{ participant.name }} (Role: {{ participant.role }})
+            {{ participant.name }}
             <a href="{{ url_for('edit_participant', participant_id=participant.id) }}">Edit</a> |
-            <form action="{{ url_for('remove_participant', person_id=participant.id) }}" method="POST" style="display:inline;"></form>
+            <form action="{{ url_for('remove_participant', person_id=participant.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Remove</button>
+            </form>
         </li>
     {% endfor %}
 </ul>
@@ -89,7 +91,9 @@
                 {% for receiver in scoreboard[participant.name] %}
                     <li>
                         {{ receiver.receiver_name }} ({{ receiver.year }})
-                        <form action="{{ url_for('remove_receiver', person_id=participant.id, receiver_name=receiver.receiver_name, year=receiver.year) }}" method="POST" style="display:inline;"></form>
+                        <form action="{{ url_for('remove_receiver', person_id=participant.id, receiver_name=receiver.receiver_name, year=receiver.year) }}" method="POST" style="display:inline;">
+                            <button type="submit">Remove</button>
+                        </form>
                     </li>
                 {% else %}
                     <li>No receivers assigned yet.</li>

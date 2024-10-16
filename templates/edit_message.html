@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Edit Message</h1>
+<form method="POST">
+    <label for="message_text">Message:</label>
+    <textarea id="message_text" name="message_text" rows="5" cols="40" required>{{ message.message }}</textarea>
+    <br>
+    <button type="submit">Update Message</button>
+</form>
+<a href="{{ url_for('participant_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

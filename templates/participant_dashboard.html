@@ -14,10 +14,17 @@
 
 <h1>Participant Dashboard</h1>
 
-<!-- Current Receiver Section -->
 <h2>Current Receiver ({{ current_year }})</h2>
 {% if current_receiver %}
-    <p>Your current receiver is: <strong>{{ current_receiver.receiver_name }}</strong></p>
+    <p>Your current receiver is: <strong>{{ current_receiver.name }}</strong></p>
+    
+    <!-- New section to display the message from the current receiver -->
+    <h3>Message from Your Current Receiver</h3>
+    {% if current_receiver_message %}
+        <p>{{ current_receiver_message }}</p>
+    {% else %}
+        <p>Your current receiver hasn't written a message yet.</p>
+    {% endif %}
 {% else %}
     <p>You do not have a receiver assigned for this year.</p>
 {% endif %}
@@ -27,16 +34,133 @@
 {% if past_receivers %}
     <ul>
         {% for receiver in past_receivers %}
-            <li>{{ receiver.receiver_name }} ({{ receiver.year }})</li>
+            <li>
+                {{ receiver.receiver_name }} ({{ receiver.year }})
+                <button onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">View Message</button>
+            </li>
         {% endfor %}
     </ul>
 {% else %}
     <p>No past receivers found.</p>
 {% endif %}
 
+<h2>Write a Message for Your Future Receiver</h2>
+<form action="{{ url_for('add_message') }}" method="POST">
+    <textarea name="message_text" rows="5" cols="40" placeholder="Write your message here..." required></textarea><br>
+    <button type="submit">Submit Message</button>
+</form>
+
+<!-- Display existing messages -->
+<h2>Your Message for {{ current_year }}</h2>
+{% if pending_messages %}
+    <ul>
+        {% for message in pending_messages %}
+            <li>
+                {{ message.message }} (Written for {{ message.year }})
+                <a href="{{ url_for('edit_message', message_id=message.id) }}">Edit</a>
+                <form action="{{ url_for('delete_message', message_id=message.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this message?');">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No pending messages found.</p>
+{% endif %}
+
 <!-- Logout Button -->
 <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
     <button type="submit">Logout</button>
 </form>
+
+<!-- Message Modal -->
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+    </div>
+</div>
+
+<!-- Add this script at the end of the file, before the closing </body> tag -->
+<script>
+// Get the modal
+var modal = document.getElementById("messageModal");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+function viewMessage(receiverId, year, receiverName) {
+    fetch(`/view_message/${receiverId}/${year}`)
+        .then(response => response.json())
+        .then(data => {
+            var modalTitle = document.getElementById("modalTitle");
+            var modalMessage = document.getElementById("modalMessage");
+            
+            modalTitle.textContent = `Message from ${receiverName} (${year})`;
+            
+            if (data.message) {
+                modalMessage.textContent = data.message;
+            } else {
+                modalMessage.textContent = 'No message found for this receiver.';
+            }
+            
+            modal.style.display = "block";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching the message.');
+        });
+}
+</script>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>
 
 {% endblock %}

@@ -1,54 +1,63 @@
 import random
 import logging
+from typing import List, Dict, Any, Tuple
 
 # Logging setup
 _logic_logger = logging.getLogger(__name__)
 _logic_logger.info('Logging setup complete')
 
 
-def is_valid_pairing(assignments: dict, past_receiver: dict) -> bool:
+def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List[Dict[str, Any]]) -> bool:
     """
     Validates the current Secret Santa pairings. Ensures no one is paired
-    with a recipient they had in the last two years.
+    with a recipient they had in the last two years or themselves.
 
     Parameters:
-        assignments (dict): Mapping of givers to recipients (giver -> recipient).
-        past_receiver (dict): Mapping of givers to their past recipients over the years (giver -> [recipient1, recipient2,...]).
+        assignments (dict): Mapping of givers to recipients (giver_id -> recipient_id).
+        past_receivers (dict): Mapping of givers to their past recipients over the years (giver_id -> [recipient_name1, recipient_name2,...]).
+        participants (List[Dict[str, Any]]): List of participant dictionaries with 'id' and 'name' keys.
 
     Returns:
         bool: True if pairings are valid, False otherwise.
     """
-    for giver, recipient in assignments.items():
-        _logic_logger.debug(f'Validating pairing: {giver} -> {recipient}')
-        if recipient in past_receiver.get(giver, [])[-2:]:
-            _logic_logger.debug(f'Invalid pairing: {giver} had {recipient} in the last 2 years')
+    for giver_id, recipient_id in assignments.items():
+        if giver_id == recipient_id:
+            return False
+        
+        # Get the recipient's name
+        recipient_name = next((p['name'] for p in participants if p['id'] == recipient_id), None)
+        
+        if recipient_name in past_receivers.get(giver_id, [])[-2:]:
             return False
     return True
 
 
-def generate_secret_santa(past_year_receiver: dict) -> dict:
+def generate_secret_santa(participants: List[Dict[str, Any]], sql_statements) -> List[Tuple[int, int]]:
     """
     Generates valid Secret Santa pairings, ensuring participants do not get the same recipient
     they had in the last two years and do not pair with themselves.
 
     Parameters:
-        past_year_receiver (dict): Mapping of givers to the list of their past recipients.
+        participants (List[Dict[str, Any]]): List of participant dictionaries with 'id' and 'name' keys.
+        sql_statements (SqlStatements): Instance of SqlStatements to execute database queries.
 
     Returns:
-        dict: Valid Secret Santa pairings (giver -> recipient).
+        List[Tuple[int, int]]: List of (giver_id, receiver_id) tuples.
     """
-    names = list(past_year_receiver.keys())
-    attempts = 100
+    participant_ids = [p['id'] for p in participants]
+    attempts = 1000  # Increased number of attempts
+
+    # Fetch past receivers for all participants
+    past_receivers = fetch_past_receiver(sql_statements)
 
     for _ in range(attempts):
-        recipients = random.sample(names, len(names))  # Shuffle names into recipients
-        candidate_assignment = {giver: recipient for giver, recipient in zip(names, recipients)}
+        receiver_ids = random.sample(participant_ids, len(participant_ids))  # Shuffle IDs
+        candidate_assignment = list(zip(participant_ids, receiver_ids))
 
-        # Ensure no one is paired with themselves
-        if all(giver != recipient for giver, recipient in candidate_assignment.items()):
-            if is_valid_pairing(candidate_assignment, past_year_receiver):
-                _logic_logger.info(f'Successful Secret Santa pairings generated.')
-                return candidate_assignment
+        # Check if the assignment is valid
+        if is_valid_pairing(dict(candidate_assignment), past_receivers, participants):
+            _logic_logger.info(f'Successful Secret Santa pairings generated.')
+            return candidate_assignment
 
     _logic_logger.error(f'Failed to generate valid Secret Santa pairings after {attempts} attempts.')
     raise ValueError("Unable to generate valid Secret Santa pairings after multiple attempts.")
@@ -62,11 +71,10 @@ def fetch_past_receiver(sql_statements) -> dict:
         sql_statements (SqlStatements): Instance of SqlStatements to execute database queries.
 
     Returns:
-        dict: Mapping of participants' names to their list of past recipients.
+        dict: Mapping of participants' IDs to their list of past recipient IDs.
     """
     participants = sql_statements.get_all_participants()
 
-    # Check if participants is None or empty
     if not participants:
         _logic_logger.error("No participants found. Ensure participants exist in the database.")
         raise ValueError("No participants found")
@@ -75,19 +83,15 @@ def fetch_past_receiver(sql_statements) -> dict:
 
     for participant in participants:
         person_id = participant['id']
-        name = participant['name']
-
-        # Fetch receivers for the participant
         receivers = sql_statements.get_receivers_for_participant(person_id)
 
-        # Ensure receivers is not None, initialize with empty list if needed
         if receivers is None:
-            _logic_logger.debug(f'No receivers found for {name}, initializing empty list')
-            past_assignments[name] = []
+            _logic_logger.debug(f'No receivers found for participant ID {person_id}, initializing empty list')
+            past_assignments[person_id] = []
         else:
-            # Extract the receiver names
-            past_assignments[name] = [receiver['receiver_name'] for receiver in receivers]
-            _logic_logger.debug(f'Fetched receivers for {name}: {past_assignments[name]}')
+            # Assuming receivers is a list of dictionaries with 'receiver_name' key
+            past_assignments[person_id] = [receiver['receiver_name'] for receiver in receivers]
+            _logic_logger.debug(f'Fetched receivers for participant ID {person_id}: {past_assignments[person_id]}')
 
     return past_assignments
 
@@ -97,26 +101,11 @@ def store_new_receiver(receiver: dict, sql_statements, year: int):
     Stores the new Secret Santa assignments into the database for the specified year.
 
     Parameters:
-        receiver (dict): Mapping of givers to recipients (giver -> recipient).
+        receiver (dict): Mapping of givers' IDs to recipients' IDs (giver_id -> recipient_id).
         sql_statements (SqlStatements): Instance of SqlStatements for database interaction.
         year (int): The year of the Secret Santa assignment.
     """
-    participants = sql_statements.get_all_participants()
-    participant_dict = {participant['name']: participant['id'] for participant in participants}
-    _logic_logger.debug(f'{participant_dict}')
-
-    for giver, recipient in receiver.items():
-        giver_id = participant_dict.get(giver)
-        if giver_id is None:
-            _logic_logger.error(f'Giver {giver} not found in participant dictionary.')
-            raise ValueError(f"Giver {giver} not found in participant list.")
-
-        recipient_id = participant_dict.get(recipient)
-        if recipient_id is None:
-            _logic_logger.error(f'Recipient {recipient} not found in participant dictionary.')
-            raise ValueError(f"Recipient {recipient} not found in participant list.")
-
+    for giver_id, recipient_id in receiver.items():
         # Store the assignment
-        sql_statements.add_receiver(giver_id, recipient, year)
-        _logic_logger.info(f'Assignment stored: {giver} -> {recipient} for year {year}')
-
+        sql_statements.add_receiver(giver_id, recipient_id, year)
+        _logic_logger.info(f'Assignment stored: giver ID {giver_id} -> recipient ID {recipient_id} for year {year}')
