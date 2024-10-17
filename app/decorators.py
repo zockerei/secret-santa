@@ -3,8 +3,8 @@ from flask import session, redirect, url_for, flash
 from typing import Optional
 import logging
 
-# Get the logger
-_app_logger = logging.getLogger(__name__)
+# Use the specific logger for the decorators
+decorators_logger = logging.getLogger('app.decorators')
 
 def login_required(role: Optional[str] = None):
     """
@@ -23,10 +23,9 @@ def login_required(role: Optional[str] = None):
                 flash('Please log in to access this page.', 'warning')
                 return redirect(url_for('auth.login'))
             if role and session.get('role') != role:
-                _app_logger.warning(f'Unauthorized access attempt by user "{session.get("user")}".')
+                decorators_logger.warning(f'Unauthorized access attempt by user "{session.get("user")}".')
                 flash('You do not have permission to access this page.', 'danger')
                 return redirect(url_for('auth.login'))
             return fn(*args, **kwargs)
         return decorated_view
     return decorator
-

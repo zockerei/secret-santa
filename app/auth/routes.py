@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, session
 from . import auth
+from . import auth_logger
 from app.queries import verify_participant, get_role
 from app.decorators import login_required
 
@@ -41,7 +42,8 @@ def handle_login():
         else:
             flash('Login failed. Check your name and password.', 'danger')
             return redirect(url_for('auth.login'))
-    except Exception:
+    except Exception as e:
+        auth_logger.error(f'Error during login for user "{name}": {e}')
         flash('An error occurred during login. Please try again later.', 'danger')
         return redirect(url_for('auth.login'))
 

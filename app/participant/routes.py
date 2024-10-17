@@ -77,7 +77,7 @@ def add_message():
 
     except DatabaseError as db_err:
         flash('Failed to add message. Please try again later.', 'danger')
-        _app_logger.error(f'Error adding message for user "{user}": {db_err}')
+        participant_logger.error(f'Error adding message for user "{user}": {db_err}')
         return redirect(url_for('participant.dashboard'))
 
 @participant.route('/edit_message/<int:message_id>', methods=['GET', 'POST'])

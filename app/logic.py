@@ -14,7 +14,8 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
 
     Parameters:
         assignments (dict): Mapping of givers to recipients (giver_id -> recipient_id).
-        past_receivers (dict): Mapping of givers to their past recipients over the years (giver_id -> [recipient_name1, recipient_name2,...]).
+        past_receivers (dict): Mapping of givers to their past recipients over the years
+        (giver_id -> [recipient_name1, recipient_name2,...]).
         participants (List[Dict[str, Any]]): List of participant dictionaries with 'id' and 'name' keys.
 
     Returns:
@@ -45,7 +46,7 @@ def generate_secret_santa(participants: List[Dict[str, Any]], sql_statements) ->
         List[Tuple[int, int]]: List of (giver_id, receiver_id) tuples.
     """
     participant_ids = [p['id'] for p in participants]
-    attempts = 1000  # Increased number of attempts
+    attempts = 1000
 
     # Fetch past receivers for all participants
     past_receivers = fetch_past_receiver(sql_statements)

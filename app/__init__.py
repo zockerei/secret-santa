@@ -1,23 +1,28 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import DevelopmentConfig
-
-app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
+from config.config import DevelopmentConfig
 
 # Initialize SQLAlchemy
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
-# Import and register blueprints
-from .auth import auth as auth_blueprint
-app.register_blueprint(auth_blueprint, url_prefix='/auth')
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(DevelopmentConfig)
 
-from .admin import admin as admin_blueprint
-app.register_blueprint(admin_blueprint, url_prefix='/admin')
+    # Initialize SQLAlchemy with the app
+    db.init_app(app)
 
-from .participant import participant as participant_blueprint
-app.register_blueprint(participant_blueprint, url_prefix='/participant')
+    # Import and register blueprints
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
-# Setup error handlers
-from .errors.errors import errors as errors_blueprint
-app.register_blueprint(errors_blueprint)
+    from .admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint, url_prefix='/admin')
+
+    from .participant import participant as participant_blueprint
+    app.register_blueprint(participant_blueprint, url_prefix='/participant')
+
+    from .errors import errors as errors_blueprint
+    app.register_blueprint(errors_blueprint)
+
+    return app

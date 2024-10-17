@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request
 from . import admin
+from . import admin_logger
 from app.auth.routes import login_required
 import app.logic as logic
 
@@ -23,7 +24,7 @@ def admin_dashboard():
         )
     except DatabaseError as db_err:
         flash('Failed to load admin dashboard. Please try again later.', 'danger')
-        _app_logger.error(f'Error loading admin dashboard: {db_err}')
+        admin_logger.error(f'Error loading admin dashboard: {db_err}')
         return redirect(url_for('login'))
 
 @admin.route('/add_participant', methods=['POST'])
@@ -39,11 +40,11 @@ def add_new_participant():
 
     try:
         sql_statements.add_participant(name, password, 'participant')
-        _app_logger.info(f'Added new participant "{name}".')
+        admin_logger.info(f'Added new participant "{name}".')
         flash(f'Participant "{name}" added successfully.', 'success')
     except Exception as e:
         flash('Failed to add participant. Please try again later.', 'danger')
-        _app_logger.error(f'Error adding participant "{name}": {e}')
+        admin_logger.error(f'Error adding participant "{name}": {e}')
 
     return redirect(url_for('admin.admin_dashboard'))
 
