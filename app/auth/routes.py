@@ -1,36 +1,32 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required
 from . import auth
 from . import auth_logger
-from app.queries import verify_participant, get_participant_by_id
+from app.queries import verify_participant, get_role
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        password = request.form.get('password', '').strip()
-
-        if not name or not password:
-            flash('Please enter both name and password.', 'warning')
-            return redirect(url_for('auth.login'))
-
-        try:
-            if verify_participant(name, password):
-                user = get_participant_by_id(name)
-                login_user(user)
-                flash('Logged in successfully.', 'success')
-                return redirect(url_for(f'{user.role}_dashboard'))
+        name = request.form.get('name')
+        password = request.form.get('password')
+        participant = verify_participant(name, password)
+        if participant:
+            login_user(participant)
+            role = get_role(name)
+            session['user'] = name
+            session['role'] = role
+            if role == 'admin':
+                return redirect(url_for('admin.admin_dashboard'))
             else:
-                flash('Login failed. Check your name and password.', 'danger')
-        except Exception as e:
-            auth_logger.error(f'Error during login for user "{name}": {e}')
-            flash('An error occurred during login. Please try again later.', 'danger')
-
+                return redirect(url_for('participant.dashboard'))
+        else:
+            flash('Invalid name or password.', 'danger')
     return render_template('login.html')
 
-@auth.route('/logout', methods=['POST'])
+@auth.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
-    flash('You have been logged out successfully.', 'info')
+    flash('You have been logged out.', 'success')
     return redirect(url_for('auth.login'))

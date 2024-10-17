@@ -3,6 +3,8 @@ from app.models import Participant, PastReceiver, Message, Assignment
 from sqlalchemy.exc import SQLAlchemyError
 import bcrypt
 from typing import Optional, List, Dict, Any
+from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import exists
 
 class DatabaseError(Exception):
     def __init__(self, message: str, original_exception: Optional[Exception] = None):
@@ -32,8 +34,7 @@ def remove_participant(participant_id: int):
 
 def add_receiver(participant_id: int, receiver_id: int, year: int):
     try:
-        existing = PastReceiver.query.filter_by(receiver_id=receiver_id, year=year).first()
-        if existing:
+        if db.session.query(exists().where(PastReceiver.receiver_id == receiver_id).where(PastReceiver.year == year)).scalar():
             raise DatabaseError(f"Receiver {receiver_id} is already assigned for year {year}")
         new_receiver = PastReceiver(participant_id=participant_id, receiver_id=receiver_id, year=year)
         db.session.add(new_receiver)
@@ -71,26 +72,24 @@ def remove_receiver(person_id: int, receiver_name: str, year: int):
         db.session.rollback()
         raise DatabaseError("Failed to remove receiver", e)
 
-def verify_participant(name: str, password: str) -> bool:
+def verify_participant(name: str, password: str) -> Optional[Participant]:
     try:
         participant = Participant.query.filter_by(name=name).first()
         if participant and bcrypt.checkpw(password.encode('utf-8'), participant.password.encode('utf-8')):
-            return True
-        return False
+            return participant
+        return None
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to verify participant", e)
 
 def is_participant(receiver_name: str, person_id: int) -> bool:
     try:
-        receiver = Participant.query.filter(Participant.name == receiver_name, Participant.id != person_id).first()
-        return receiver is not None
+        return db.session.query(exists().where(Participant.name == receiver_name).where(Participant.id != person_id)).scalar()
     except SQLAlchemyError:
         return False
 
 def check_duplicate_receiver(person_id: int, year: int) -> bool:
     try:
-        count = PastReceiver.query.filter_by(participant_id=person_id, year=year).count()
-        return count > 0
+        return db.session.query(exists().where(PastReceiver.participant_id == person_id).where(PastReceiver.year == year)).scalar()
     except SQLAlchemyError:
         return False
 
@@ -119,8 +118,10 @@ def get_all_participants() -> List[Dict[str, Any]]:
 
 def get_receivers_for_participant(person_id: int) -> List[Dict[str, Any]]:
     try:
-        receivers = db.session.query(PastReceiver).join(Participant, PastReceiver.receiver_id == Participant.id).filter(PastReceiver.participant_id == person_id).all()
-        return [{'receiver_id': r.receiver_id, 'receiver_name': r.Participant.name, 'year': r.year} for r in receivers]
+        receivers = db.session.query(PastReceiver).options(
+            joinedload(PastReceiver.receiver)
+        ).filter(PastReceiver.participant_id == person_id).all()
+        return [{'receiver_id': r.receiver_id, 'receiver_name': r.receiver.name, 'year': r.year} for r in receivers]
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to fetch receivers", e)
 
@@ -132,10 +133,11 @@ def get_participants_count() -> int:
 
 def get_current_receiver(giver_id: int, year: int) -> Optional[Dict[str, Any]]:
     try:
-        assignment = Assignment.query.filter_by(giver_id=giver_id, year=year).first()
+        assignment = Assignment.query.options(
+            joinedload(Assignment.receiver)
+        ).filter_by(giver_id=giver_id, year=year).first()
         if assignment:
-            receiver = Participant.query.get(assignment.receiver_id)
-            return {'id': receiver.id, 'name': receiver.name, 'message_id': assignment.message_id}
+            return {'id': assignment.receiver.id, 'name': assignment.receiver.name, 'message_id': assignment.message_id}
         return None
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to fetch current receiver", e)
@@ -169,7 +171,7 @@ def update_participant(participant_id: int, name: str, password: str):
 
 def admin_exists() -> bool:
     try:
-        return Participant.query.filter_by(admin=True).first() is not None
+        return db.session.query(exists().where(Participant.admin == True)).scalar()
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to check for admin", e)
 
@@ -186,9 +188,7 @@ def update_participant_name(participant_id: int, name: str):
 def get_message_by_id(message_id: int, participant_id: int) -> Optional[Dict[str, Any]]:
     try:
         message = Message.query.filter_by(id=message_id, participant_id=participant_id).first()
-        if message:
-            return {'id': message.id, 'message': message.message, 'year': message.year}
-        return None
+        return {'id': message.id, 'message': message.message, 'year': message.year} if message else None
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to fetch message", e)
 
@@ -220,3 +220,20 @@ def get_message_for_year(participant_id: int, year: int) -> Optional[Dict[str, A
         return None
     except SQLAlchemyError as e:
         raise DatabaseError("Failed to fetch message for year", e)
+
+def get_wishlist(participant_id: int) -> Optional[str]:
+    try:
+        participant = Participant.query.get(participant_id)
+        return participant.wishlist if participant else None
+    except SQLAlchemyError as e:
+        raise DatabaseError("Failed to fetch wishlist", e)
+
+def update_wishlist(participant_id: int, wishlist: str):
+    try:
+        participant = Participant.query.get(participant_id)
+        if participant:
+            participant.wishlist = wishlist
+            db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseError("Failed to update wishlist", e)

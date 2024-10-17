@@ -1,15 +1,18 @@
 import os
 import logging.config
 from dotenv import load_dotenv
-from flask_login import LoginManager
-from app import create_app, db
+from app import create_app
 from app.queries import add_participant, admin_exists
+from config.logging_config import setup_logging
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize Flask application
 app = create_app()
+
+# Setup logging
+setup_logging()
 
 # Get loggers
 app_logger = logging.getLogger('app')

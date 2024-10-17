@@ -1,11 +1,7 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask import Flask, redirect, url_for
 from config.config import DevelopmentConfig
-
-# Initialize SQLAlchemy
-db = SQLAlchemy()
-login_manager = LoginManager()
+from app.models import Participant
+from app.extensions import db, login_manager
 
 def create_app():
     app = Flask(__name__)
@@ -17,6 +13,11 @@ def create_app():
     # Initialize Flask-Login
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+
+    # Define the user_loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Participant.query.get(int(user_id))
 
     # Import and register blueprints
     from .auth import auth as auth_blueprint
@@ -31,8 +32,9 @@ def create_app():
     from .errors import errors as errors_blueprint
     app.register_blueprint(errors_blueprint, url_prefix='/errors')
 
-    return app
+    # Root route redirecting to login
+    @app.route('/')
+    def index():
+        return redirect(url_for('auth.login'))
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Participant.query.get(int(user_id))
+    return app
