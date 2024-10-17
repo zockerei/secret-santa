@@ -1,9 +1,8 @@
 from flask import Blueprint
 import logging
 
-admin = Blueprint('admin', __name__)
+admin = Blueprint('admin', __name__, template_folder='templates')
 
-# Create a logger for the admin blueprint
 admin_logger = logging.getLogger('app.admin')
 
 from . import routes

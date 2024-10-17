@@ -23,6 +23,6 @@ def create_app():
     app.register_blueprint(participant_blueprint, url_prefix='/participant')
 
     from .errors import errors as errors_blueprint
-    app.register_blueprint(errors_blueprint)
+    app.register_blueprint(errors_blueprint, url_prefix='/errors')
 
     return app

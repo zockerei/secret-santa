@@ -9,7 +9,7 @@
 {% endwith %}
 
 <h2>Login</h2>
-<form action="{{ url_for('login') }}" method="POST">
+<form action="{{ url_for('auth.login') }}" method="POST">
     <input type="text" name="name" placeholder="Enter name" required oninput="this.value = this.value.toLowerCase()">
     <input type="password" name="password" placeholder="Enter password" required>
     <button type="submit">Login</button>

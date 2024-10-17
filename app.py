@@ -24,7 +24,6 @@ def load_user(user_id):
 # Get loggers
 app_logger = logging.getLogger('app')
 app_logger.info('Logging setup complete')
-
 flask_logger = logging.getLogger('flask')
 
 def initialize_admin():
@@ -43,12 +42,6 @@ def initialize_admin():
 
 # Call the admin initialization function
 initialize_admin()
-
-# Routes
-@app.route('/')
-def home():
-    """Redirect to the login page."""
-    return redirect(url_for('auth.login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
