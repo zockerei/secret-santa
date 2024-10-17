@@ -2,10 +2,20 @@ from flask import Flask, redirect, url_for
 from config.config import DevelopmentConfig
 from app.models import Participant
 from app.extensions import db, login_manager
+from config.logging_config import setup_logging
+from app.initialization import initialize_admin
+from dotenv import load_dotenv
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(DevelopmentConfig)
+
+    # Load environment variables from .env file
+    load_dotenv(dotenv_path='instance/.env')
+
+    setup_logging()
+
+    initialize_admin(app)
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
