@@ -1,12 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required
 from . import auth
 from . import auth_logger
 from app.queries import verify_participant, get_participant_by_id
-
-# Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.login_view = 'auth.login'
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -38,7 +34,3 @@ def logout():
     logout_user()
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('auth.login'))
-
-@login_manager.user_loader
-def load_user(user_id):
-    return get_participant_by_id(user_id)

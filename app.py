@@ -3,23 +3,13 @@ import logging.config
 from dotenv import load_dotenv
 from flask_login import LoginManager
 from app import create_app, db
-from app.queries import add_participant, admin_exists, get_participant_by_id
+from app.queries import add_participant, admin_exists
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize Flask application
 app = create_app()
-
-# Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'auth.login'
-
-# User loader function
-@login_manager.user_loader
-def load_user(user_id):
-    return get_participant_by_id(user_id)
 
 # Get loggers
 app_logger = logging.getLogger('app')

@@ -1,9 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 from config.config import DevelopmentConfig
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
@@ -11,6 +13,10 @@ def create_app():
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
+
+    # Initialize Flask-Login
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
 
     # Import and register blueprints
     from .auth import auth as auth_blueprint
@@ -26,3 +32,7 @@ def create_app():
     app.register_blueprint(errors_blueprint, url_prefix='/errors')
 
     return app
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Participant.query.get(int(user_id))
