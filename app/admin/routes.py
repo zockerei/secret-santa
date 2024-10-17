@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request
 from . import admin
 from . import admin_logger
-from app.auth.routes import login_required
+from app.decorators import login_required
 import app.logic as logic
 
 @admin.route('/admin_dashboard')

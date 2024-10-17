@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from . import errors
 from . import errors_logger
+from app.queries import DatabaseError
 
 @errors.app_errorhandler(404)
 def page_not_found(e):
@@ -12,8 +13,7 @@ def internal_server_error(e):
     errors_logger.error('Internal server error: %s', (e))
     return render_template('500.html'), 500
 
-@errors.app_errorhandler(Exception)
+@errors.app_errorhandler(DatabaseError)
 def handle_database_error(e):
-    errors_logger.error('Unhandled exception: %s', (e))
-    flash('A database error occurred. Please try again later.', 'danger')
-    return redirect(url_for('auth.login'))
+    errors_logger.error('Database error: %s', (e))
+    return render_template('500.html'), 500

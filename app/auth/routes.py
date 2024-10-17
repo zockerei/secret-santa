@@ -1,57 +1,44 @@
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import LoginManager, login_user, logout_user, login_required
 from . import auth
 from . import auth_logger
-from app.queries import verify_participant, get_role
-from app.decorators import login_required
+from app.queries import verify_participant, get_participant_by_id
 
-@auth.route('/login', methods=['GET'])
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login'
+
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
-    """Render the login page."""
-    if 'user' in session:
-        if session.get('role') == 'admin':
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return redirect(url_for('participant_dashboard'))
-    return render_template('login.html')
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        password = request.form.get('password', '').strip()
 
-@auth.route('/login', methods=['POST'])
-def handle_login():
-    """Handle login functionality."""
-    name = request.form.get('name', '').strip()
-    password = request.form.get('password', '').strip()
-
-    if not name or not password:
-        flash('Please enter both name and password.', 'warning')
-        return redirect(url_for('auth.login'))
-
-    try:
-        # Verify the participant's credentials
-        if verify_participant(name, password):
-            # Retrieve the participant's role
-            role = get_role(name)
-            if role is None:
-                flash('User role not found. Contact administrator.', 'danger')
-                return redirect(url_for('auth.login'))
-            
-            # Store user information in session
-            session['user'] = name
-            session['role'] = role
-            
-            # Redirect based on role
-            return redirect(url_for(f'{role}_dashboard'))
-        else:
-            flash('Login failed. Check your name and password.', 'danger')
+        if not name or not password:
+            flash('Please enter both name and password.', 'warning')
             return redirect(url_for('auth.login'))
-    except Exception as e:
-        auth_logger.error(f'Error during login for user "{name}": {e}')
-        flash('An error occurred during login. Please try again later.', 'danger')
-        return redirect(url_for('auth.login'))
+
+        try:
+            if verify_participant(name, password):
+                user = get_participant_by_id(name)
+                login_user(user)
+                flash('Logged in successfully.', 'success')
+                return redirect(url_for(f'{user.role}_dashboard'))
+            else:
+                flash('Login failed. Check your name and password.', 'danger')
+        except Exception as e:
+            auth_logger.error(f'Error during login for user "{name}": {e}')
+            flash('An error occurred during login. Please try again later.', 'danger')
+
+    return render_template('login.html')
 
 @auth.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    """Log the user out by clearing their session data."""
-    user = session.pop('user', None)
-    session.pop('role', None)
+    logout_user()
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('auth.login'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return get_participant_by_id(user_id)
