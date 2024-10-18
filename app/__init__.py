@@ -5,20 +5,26 @@ from app.extensions import db, login_manager
 from config.logging_config import setup_logging
 from app.initialization import initialize_admin
 from dotenv import load_dotenv
+import os
 
 def create_app():
+    # Adjust the path to the logging configuration file
+    setup_logging(default_path=os.path.join(os.path.dirname(__file__), '..', 'config', 'logging_config.yaml'))
+
+    # Load environment variables from .env file
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'))
+
     app = Flask(__name__)
     app.config.from_object(DevelopmentConfig)
 
-    # Load environment variables from .env file
-    load_dotenv(dotenv_path='instance/.env')
-
-    setup_logging()
-
-    initialize_admin(app)
-
     # Initialize SQLAlchemy with the app
     db.init_app(app)
+
+    # Move db.create_all() inside an app context
+    with app.app_context():
+        db.create_all()
+
+    initialize_admin(app)
 
     # Initialize Flask-Login
     login_manager.init_app(app)
