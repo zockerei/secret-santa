@@ -56,7 +56,7 @@ def add_message():
     if not message_text:
         flash('Message text cannot be empty.', 'danger')
         participant_logger.warning(f'User "{user}" attempted to add an empty message.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     participant_id = sql_statements.get_participant_id(user)
     if participant_id is None:
@@ -75,7 +75,7 @@ def add_message():
     sql_statements.add_message(participant_id, message_text, current_year)
     flash('Message added successfully!', 'success')
     participant_logger.info(f'Message added for user "{user}" for the year {current_year}.')
-    return redirect(url_for('participant.dashboard'))
+    return redirect(url_for('participant.participant_dashboard'))
 
 @participant.route('/edit_message/<int:message_id>', methods=['GET', 'POST'])
 @login_required(role='participant')
@@ -93,7 +93,7 @@ def edit_message(message_id):
     if message is None:
         flash('Message not found or you do not have permission to edit it.', 'danger')
         participant_logger.warning(f'User "{user}" attempted to edit a non-existent or unauthorized message ID {message_id}.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     if request.method == 'POST':
         new_message_text = request.form.get('message_text')
@@ -124,12 +124,12 @@ def delete_message(message_id):
     if message is None:
         flash('Message not found or you do not have permission to delete it.', 'danger')
         participant_logger.warning(f'User "{user}" attempted to delete a non-existent or unauthorized message ID {message_id}.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     sql_statements.delete_message(message_id)
     flash('Message deleted successfully!', 'success')
     participant_logger.info(f'Message ID {message_id} deleted by user "{user}".')
-    return redirect(url_for('participant.dashboard'))
+    return redirect(url_for('participant.participant_dashboard'))
 
 @participant.route('/view_message/<int:receiver_id>/<int:year>')
 @login_required(role='participant')

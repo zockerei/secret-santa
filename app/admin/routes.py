@@ -15,16 +15,31 @@ def admin_dashboard():
         for participant in participants:
             person_id = participant['id']
             participant_name = participant['name']
-            receivers = sql_statements.get_receivers_for_participant(person_id)
+            
+            # Get all receivers (including both past receivers and assignments)
+            all_receivers = sql_statements.get_receivers_for_participant(person_id)
+            
+            # Sort by year in descending order
+            all_receivers.sort(key=lambda x: x['year'], reverse=True)
+            
             scoreboard[participant_name] = {
                 'participant_id': person_id,
-                'receivers': receivers if receivers else []
+                'all_receivers': all_receivers
             }
     return render_template(
         'admin_dashboard.html',
         participants=participants,
         scoreboard=scoreboard
     )
+
+@admin.route('/remove_assignment/<int:giver_id>/<int:receiver_id>/<int:year>', methods=['POST'])
+@login_required(role='admin')
+def remove_assignment(giver_id, receiver_id, year):
+    """Remove a past assignment for a specific participant, based on the year."""
+    sql_statements.remove_assignment(giver_id, receiver_id, year)
+    admin_logger.info(f'Removed assignment for giver ID "{giver_id}" and receiver ID "{receiver_id}" in year {year}.')
+    flash(f'Assignment for year {year} removed successfully.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
 
 @admin.route('/add_participant', methods=['POST'])
 @login_required(role='admin')
@@ -170,7 +185,7 @@ def create_event():
         event_date = request.form['event_date']
         sql_statements.create_event(event_name, event_date)
         flash('Event created successfully!', 'success')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
     return render_template('admin/create_event.html')
 
 @admin.route('/admin/manage_participants')
@@ -191,4 +206,4 @@ def delete_participant(participant_id):
 def assign_santas():
     sql_statements.assign_secret_santas()
     flash('Secret Santas assigned successfully!', 'success')
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.admin_dashboard'))

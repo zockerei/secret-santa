@@ -237,3 +237,12 @@ def update_wishlist(participant_id: int, wishlist: str):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise DatabaseError("Failed to update wishlist", e)
+
+def get_past_assignments(giver_id: int) -> List[Dict[str, Any]]:
+    try:
+        assignments = db.session.query(Assignment).options(
+            joinedload(Assignment.receiver)
+        ).filter(Assignment.giver_id == giver_id).all()
+        return [{'receiver_id': a.receiver_id, 'receiver_name': a.receiver.name, 'year': a.year} for a in assignments]
+    except SQLAlchemyError as e:
+        raise DatabaseError("Failed to fetch past assignments", e)

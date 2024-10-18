@@ -1750,3 +1750,1190 @@ jinja2.exceptions.TemplateNotFound: base.html
 [2024-10-18 11:28:09] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:28:09] "GET /admin/admin HTTP/1.1" 200 -
 [2024-10-18 11:28:09] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 [2024-10-18 11:28:09] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:28:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:30:18] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:30:18] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:30:18] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:30:18] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:30:21] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:21] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:30:21] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:21] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:30:23] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:30:24] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:30:24] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:24] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:30:24] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:24] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:30:24] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:30:24] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:30:28] [ERROR   ] app: Exception on /admin/add_participant [POST]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: participants.name
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\queries.py", line 20, in add_participant
+    db.session.commit()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 4352, in flush
+    self._flush(objects)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 4487, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\session.py", line 4448, in _flush
+    flush_context.execute()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: participants.name
+[SQL: INSERT INTO participants (name, password, wishlist, admin) VALUES (?, ?, ?, ?)]
+[parameters: ('alex', '$2b$12$Ly.2diIKxUWyxQlZIna26ugXG9sDPlF8NnYjrRwWEp6ZAYzwCQaWu', None, 0)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\admin\routes.py", line 40, in add_new_participant
+    sql_statements.add_participant(name, password, 'participant')
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\queries.py", line 23, in add_participant
+    raise DatabaseError("Failed to add participant", e)
+app.queries.DatabaseError: Failed to add participant
+[2024-10-18 11:30:28] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:30:28] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:28] "[35m[1mPOST /admin/add_participant HTTP/1.1[0m" 500 -
+[2024-10-18 11:30:30] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:30] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:30:39] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:30:39] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:30:39] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:30:39] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:30:41] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:41] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:30:41] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:41] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:30:45] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:30:46] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:30:46] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:46] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:30:46] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:46] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:30:46] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:30:46] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:30:49] [ERROR   ] app.errors: Database error: Failed to add participant
+[2024-10-18 11:30:49] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:49] "[35m[1mPOST /admin/add_participant HTTP/1.1[0m" 500 -
+[2024-10-18 11:30:51] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:30:51] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:25] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:32:25] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:32:25] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:32:25] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:32:26] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:26] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:26] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:26] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:32:29] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:32:29] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:32:29] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:29] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:29] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:29] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:29] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:29] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:32:38] [INFO    ] app.admin: Added receiver "alex" for participant ID "3" in year 2021.
+[2024-10-18 11:32:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:38] "[32mPOST /admin/add_receiver/3 HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:38] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:38] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:32:45] [INFO    ] app.admin: Added receiver "kathi" for participant ID "4" in year 2021.
+[2024-10-18 11:32:45] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:45] "[32mPOST /admin/add_receiver/4 HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:45] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:45] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:45] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:45] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:32:48] [DEBUG   ] app.logic: Fetched receivers for participant ID 2: ['magda']
+[2024-10-18 11:32:48] [DEBUG   ] app.logic: Fetched receivers for participant ID 3: ['alex']
+[2024-10-18 11:32:48] [DEBUG   ] app.logic: Fetched receivers for participant ID 4: ['kathi']
+[2024-10-18 11:32:48] [INFO    ] app.logic: Successful Secret Santa pairings generated.
+[2024-10-18 11:32:48] [INFO    ] app.admin: Secret Santa round started for year 2022.
+[2024-10-18 11:32:48] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:48] "[32mPOST /admin/start_new_run HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:48] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:48] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:48] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:48] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:48] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:32:52] [INFO    ] app.auth: User santa logged out
+[2024-10-18 11:32:52] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:52] "[32mPOST /auth/logout HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:52] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:52] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:32:52] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:52] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:32:54] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:32:55] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:32:55] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:55] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:32:55] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:55] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:32:55] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:32:55] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:32:55] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:34:26] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:34:26] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:34:26] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:34:26] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:34:28] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:28] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:34:28] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:28] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:34:31] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:34:31] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:34:31] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:31] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:34:31] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:31] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:34:31] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:34:31] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:34:38] [WARNING ] app.admin: Participant 'alex' already has a receiver for year 2022.
+[2024-10-18 11:34:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:38] "[32mPOST /admin/start_new_run HTTP/1.1[0m" 302 -
+[2024-10-18 11:34:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:38] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:34:38] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:34:38] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:34:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:35:43] [DEBUG   ] app.logic: Fetched receivers for participant ID 2: ['magda']
+[2024-10-18 11:35:43] [DEBUG   ] app.logic: Fetched receivers for participant ID 3: ['alex']
+[2024-10-18 11:35:43] [DEBUG   ] app.logic: Fetched receivers for participant ID 4: ['kathi']
+[2024-10-18 11:35:43] [INFO    ] app.logic: Successful Secret Santa pairings generated.
+[2024-10-18 11:35:43] [INFO    ] app.admin: Secret Santa round started for year 2023.
+[2024-10-18 11:35:43] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:35:43] "[32mPOST /admin/start_new_run HTTP/1.1[0m" 302 -
+[2024-10-18 11:35:43] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:35:43] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:35:44] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:35:44] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:35:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:36:40] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:36:40] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:36:40] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:36:40] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:36:42] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:36:42] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:36:42] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:36:42] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:36:46] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:36:47] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:36:47] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:36:47] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:36:47] [ERROR   ] app: Exception on /admin/admin [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\admin\routes.py", line 14, in admin_dashboard
+    current_year = datetime.now().year  # Get the current year
+                   ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
+[2024-10-18 11:36:47] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:36:47] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:36:47] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+[2024-10-18 11:36:47] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:36:47] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:36:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:37:10] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:37:10] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:37:10] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:37:10] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:37:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:37:12] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:37:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:37:12] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:37:15] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:37:15] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:37:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:37:15] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:37:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:37:15] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:37:15] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:37:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:37:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:38:53] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:38:53] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:38:53] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:38:53] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:38:54] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:54] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:38:54] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:54] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:38:57] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:38:57] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:38:57] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:57] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:38:57] [ERROR   ] app: Exception on /admin/admin [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\admin\routes.py", line 21, in admin_dashboard
+    past_assignments = sql_statements.get_past_assignments(person_id)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'app.queries' has no attribute 'get_past_assignments'
+[2024-10-18 11:38:57] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:38:57] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:57] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+[2024-10-18 11:38:57] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:38:57] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:57] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:38:59] [ERROR   ] app: Exception on /admin/admin [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\admin\routes.py", line 21, in admin_dashboard
+    past_assignments = sql_statements.get_past_assignments(person_id)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'app.queries' has no attribute 'get_past_assignments'
+[2024-10-18 11:38:59] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:38:59] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:38:59] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+[2024-10-18 11:40:15] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:40:15] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:40:15] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:40:15] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:40:17] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:40:17] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:40:17] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:40:17] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:40:19] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:40:20] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:40:20] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:40:20] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:40:20] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:40:20] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:40:20] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:40:20] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:40:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:00] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:43:00] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:43:00] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:43:00] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:43:01] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:01] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:01] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:01] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:43:04] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:43:05] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:43:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:05] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:05] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:05] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:08] [INFO    ] app.admin: Removed receiver "kathi" for participant ID "2" in year 2022.
+[2024-10-18 11:43:08] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:08] "[32mPOST /admin/remove_receiver/2/kathi/2022 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:08] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:08] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:08] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:08] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:08] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:10] [INFO    ] app.admin: Removed receiver "magda" for participant ID "3" in year 2022.
+[2024-10-18 11:43:10] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:10] "[32mPOST /admin/remove_receiver/3/magda/2022 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:10] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:10] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:10] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:10] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:11] [INFO    ] app.admin: Removed receiver "alex" for participant ID "4" in year 2022.
+[2024-10-18 11:43:11] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:11] "[32mPOST /admin/remove_receiver/4/alex/2022 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:11] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:11] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:12] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:12] [INFO    ] app.admin: Removed receiver "kathi" for participant ID "2" in year 2023.
+[2024-10-18 11:43:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:12] "[32mPOST /admin/remove_receiver/2/kathi/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:12] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:12] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:14] [INFO    ] app.admin: Removed receiver "magda" for participant ID "3" in year 2023.
+[2024-10-18 11:43:14] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:14] "[32mPOST /admin/remove_receiver/3/magda/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:14] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:14] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:14] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:14] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:15] [INFO    ] app.admin: Removed receiver "alex" for participant ID "4" in year 2023.
+[2024-10-18 11:43:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:15] "[32mPOST /admin/remove_receiver/4/alex/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:15] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:15] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:43:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 2: ['magda']
+[2024-10-18 11:43:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 3: ['alex']
+[2024-10-18 11:43:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 4: ['kathi']
+[2024-10-18 11:43:19] [INFO    ] app.logic: Successful Secret Santa pairings generated.
+[2024-10-18 11:43:19] [INFO    ] app.admin: Secret Santa round started for year 2022.
+[2024-10-18 11:43:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:19] "[32mPOST /admin/start_new_run HTTP/1.1[0m" 302 -
+[2024-10-18 11:43:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:19] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:43:19] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:43:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:43:19] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:46:01] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:46:01] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:46:01] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:46:01] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:46:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:02] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:46:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:02] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:46:05] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:46:05] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:46:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:05] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:46:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:05] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:46:05] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:46:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:46:12] [DEBUG   ] app.logic: Fetched receivers for participant ID 2: ['magda']
+[2024-10-18 11:46:12] [DEBUG   ] app.logic: Fetched receivers for participant ID 3: ['alex']
+[2024-10-18 11:46:12] [DEBUG   ] app.logic: Fetched receivers for participant ID 4: ['kathi']
+[2024-10-18 11:46:12] [INFO    ] app.logic: Successful Secret Santa pairings generated.
+[2024-10-18 11:46:12] [INFO    ] app.admin: Secret Santa round started for year 2023.
+[2024-10-18 11:46:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:12] "[32mPOST /admin/start_new_run HTTP/1.1[0m" 302 -
+[2024-10-18 11:46:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:12] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:46:12] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:46:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:46:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:47:51] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:47:51] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:47:51] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:47:51] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:47:53] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:47:53] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:47:53] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:47:53] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:47:55] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:47:56] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:47:56] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:47:56] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:47:56] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:47:56] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:47:56] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:47:56] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:47:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:48:02] [INFO    ] app.admin: Removed receiver "kathi" for participant ID "2" in year 2023.
+[2024-10-18 11:48:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:02] "[32mPOST /admin/remove_receiver/2/kathi/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:48:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:02] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:48:02] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:48:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:02] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:48:05] [INFO    ] app.admin: Removed receiver "magda" for participant ID "3" in year 2023.
+[2024-10-18 11:48:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:05] "[32mPOST /admin/remove_receiver/3/magda/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:48:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:05] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:48:05] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:48:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:48:05] [INFO    ] app.admin: Removed receiver "magda" for participant ID "3" in year 2022.
+[2024-10-18 11:48:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:05] "[32mPOST /admin/remove_receiver/3/magda/2022 HTTP/1.1[0m" 302 -
+[2024-10-18 11:48:05] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:05] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:48:06] [INFO    ] app.admin: Removed receiver "alex" for participant ID "4" in year 2023.
+[2024-10-18 11:48:06] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:06] "[32mPOST /admin/remove_receiver/4/alex/2023 HTTP/1.1[0m" 302 -
+[2024-10-18 11:48:06] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:06] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:48:07] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:48:07] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:48:07] [INFO    ] app.admin: Removed receiver "alex" for participant ID "4" in year 2022.
+[2024-10-18 11:48:07] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:07] "[32mPOST /admin/remove_receiver/4/alex/2022 HTTP/1.1[0m" 302 -
+[2024-10-18 11:48:07] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:07] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:48:07] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:48:07] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:48:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:49:10] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:49:10] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:49:10] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:49:10] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:49:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:12] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:49:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:12] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:49:14] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:49:15] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:49:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:15] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:49:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:15] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:49:15] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:49:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:49:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 2: ['kathi', 'magda']
+[2024-10-18 11:49:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 3: ['alex']
+[2024-10-18 11:49:19] [DEBUG   ] app.logic: Fetched receivers for participant ID 4: ['kathi']
+[2024-10-18 11:49:19] [ERROR   ] app: Exception on /admin/start_new_run [POST]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\admin\routes.py", line 169, in start_new_run
+    new_assignments = logic.generate_secret_santa(participants, sql_statements)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\logic.py", line 62, in generate_secret_santa
+    if is_valid_pairing(dict(candidate_assignment), past_receivers, participants):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\logic.py", line 33, in is_valid_pairing
+    last_two_years_receivers = [r['receiver_name'] for r in past_receivers[giver_id][:2]]
+                                ~^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+[2024-10-18 11:49:19] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:49:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:49:19] "[35m[1mPOST /admin/start_new_run HTTP/1.1[0m" 500 -
+[2024-10-18 11:53:00] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:53:00] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:53:00] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:53:00] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:53:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:02] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:02] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:02] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:53:05] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:53:06] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:53:06] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:06] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:06] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:06] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:53:06] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:53:06] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:06] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:53:07] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:07] "GET /admin/edit_participant/2 HTTP/1.1" 200 -
+[2024-10-18 11:53:11] [INFO    ] app.admin: Participant ID "2" updated to name "alex".
+[2024-10-18 11:53:11] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:11] "[32mPOST /admin/edit_participant/2 HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:11] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:11] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:53:11] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:53:11] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:53:12] [INFO    ] app.auth: User santa logged out
+[2024-10-18 11:53:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:12] "[32mPOST /auth/logout HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:12] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:53:12] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:53:12] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2024-10-18 11:53:15] [INFO    ] app.auth: Login attempt for user: alex
+[2024-10-18 11:53:16] [INFO    ] app.auth: User alex logged in with role participant
+[2024-10-18 11:53:16] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:16] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:16] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:53:16] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:53:16] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:16] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:53:16] [ERROR   ] app.errors: Page not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2024-10-18 11:53:16] [ERROR   ] app: Exception on /favicon.ico [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 854, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 463, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 765, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 740, in handle_http_exception
+    return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 9, in page_not_found
+    return render_template('404.html'), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\404.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:53:16] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:53:16] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:16] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+[2024-10-18 11:53:16] [ERROR   ] werkzeug: Error on request:
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 854, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 463, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 765, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 740, in handle_http_exception
+    return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 9, in page_not_found
+    return render_template('404.html'), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\404.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 331, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1498, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 823, in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 14, in internal_server_error
+    return render_template('500.html'), 500
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\500.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:53:19] [INFO    ] app.participant: User "alex" requested to view message for receiver ID 4 for the year 2021.
+[2024-10-18 11:53:19] [WARNING ] app.participant: No message found for receiver ID 4 for the year 2021 for user "alex".
+[2024-10-18 11:53:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:19] "GET /participant/view_message/4/2021 HTTP/1.1" 200 -
+[2024-10-18 11:53:47] [INFO    ] app.participant: Message added for user "alex" for the year 2024.
+[2024-10-18 11:53:47] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:47] "[32mPOST /participant/add_message HTTP/1.1[0m" 302 -
+[2024-10-18 11:53:47] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:53:47] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:53:47] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:47] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:53:50] [INFO    ] app.participant: User "alex" accessed edit message page for message ID 1.
+[2024-10-18 11:53:50] [ERROR   ] app: Exception on /participant/edit_message/1 [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 109, in edit_message
+    return render_template('edit_message.html', message=message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\templates\edit_message.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: base.html
+[2024-10-18 11:53:50] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:53:50] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:53:50] "[35m[1mGET /participant/edit_message/1 HTTP/1.1[0m" 500 -
+[2024-10-18 11:53:50] [ERROR   ] werkzeug: Error on request:
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 109, in edit_message
+    return render_template('edit_message.html', message=message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\templates\edit_message.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: base.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 331, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1498, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 823, in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 14, in internal_server_error
+    return render_template('500.html'), 500
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\500.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:54:14] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:54:14] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:54:14] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:54:14] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:54:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:54:15] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:54:15] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:54:15] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:54:19] [INFO    ] app.auth: Login attempt for user: alex
+[2024-10-18 11:54:19] [INFO    ] app.auth: User alex logged in with role participant
+[2024-10-18 11:54:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:54:19] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:54:19] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:54:19] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:54:19] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:54:19] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:54:21] [INFO    ] app.participant: User "alex" accessed edit message page for message ID 1.
+[2024-10-18 11:54:21] [ERROR   ] app: Exception on /participant/edit_message/1 [GET]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 109, in edit_message
+    return render_template('edit_message.html', message=message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\templates\edit_message.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: base.html
+[2024-10-18 11:54:21] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:54:21] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:54:21] "[35m[1mGET /participant/edit_message/1 HTTP/1.1[0m" 500 -
+[2024-10-18 11:54:21] [ERROR   ] werkzeug: Error on request:
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 109, in edit_message
+    return render_template('edit_message.html', message=message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\templates\edit_message.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: base.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 331, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1498, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 823, in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 14, in internal_server_error
+    return render_template('500.html'), 500
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\500.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:54:37] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:54:37] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:54:37] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:54:37] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:55:38] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:55:38] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:55:38] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:55:38] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:55:40] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:40] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:55:40] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:40] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:55:42] [INFO    ] app.auth: Login attempt for user: santa
+[2024-10-18 11:55:43] [INFO    ] app.auth: User santa logged in with role admin
+[2024-10-18 11:55:43] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:43] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:55:43] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:43] "GET /admin/admin HTTP/1.1" 200 -
+[2024-10-18 11:55:44] [INFO    ] app.auth: User santa logged out
+[2024-10-18 11:55:44] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:44] "[32mPOST /auth/logout HTTP/1.1[0m" 302 -
+[2024-10-18 11:55:44] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:44] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:55:47] [INFO    ] app.auth: Login attempt for user: alex
+[2024-10-18 11:55:48] [INFO    ] app.auth: User alex logged in with role participant
+[2024-10-18 11:55:48] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:48] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:55:48] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:55:48] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:55:48] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:48] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:55:50] [INFO    ] app.participant: User "alex" requested to view message for receiver ID 4 for the year 2021.
+[2024-10-18 11:55:50] [WARNING ] app.participant: No message found for receiver ID 4 for the year 2021 for user "alex".
+[2024-10-18 11:55:50] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:50] "GET /participant/view_message/4/2021 HTTP/1.1" 200 -
+[2024-10-18 11:55:54] [INFO    ] app.participant: User "alex" attempted to add a duplicate message for the year 2024.
+[2024-10-18 11:55:54] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:54] "[32mPOST /participant/add_message HTTP/1.1[0m" 302 -
+[2024-10-18 11:55:55] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:55:55] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:55:55] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:55:55] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:56:00] [INFO    ] app.participant: User "alex" attempted to delete message ID 1.
+[2024-10-18 11:56:00] [INFO    ] app.participant: Message ID 1 deleted by user "alex".
+[2024-10-18 11:56:00] [ERROR   ] app: Exception on /participant/delete_message/1 [POST]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 132, in delete_message
+    return redirect(url_for('participant.participant_dashboard'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\helpers.py", line 220, in url_for
+    return current_app.url_for(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:56:00] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:56:00] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:56:00] "[35m[1mPOST /participant/delete_message/1 HTTP/1.1[0m" 500 -
+[2024-10-18 11:56:00] [ERROR   ] werkzeug: Error on request:
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 132, in delete_message
+    return redirect(url_for('participant.participant_dashboard'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\helpers.py", line 220, in url_for
+    return current_app.url_for(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 331, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1498, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 823, in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 14, in internal_server_error
+    return render_template('500.html'), 500
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\500.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:56:54] [INFO    ] app: Admin user already exists.
+[2024-10-18 11:56:54] [INFO    ] app.logic: Logging setup complete
+[2024-10-18 11:56:54] [INFO    ] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2024-10-18 11:56:54] [INFO    ] werkzeug: [33mPress CTRL+C to quit[0m
+[2024-10-18 11:56:55] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:56:55] "[32mGET / HTTP/1.1[0m" 302 -
+[2024-10-18 11:56:56] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:56:56] "GET /auth/login HTTP/1.1" 200 -
+[2024-10-18 11:56:59] [INFO    ] app.auth: Login attempt for user: alex
+[2024-10-18 11:56:59] [INFO    ] app.auth: User alex logged in with role participant
+[2024-10-18 11:56:59] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:56:59] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+[2024-10-18 11:57:00] [INFO    ] app.participant: User "alex" accessed the dashboard.
+[2024-10-18 11:57:00] [INFO    ] app.participant: Dashboard data prepared for user "alex".
+[2024-10-18 11:57:00] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:57:00] "GET /participant/dashboard HTTP/1.1" 200 -
+[2024-10-18 11:57:03] [INFO    ] app.participant: Message added for user "alex" for the year 2024.
+[2024-10-18 11:57:03] [ERROR   ] app: Exception on /participant/add_message [POST]
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 78, in add_message
+    return redirect(url_for('participant.participant_dashboard'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\helpers.py", line 220, in url_for
+    return current_app.url_for(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+[2024-10-18 11:57:03] [ERROR   ] app.errors: Internal server error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+[2024-10-18 11:57:03] [INFO    ] werkzeug: 127.0.0.1 - - [18/Oct/2024 11:57:03] "[35m[1mPOST /participant/add_message HTTP/1.1[0m" 500 -
+[2024-10-18 11:57:03] [ERROR   ] werkzeug: Error on request:
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\decorators.py", line 29, in decorated_view
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\participant\routes.py", line 78, in add_message
+    return redirect(url_for('participant.participant_dashboard'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\helpers.py", line 220, in url_for
+    return current_app.url_for(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\serving.py", line 331, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1498, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 823, in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\routes.py", line 14, in internal_server_error
+    return render_template('500.html'), 500
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\jinja2\environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Mac OS\Pro-Programming\secret-santa\app\errors\templates\500.html", line 9, in top-level template code
+    <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mac OS\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'participant.participant_dashboard'. Did you mean 'participant.dashboard' instead?

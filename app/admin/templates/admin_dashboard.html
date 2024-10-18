@@ -84,16 +84,23 @@
     {% for participant_name, data in scoreboard.items() %}
         <div class="participant-block">
             <strong>{{ participant_name }}</strong>
+            <h3>Past Receivers and Assignments:</h3>
             <ul class="receiver-list">
-                {% for receiver in data.receivers %}
+                {% for receiver in data.all_receivers %}
                     <li>
                         {{ receiver.receiver_name }} ({{ receiver.year }})
-                        <form action="{{ url_for('admin.remove_receiver', person_id=data.participant_id, receiver_name=receiver.receiver_name, year=receiver.year) }}" method="POST" style="display:inline;">
-                            <button type="submit">Remove</button>
-                        </form>
+                        {% if 'receiver_id' in receiver %}
+                            <form action="{{ url_for('admin.remove_receiver', person_id=data.participant_id, receiver_name=receiver.receiver_name, year=receiver.year) }}" method="POST" style="display:inline;">
+                                <button type="submit">Remove</button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('admin.remove_assignment', giver_id=data.participant_id, receiver_id=receiver.receiver_id, year=receiver.year) }}" method="POST" style="display:inline;">
+                                <button type="submit">Remove</button>
+                            </form>
+                        {% endif %}
                     </li>
                 {% else %}
-                    <li>No receivers assigned yet.</li>
+                    <li>No past receivers or assignments yet.</li>
                 {% endfor %}
             </ul>
 
