@@ -60,6 +60,11 @@ loggers:
     handlers: [console, rotating_file, error_file]
     propagate: False
 
+  app.queries:
+    level: DEBUG
+    handlers: [console, rotating_file, error_file]
+    propagate: False
+
 root:
   level: DEBUG
   handlers: [console, rotating_file, error_file]

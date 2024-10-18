@@ -20,7 +20,7 @@ def login():
             if role == 'admin':
                 return redirect(url_for('admin.admin_dashboard'))
             else:
-                return redirect(url_for('participant.dashboard'))
+                return redirect(url_for('participant.participant_dashboard'))
         else:
             auth_logger.warning(f"Failed login attempt for user: {name}")
             flash('Invalid name or password.', 'danger')
