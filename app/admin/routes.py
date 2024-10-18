@@ -176,34 +176,3 @@ def start_new_run():
     admin_logger.info(f'Secret Santa round started for year {year}.')
     flash('New Secret Santa round started successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
-
-@admin.route('/admin/create_event', methods=['GET', 'POST'])
-@login_required(role='admin')
-def create_event():
-    if request.method == 'POST':
-        event_name = request.form['event_name']
-        event_date = request.form['event_date']
-        sql_statements.create_event(event_name, event_date)
-        flash('Event created successfully!', 'success')
-        return redirect(url_for('admin.admin_dashboard'))
-    return render_template('admin/create_event.html')
-
-@admin.route('/admin/manage_participants')
-@login_required(role='admin')
-def manage_participants():
-    participants = sql_statements.get_all_participants()
-    return render_template('admin/manage_participants.html', participants=participants)
-
-@admin.route('/admin/delete_participant/<int:participant_id>', methods=['POST'])
-@login_required(role='admin')
-def delete_participant(participant_id):
-    sql_statements.delete_participant(participant_id)
-    flash('Participant deleted successfully!', 'success')
-    return redirect(url_for('admin.manage_participants'))
-
-@admin.route('/admin/assign_santas', methods=['POST'])
-@login_required(role='admin')
-def assign_santas():
-    sql_statements.assign_secret_santas()
-    flash('Secret Santas assigned successfully!', 'success')
-    return redirect(url_for('admin.admin_dashboard'))

@@ -14,8 +14,7 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
 
     Parameters:
         assignments (dict): Mapping of givers to recipients (giver_id -> recipient_id).
-        past_receivers (dict): Mapping of givers to their past recipients over the years
-        (giver_id -> [recipient_name1, recipient_name2,...]).
+        past_receivers (dict): Mapping of givers to their past recipients over the years (giver_id -> [recipient_name1, recipient_name2,...]).
         participants (List[Dict[str, Any]]): List of participant dictionaries with 'id' and 'name' keys.
 
     Returns:
@@ -28,8 +27,7 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
         # Get the recipient's name
         recipient_name = next((p['name'] for p in participants if p['id'] == recipient_id), None)
         
-        # Check if the recipient is the same as any of the last two years' recipients
-        if past_receivers.get(giver_id) and recipient_name in past_receivers[giver_id][-2:]:
+        if recipient_name in past_receivers.get(giver_id, [])[-2:]:
             return False
     return True
 
@@ -98,20 +96,16 @@ def fetch_past_receiver(sql_statements) -> dict:
     return past_assignments
 
 
-def store_new_receiver(assignments: List[Tuple[int, int]], sql_statements, year: int):
+def store_new_receiver(receiver: dict, sql_statements, year: int):
     """
     Stores the new Secret Santa assignments into the database for the specified year.
 
     Parameters:
-        assignments (List[Tuple[int, int]]): List of (giver_id, receiver_id) tuples.
+        receiver (dict): Mapping of givers' IDs to recipients' IDs (giver_id -> recipient_id).
         sql_statements (SqlStatements): Instance of SqlStatements for database interaction.
         year (int): The year of the Secret Santa assignment.
     """
-    for giver_id, receiver_id in assignments:
-        # Get the message for this giver and year, if it exists
-        message = sql_statements.get_message_for_year(giver_id, year)
-        message_id = message['id'] if message else None
-
+    for giver_id, recipient_id in receiver.items():
         # Store the assignment
-        sql_statements.assign_receiver(giver_id, receiver_id, message_id, year)
-        _logic_logger.info(f'Assignment stored: giver ID {giver_id} -> recipient ID {receiver_id} for year {year}')
+        sql_statements.add_receiver(giver_id, recipient_id, year)
+        _logic_logger.info(f'Assignment stored: giver ID {giver_id} -> recipient ID {recipient_id} for year {year}')
