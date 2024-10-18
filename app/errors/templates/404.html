@@ -4,9 +4,9 @@
 <p>
     {% if session.user %}
         {% if session.role == 'admin' %}
-            <a href="{{ url_for('admin.dashboard') }}">Return to Dashboard</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}">Return to Dashboard</a>
         {% else %}
-            <a href="{{ url_for('participant.dashboard') }}">Return to Dashboard</a>
+            <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
         {% endif %}
     {% else %}
         <a href="{{ url_for('auth.login') }}">Return to Login</a>

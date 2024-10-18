@@ -2,9 +2,10 @@ from flask import render_template, redirect, url_for, flash, request
 from . import admin
 from . import admin_logger
 from app.decorators import login_required
-import app.queries as sql_statements  # Updated import to use queries
+import app.queries as sql_statements
+import app.logic as logic
 
-@admin.route('/admin_dashboard')
+@admin.route('/admin')
 @login_required(role='admin')
 def admin_dashboard():
     """Display the admin dashboard."""
@@ -15,7 +16,10 @@ def admin_dashboard():
             person_id = participant['id']
             participant_name = participant['name']
             receivers = sql_statements.get_receivers_for_participant(person_id)
-            scoreboard[participant_name] = receivers if receivers else []
+            scoreboard[participant_name] = {
+                'participant_id': person_id,
+                'receivers': receivers if receivers else []
+            }
     return render_template(
         'admin_dashboard.html',
         participants=participants,

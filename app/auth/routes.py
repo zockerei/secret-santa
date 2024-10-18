@@ -26,7 +26,7 @@ def login():
             flash('Invalid name or password.', 'danger')
     return render_template('login.html')
 
-@auth.route('/logout')
+@auth.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     auth_logger.info(f"User {session.get('user')} logged out")

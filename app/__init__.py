@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for
-from config.config import DevelopmentConfig
+from config.config import DevelopmentConfig, TestingConfig, ProductionConfig
 from app.models import Participant
 from app.extensions import db, login_manager
 from config.logging_config import setup_logging
@@ -15,7 +15,18 @@ def create_app():
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'))
 
     app = Flask(__name__)
-    app.config.from_object(DevelopmentConfig)
+
+    # Determine the configuration mode
+    config_mode = os.getenv('FLASK_CONFIG', 'development').lower()
+
+    if config_mode == 'development':
+        app.config.from_object(DevelopmentConfig)
+    elif config_mode == 'testing':
+        app.config.from_object(TestingConfig)
+    elif config_mode == 'production':
+        app.config.from_object(ProductionConfig)
+    else:
+        raise ValueError(f"Invalid FLASK_CONFIG value: {config_mode}")
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
