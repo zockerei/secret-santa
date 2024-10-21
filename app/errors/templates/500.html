@@ -1,0 +1,14 @@
+<!-- 500.html -->
+<h1>500 - Internal Server Error</h1>
+<p>Oops! Something went wrong on our end. Please try again later.</p>
+<p>
+    {% if session.user %}
+        {% if session.role == 'admin' %}
+            <a href="{{ url_for('admin.admin_dashboard') }}">Return to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+        {% endif %}
+    {% else %}
+        <a href="{{ url_for('auth.login') }}">Return to Login</a>
+    {% endif %}
+</p>

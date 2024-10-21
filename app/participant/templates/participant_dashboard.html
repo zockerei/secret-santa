@@ -1,6 +1,3 @@
-{% extends 'base.html' %}
-
-{% block content %}
 <!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -16,7 +13,7 @@
 
 <h2>Current Receiver ({{ current_year }})</h2>
 {% if current_receiver %}
-    <p>Your current receiver is: <strong>{{ current_receiver.name }}</strong></p>
+    <p>Your current receiver is: <strong>{{ current_receiver.receiver_name }}</strong></p>
     
     <!-- New section to display the message from the current receiver -->
     <h3>Message from Your Current Receiver</h3>
@@ -45,7 +42,7 @@
 {% endif %}
 
 <h2>Write a Message for Your Future Receiver</h2>
-<form action="{{ url_for('add_message') }}" method="POST">
+<form action="{{ url_for('participant.add_message') }}" method="POST">
     <textarea name="message_text" rows="5" cols="40" placeholder="Write your message here..." required></textarea><br>
     <button type="submit">Submit Message</button>
 </form>
@@ -57,8 +54,8 @@
         {% for message in pending_messages %}
             <li>
                 {{ message.message }} (Written for {{ message.year }})
-                <a href="{{ url_for('edit_message', message_id=message.id) }}">Edit</a>
-                <form action="{{ url_for('delete_message', message_id=message.id) }}" method="POST" style="display:inline;">
+                <a href="{{ url_for('participant.edit_message', message_id=message.id) }}">Edit</a>
+                <form action="{{ url_for('participant.delete_message', message_id=message.id) }}" method="POST" style="display:inline;">
                     <button type="submit" onclick="return confirm('Are you sure you want to delete this message?');">Delete</button>
                 </form>
             </li>
@@ -69,7 +66,7 @@
 {% endif %}
 
 <!-- Logout Button -->
-<form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+<form action="{{ url_for('auth.logout') }}" method="POST" style="display:inline;">
     <button type="submit">Logout</button>
 </form>
 
@@ -103,7 +100,7 @@ window.onclick = function(event) {
 }
 
 function viewMessage(receiverId, year, receiverName) {
-    fetch(`/view_message/${receiverId}/${year}`)
+    fetch(`/participant/view_message/${receiverId}/${year}`)
         .then(response => response.json())
         .then(data => {
             var modalTitle = document.getElementById("modalTitle");
@@ -162,5 +159,3 @@ function viewMessage(receiverId, year, receiverName) {
     cursor: pointer;
 }
 </style>
-
-{% endblock %}

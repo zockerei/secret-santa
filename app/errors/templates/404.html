@@ -1,0 +1,14 @@
+<!-- 404.html -->
+<h1>404 - Page Not Found</h1>
+<p>Sorry, the page you are looking for does not exist.</p>
+<p>
+    {% if session.user %}
+        {% if session.role == 'admin' %}
+            <a href="{{ url_for('admin.admin_dashboard') }}">Return to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('participant.participant_dashboard') }}">Return to Dashboard</a>
+        {% endif %}
+    {% else %}
+        <a href="{{ url_for('auth.login') }}">Return to Login</a>
+    {% endif %}
+</p>

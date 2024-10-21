@@ -1,5 +1,4 @@
 .idea/
-logging/logger.log
-instance/secret_santa.db
 __pycache__/
-resources/
+instance/
+logs/

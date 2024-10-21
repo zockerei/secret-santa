@@ -1,6 +1,3 @@
-{% extends 'base.html' %}
-
-{% block content %}
 <h1>Edit Message</h1>
 <form method="POST">
     <label for="message_text">Message:</label>
@@ -8,5 +5,4 @@
     <br>
     <button type="submit">Update Message</button>
 </form>
-<a href="{{ url_for('participant_dashboard') }}">Back to Dashboard</a>
-{% endblock %}
+<a href="{{ url_for('participant.participant_dashboard') }}">Back to Dashboard</a>
