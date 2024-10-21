@@ -19,7 +19,7 @@ def participant_dashboard():
         return redirect(url_for('auth.logout'))
 
     # Fetch past receivers and current year receiver
-    past_receivers = sql_statements.get_receivers_for_participant(participant_id) or []
+    past_receivers = sql_statements.get_assignments_for_giver(participant_id) or []
     current_year = datetime.now().year
     current_receiver = next((r for r in past_receivers if r['year'] == current_year), None)
 
@@ -29,11 +29,9 @@ def participant_dashboard():
     # Fetch the message from the current receiver
     current_receiver_message = None
     if current_receiver:
-        current_receiver_id = sql_statements.get_participant_id(current_receiver['receiver_name'])
-        if current_receiver_id:
-            message = sql_statements.get_message_for_year(current_receiver_id, current_year)
-            if message:
-                current_receiver_message = message['message']
+        message = sql_statements.get_message_for_year(current_receiver['receiver_id'], current_year)
+        if message:
+            current_receiver_message = message['message']
 
     participant_logger.info(f'Dashboard data prepared for user "{user}".')
     return render_template(

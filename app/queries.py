@@ -293,3 +293,15 @@ def is_duplicate_assignment(giver_id: int, year: int) -> bool:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to check for duplicate assignment for giver ID {giver_id} in year {year}: {e}")
         raise DatabaseError("Failed to check for duplicate assignment", e)
+
+def add_message(participant_id: int, message_text: str, year: int):
+    try:
+        queries_logger.debug(f"Attempting to add message for participant ID {participant_id} for year {year}")
+        new_message = Message(participant_id=participant_id, message=message_text, year=year)
+        db.session.add(new_message)
+        db.session.commit()
+        queries_logger.info(f"Message added for participant ID {participant_id} for year {year}")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        queries_logger.error(f"Failed to add message for participant ID {participant_id} for year {year}: {e}")
+        raise DatabaseError("Failed to add message", e)
