@@ -17,7 +17,7 @@ def admin_dashboard():
             participant_name = participant['name']
             
             # Get all receivers (including both past receivers and assignments)
-            all_receivers = sql_statements.get_receivers_for_participant(person_id)
+            all_receivers = sql_statements.get_assignments_for_giver(person_id)
             
             # Sort by year in descending order
             all_receivers.sort(key=lambda x: x['year'], reverse=True)
@@ -36,7 +36,7 @@ def admin_dashboard():
 @login_required(role='admin')
 def remove_assignment(giver_id, receiver_id, year):
     """Remove a past assignment for a specific participant, based on the year."""
-    sql_statements.remove_assignment(giver_id, receiver_id, year)
+    sql_statements.remove_receiver(giver_id, receiver_id, year)
     admin_logger.info(f'Removed assignment for giver ID "{giver_id}" and receiver ID "{receiver_id}" in year {year}.')
     flash(f'Assignment for year {year} removed successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
@@ -118,11 +118,11 @@ def add_receiver(person_id):
         flash('A participant cannot be their own past receiver.', 'warning')
         return redirect(url_for('admin.admin_dashboard'))
 
-    if sql_statements.check_duplicate_receiver(person_id, year):
+    if sql_statements.is_duplicate_assignment(person_id, year):
         flash(f'Error: A receiver for year {year} is already assigned.', 'warning')
         return redirect(url_for('admin.admin_dashboard'))
 
-    sql_statements.add_receiver(person_id, receiver_id, year)
+    sql_statements.add_or_assign_receiver(person_id, receiver_id, year)
     admin_logger.info(f'Added receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
     flash(f'Receiver "{receiver_name}" added for year {year}.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
@@ -171,7 +171,8 @@ def start_new_run():
     for giver_id, receiver_id in new_assignments:
         message = sql_statements.get_message_for_year(giver_id, year)
         message_id = message['id'] if message else None
-        sql_statements.assign_receiver(giver_id, receiver_id, message_id, year)
+        # Use add_or_assign_receiver instead of assign_receiver
+        sql_statements.add_or_assign_receiver(giver_id, receiver_id, year, message_id)
 
     admin_logger.info(f'Secret Santa round started for year {year}.')
     flash('New Secret Santa round started successfully.', 'success')

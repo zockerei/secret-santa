@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for
 from config.config import DevelopmentConfig, TestingConfig, ProductionConfig
 from app.models import Participant
-from app.extensions import db, login_manager
+from app.extensions import db, login_manager, migrate
 from config.logging_config import setup_logging
 from app.initialization import initialize_admin
 from dotenv import load_dotenv
@@ -30,6 +30,9 @@ def create_app():
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
+
+    # Initialize Flask-Migrate with the app and db
+    migrate.init_app(app, db)
 
     # Move db.create_all() inside an app context
     with app.app_context():

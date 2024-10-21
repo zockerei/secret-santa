@@ -27,7 +27,7 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
         # Get the recipient's name
         recipient_name = next((p['name'] for p in participants if p['id'] == recipient_id), None)
         
-        if recipient_name in past_receivers.get(giver_id, [])[-2:]:
+        if recipient_name in past_receivers.get(giver_id, []):
             return False
     return True
 
@@ -48,7 +48,7 @@ def generate_secret_santa(participants: List[Dict[str, Any]], sql_statements) ->
     attempts = 1000
 
     # Fetch past receivers for all participants
-    past_receivers = fetch_past_receiver(sql_statements)
+    past_receivers = fetch_past_receivers(sql_statements)
 
     for _ in range(attempts):
         receiver_ids = random.sample(participant_ids, len(participant_ids))  # Shuffle IDs
@@ -63,7 +63,7 @@ def generate_secret_santa(participants: List[Dict[str, Any]], sql_statements) ->
     raise ValueError("Unable to generate valid Secret Santa pairings after multiple attempts.")
 
 
-def fetch_past_receiver(sql_statements) -> dict:
+def fetch_past_receivers(sql_statements) -> dict:
     """
     Retrieves past receiver data for each participant from the database.
 
@@ -83,14 +83,14 @@ def fetch_past_receiver(sql_statements) -> dict:
 
     for participant in participants:
         person_id = participant['id']
-        receivers = sql_statements.get_receivers_for_participant(person_id)
+        receivers = sql_statements.get_assignments_for_giver(person_id)
 
         if receivers is None:
             _logic_logger.debug(f'No receivers found for participant ID {person_id}, initializing empty list')
             past_assignments[person_id] = []
         else:
-            # Assuming receivers is a list of dictionaries with 'receiver_name' key
-            past_assignments[person_id] = [receiver['receiver_name'] for receiver in receivers]
+            # Collect the last two years of receiver names
+            past_assignments[person_id] = [receiver['receiver_name'] for receiver in receivers][-2:]
             _logic_logger.debug(f'Fetched receivers for participant ID {person_id}: {past_assignments[person_id]}')
 
     return past_assignments
@@ -107,5 +107,5 @@ def store_new_receiver(receiver: dict, sql_statements, year: int):
     """
     for giver_id, recipient_id in receiver.items():
         # Store the assignment
-        sql_statements.add_receiver(giver_id, recipient_id, year)
+        sql_statements.add_or_assign_receiver(giver_id, recipient_id, year)
         _logic_logger.info(f'Assignment stored: giver ID {giver_id} -> recipient ID {recipient_id} for year {year}')

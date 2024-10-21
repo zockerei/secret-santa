@@ -1,50 +1,43 @@
-from app.extensions import db
+from sqlalchemy import UniqueConstraint
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from app.extensions import db
 
 class Participant(db.Model, UserMixin):
     __tablename__ = 'participants'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    wishlist = db.Column(db.String)
-    admin = db.Column(db.Boolean, default=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
-    # Relationships
-    messages = db.relationship('Message', back_populates='participant', cascade='all, delete-orphan')
-    given_assignments = db.relationship('Assignment', foreign_keys='Assignment.giver_id', back_populates='giver', cascade='all, delete-orphan')
-    received_assignments = db.relationship('Assignment', foreign_keys='Assignment.receiver_id', back_populates='receiver', cascade='all, delete-orphan')
-    past_receivers = db.relationship('PastReceiver', foreign_keys='PastReceiver.participant_id', back_populates='participant', cascade='all, delete-orphan')
-    past_received = db.relationship('PastReceiver', foreign_keys='PastReceiver.receiver_id', back_populates='receiver', cascade='all, delete-orphan')
+    messages = db.relationship('Message', backref='participant', lazy='dynamic')
+    giver_assignments = db.relationship('Assignment', foreign_keys='Assignment.giver_id', backref='giver', lazy='dynamic')
+    receiver_assignments = db.relationship('Assignment', foreign_keys='Assignment.receiver_id', backref='receiver', lazy='dynamic')
 
-class PastReceiver(db.Model):
-    __tablename__ = 'past_receivers'
-    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'), primary_key=True, nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('participants.id'), primary_key=True, nullable=False)
-    year = db.Column(db.Integer, primary_key=True, nullable=False)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    # Relationships
-    participant = db.relationship('Participant', foreign_keys=[participant_id], back_populates='past_receivers')
-    receiver = db.relationship('Participant', foreign_keys=[receiver_id], back_populates='past_received')
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def get_id(self):
+        return str(self.id)
 
 class Message(db.Model):
     __tablename__ = 'messages'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id'), nullable=False)
-    message = db.Column(db.String, nullable=False)
-    year = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    participant_id = db.Column(db.Integer, db.ForeignKey('participants.id', ondelete='CASCADE'), nullable=False, index=True)
+    message = db.Column(db.Text, nullable=False)
+    year = db.Column(db.Integer, nullable=False, index=True)
 
-    # Relationships
-    participant = db.relationship('Participant', back_populates='messages')
+    __table_args__ = (UniqueConstraint('participant_id', 'year', name='uq_participant_year_message'),)
 
 class Assignment(db.Model):
     __tablename__ = 'assignments'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    giver_id = db.Column(db.Integer, db.ForeignKey('participants.id'), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('participants.id'), nullable=False)
-    message_id = db.Column(db.Integer, db.ForeignKey('messages.id'))
-    year = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    giver_id = db.Column(db.Integer, db.ForeignKey('participants.id', ondelete='CASCADE'), nullable=False, index=True)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('participants.id', ondelete='CASCADE'), nullable=False, index=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('messages.id', ondelete='SET NULL'), nullable=True, index=True)
+    year = db.Column(db.Integer, nullable=False, index=True)
 
-    # Relationships
-    giver = db.relationship('Participant', foreign_keys=[giver_id], back_populates='given_assignments')
-    receiver = db.relationship('Participant', foreign_keys=[receiver_id], back_populates='received_assignments')
-    message = db.relationship('Message')
+    __table_args__ = (UniqueConstraint('giver_id', 'year', name='uq_giver_year_assignment'),)
