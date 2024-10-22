@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Teilnehmer-Dashboard{% endblock %}
+{% block title %}Wichtel-Dashboard{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Teilnehmer-Dashboard</h1>
+    <h1 class="text-center mb-4">Wichtel-Dashboard</h1>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
@@ -12,22 +12,22 @@
         </div>
         <div class="card-body">
             {% if current_receiver %}
-                <p>Ihr aktueller Empfänger ist: <strong>{{ current_receiver.receiver_name }}</strong></p>
-                <h5>Nachricht von Ihrem aktuellen Empfänger</h5>
+                <p>Dein Wichtelpartner ist: <strong>{{ current_receiver.receiver_name }}</strong></p>
+                <h5>Nachricht von Deinem aktuellen Wichtelpartner</h5>
                 {% if current_receiver_message %}
                     <p>{{ current_receiver_message }}</p>
                 {% else %}
-                    <p class="text-muted">Ihr aktueller Empfänger hat noch keine Nachricht geschrieben.</p>
+                    <p class="text-muted">Dein aktueller Wichtelpartner hat noch keine Nachricht geschrieben.</p>
                 {% endif %}
             {% else %}
-                <p class="text-muted">Sie haben für dieses Jahr keinen Empfänger zugewiesen.</p>
+                <p class="text-muted">Du hast für dieses Jahr noch keinen Wichtelpartner zugewiesen.</p>
             {% endif %}
         </div>
     </div>
 
     <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
-            Frühere Empfänger
+            Frühere Wichtelpartner
         </div>
         <div class="card-body">
             {% if past_receivers %}
@@ -40,14 +40,14 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="text-muted">Keine früheren Empfänger gefunden.</p>
+                <p class="text-muted">Keine früheren Wichtelpartner gefunden.</p>
             {% endif %}
         </div>
     </div>
 
     <div class="card mb-4">
         <div class="card-header bg-success text-white">
-            Schreiben Sie eine Nachricht für Ihren zukünftigen Empfänger
+            Schreiben Sie eine Nachricht für Deinen zukünftigen Wichtelpartner
         </div>
         <div class="card-body">
             <form action="{{ url_for('participant.add_message') }}" method="POST">
@@ -61,7 +61,7 @@
 
     <div class="card mb-4">
         <div class="card-header bg-warning text-dark">
-            Ihre Nachricht für {{ current_year }}
+            Deine Nachricht für {{ current_year }}
         </div>
         <div class="card-body">
             {% if pending_messages %}
@@ -71,7 +71,6 @@
                             {{ message.message }} (Geschrieben für {{ message.year }})
                             <div>
                                 <a href="{{ url_for('participant.edit_message', message_id=message.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
-                                <!-- Button to trigger delete confirmation -->
                                 <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ message.id }})">Löschen</button>
                             </div>
                         </li>
