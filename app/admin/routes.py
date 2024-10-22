@@ -6,13 +6,13 @@ import app.queries as sql_statements
 import app.logic as logic
 
 
-@admin.route('/dashboard')
+@admin.route('/admin_dashboard')
 @login_required(role='admin')
-def dashboard():
+def admin_dashboard():
     """Display the admin dashboard."""
     participants = sql_statements.get_all_participants()
     return render_template(
-        'dashboard.html',
+        'admin_dashboard.html',
         participants=participants,
     )
 
@@ -36,12 +36,12 @@ def add_new_participant():
 
     if not name or not password:
         flash('All fields are required to add a participant.', 'warning')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
 
     sql_statements.add_participant(name, password, 'participant')
     admin_logger.info(f'Added new participant "{name}".')
     flash(f'Participant "{name}" added successfully.', 'success')
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.admin_dashboard'))
 
 
 @admin.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
@@ -61,12 +61,12 @@ def edit_participant(participant_id):
             sql_statements.update_participant_name(participant_id, name)
         admin_logger.info(f'Participant ID "{participant_id}" updated to name "{name}".')
         flash(f'Participant "{name}" updated successfully.', 'success')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
     else:
         participant = sql_statements.get_participant_by_id(participant_id)
         if participant is None:
             flash('Participant not found.', 'warning')
-            return redirect(url_for('admin.dashboard'))
+            return redirect(url_for('admin.admin_dashboard'))
         return render_template('edit_participant.html', participant=participant)
 
 
@@ -77,7 +77,7 @@ def remove_participant(person_id):
     sql_statements.remove_participant(person_id)
     admin_logger.info(f'Participant ID "{person_id}" removed.')
     flash('Participant removed successfully.', 'success')
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.admin_dashboard'))
 
 
 @admin.route('/add_receiver/<int:person_id>', methods=['POST'])
@@ -135,19 +135,19 @@ def start_new_run():
 
     if not year_str:
         flash('Year is required to start a new run.', 'warning')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
 
     try:
         year = int(year_str)
     except ValueError:
         flash('Year must be a valid integer.', 'warning')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
 
     participants = sql_statements.get_all_participants() or []
 
     if not participants:
         flash('No participants available to start a new run.', 'warning')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
 
     for participant in participants:
         person_id = participant['id']
@@ -155,7 +155,7 @@ def start_new_run():
         if current_receiver:
             flash(f"Participant '{participant['name']}' already has a receiver for the year {year}.", "warning")
             admin_logger.warning(f"Participant '{participant['name']}' already has a receiver for year {year}.")
-            return redirect(url_for('admin.dashboard'))
+            return redirect(url_for('admin.admin_dashboard'))
 
     new_assignments = logic.generate_secret_santa(participants, sql_statements)
 
@@ -167,7 +167,7 @@ def start_new_run():
 
     admin_logger.info(f'Secret Santa round started for year {year}.')
     flash('New Secret Santa round started successfully.', 'success')
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.admin_dashboard'))
 
 
 @admin.route('/scoreboard')

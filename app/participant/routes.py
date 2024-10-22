@@ -5,9 +5,9 @@ from datetime import datetime
 import app.queries as sql_statements
 
 
-@participant.route('/dashboard')
+@participant.route('/participant_dashboard')
 @login_required(role='participant')
-def dashboard():
+def participant_dashboard():
     """Display the participant dashboard with past receivers and the current year's receiver."""
     user = session.get('user')
     participant_logger.info(f'User "{user}" accessed the dashboard.')
@@ -15,8 +15,8 @@ def dashboard():
     # Get participant ID
     participant_id = sql_statements.get_participant_id(user)
     if participant_id is None:
-        flash('Participant not found. Contact administrator.', 'danger')
-        participant_logger.error(f'Participant "{user}" not found in the database.')
+        flash('Teilnehmer nicht gefunden.' 'danger')
+        participant_logger.error(f'Participant "{user}" not found in the .')
         return redirect(url_for('auth.logout'))
 
     # Fetch past receivers and current year receiver
@@ -36,7 +36,7 @@ def dashboard():
 
     participant_logger.info(f'Dashboard data prepared for user "{user}".')
     return render_template(
-        'dashboard.html',
+        'participant_dashboard.html',
         past_receivers=past_receivers,
         current_receiver=current_receiver,
         current_year=current_year,
@@ -56,7 +56,7 @@ def add_message():
     if not message_text:
         flash('Message text cannot be empty.', 'danger')
         participant_logger.warning(f'User "{user}" attempted to add an empty message.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     participant_id = sql_statements.get_participant_id(user)
     if participant_id is None:
@@ -69,13 +69,13 @@ def add_message():
     if existing_message:
         flash('You have already written a message for this year. You can edit the existing message instead.', 'warning')
         participant_logger.info(f'User "{user}" attempted to add a duplicate message for the year {current_year}.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     # Insert the message into the database with the current year
     sql_statements.add_message(participant_id, message_text, current_year)
     flash('Message added successfully!', 'success')
     participant_logger.info(f'Message added for user "{user}" for the year {current_year}.')
-    return redirect(url_for('participant.dashboard'))
+    return redirect(url_for('participant.participant_dashboard'))
 
 
 @participant.route('/edit_message/<int:message_id>', methods=['GET', 'POST'])
@@ -95,7 +95,7 @@ def edit_message(message_id):
         flash('Message not found or you do not have permission to edit it.', 'danger')
         participant_logger.warning(
             f'User "{user}" attempted to edit a non-existent or unauthorized message ID {message_id}.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     if request.method == 'POST':
         new_message_text = request.form.get('message_text')
@@ -103,7 +103,7 @@ def edit_message(message_id):
             sql_statements.update_message(message_id, new_message_text)
             flash('Message updated successfully!', 'success')
             participant_logger.info(f'Message ID {message_id} updated by user "{user}".')
-            return redirect(url_for('participant.dashboard'))
+            return redirect(url_for('participant.participant_dashboard'))
         else:
             flash('Message text cannot be empty.', 'danger')
             participant_logger.warning(f'User "{user}" attempted to update message ID {message_id} with empty text.')
@@ -128,12 +128,12 @@ def delete_message(message_id):
         flash('Message not found or you do not have permission to delete it.', 'danger')
         participant_logger.warning(
             f'User "{user}" attempted to delete a non-existent or unauthorized message ID {message_id}.')
-        return redirect(url_for('participant.dashboard'))
+        return redirect(url_for('participant.participant_dashboard'))
 
     sql_statements.delete_message(message_id)
     flash('Message deleted successfully!', 'success')
     participant_logger.info(f'Message ID {message_id} deleted by user "{user}".')
-    return redirect(url_for('participant.dashboard'))
+    return redirect(url_for('participant.participant_dashboard'))
 
 
 @participant.route('/view_message/<int:receiver_id>/<int:year>')

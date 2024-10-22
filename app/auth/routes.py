@@ -21,10 +21,10 @@ def login():
             auth_logger.info(f"User {name} logged in with role {role}")
             if role == 'admin':
                 current_app.logger.debug('Redirecting to admin dashboard')
-                return redirect(url_for('admin.dashboard'))
+                return redirect(url_for('admin.admin_dashboard'))
             else:
                 current_app.logger.debug('Redirecting to participant dashboard')
-                return redirect(url_for('participant.dashboard'))
+                return redirect(url_for('participant.participant_dashboard'))
         else:
             auth_logger.warning(f"Failed login attempt for user: {name}")
             flash('Ungültiger Name oder Passwort.', 'danger')

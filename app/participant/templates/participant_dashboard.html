@@ -71,9 +71,8 @@
                             {{ message.message }} (Geschrieben für {{ message.year }})
                             <div>
                                 <a href="{{ url_for('participant.edit_message', message_id=message.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
-                                <form action="{{ url_for('participant.delete_message', message_id=message.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sind Sie sicher, dass Sie diese Nachricht löschen möchten?');">Löschen</button>
-                                </form>
+                                <!-- Button to trigger delete confirmation -->
+                                <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ message.id }})">Löschen</button>
                             </div>
                         </li>
                     {% endfor %}
@@ -106,6 +105,29 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nachricht löschen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Sind Sie sicher, dass Sie diese Nachricht löschen möchten?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                <form id="deleteForm" action="" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function viewMessage(receiverId, year, receiverName) {
     fetch(`/participant/view_message/${receiverId}/${year}`)
@@ -128,6 +150,13 @@ function viewMessage(receiverId, year, receiverName) {
             console.error('Fehler:', error);
             alert('Beim Abrufen der Nachricht ist ein Fehler aufgetreten.');
         });
+}
+
+function confirmDelete(messageId) {
+    var deleteForm = document.getElementById('deleteForm');
+    var baseUrl = "{{ url_for('participant.delete_message', message_id=0) }}";
+    deleteForm.action = baseUrl.replace('0', messageId);
+    $('#deleteModal').modal('show');
 }
 </script>
 {% endblock %}
