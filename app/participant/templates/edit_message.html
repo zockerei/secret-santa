@@ -1,8 +1,17 @@
-<h1>Edit Message</h1>
-<form method="POST">
-    <label for="message_text">Message:</label>
-    <textarea id="message_text" name="message_text" rows="5" cols="40" required>{{ message.message }}</textarea>
-    <br>
-    <button type="submit">Update Message</button>
-</form>
-<a href="{{ url_for('participant.participant_dashboard') }}">Back to Dashboard</a>
+{% extends "base.html" %}
+
+{% block title %}Nachricht bearbeiten{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Nachricht bearbeiten</h1>
+    <form method="POST" class="mb-4">
+        <div class="form-group">
+            <label for="message_text">Nachricht:</label>
+            <textarea id="message_text" name="message_text" rows="5" class="form-control" required>{{ message.message }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Nachricht aktualisieren</button>
+    </form>
+    <a href="{{ url_for('participant.dashboard') }}" class="btn btn-secondary">Zurück zum Dashboard</a>
+</div>
+{% endblock %}

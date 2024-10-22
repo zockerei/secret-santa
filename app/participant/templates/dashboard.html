@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Teilnehmer-Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Teilnehmer-Dashboard</h1>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Aktueller Empfänger ({{ current_year }})
+        </div>
+        <div class="card-body">
+            {% if current_receiver %}
+                <p>Ihr aktueller Empfänger ist: <strong>{{ current_receiver.receiver_name }}</strong></p>
+                <h5>Nachricht von Ihrem aktuellen Empfänger</h5>
+                {% if current_receiver_message %}
+                    <p>{{ current_receiver_message }}</p>
+                {% else %}
+                    <p class="text-muted">Ihr aktueller Empfänger hat noch keine Nachricht geschrieben.</p>
+                {% endif %}
+            {% else %}
+                <p class="text-muted">Sie haben für dieses Jahr keinen Empfänger zugewiesen.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            Frühere Empfänger
+        </div>
+        <div class="card-body">
+            {% if past_receivers %}
+                <ul class="list-group">
+                    {% for receiver in past_receivers %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ receiver.receiver_name }} ({{ receiver.year }})
+                            <button class="btn btn-primary btn-sm" onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">Nachricht anzeigen</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Keine früheren Empfänger gefunden.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            Schreiben Sie eine Nachricht für Ihren zukünftigen Empfänger
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('participant.add_message') }}" method="POST">
+                <div class="form-group">
+                    <textarea class="form-control" name="message_text" rows="5" placeholder="Schreiben Sie hier Ihre Nachricht..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Nachricht senden</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            Ihre Nachricht für {{ current_year }}
+        </div>
+        <div class="card-body">
+            {% if pending_messages %}
+                <ul class="list-group">
+                    {% for message in pending_messages %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ message.message }} (Geschrieben für {{ message.year }})
+                            <div>
+                                <a href="{{ url_for('participant.edit_message', message_id=message.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
+                                <form action="{{ url_for('participant.delete_message', message_id=message.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sind Sie sicher, dass Sie diese Nachricht löschen möchten?');">Löschen</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Keine ausstehenden Nachrichten gefunden.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <form action="{{ url_for('auth.logout') }}" method="POST" class="text-center">
+        <button type="submit" class="btn btn-secondary">Abmelden</button>
+    </form>
+</div>
+
+<!-- Nachricht Modal -->
+<div id="messageModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewMessage(receiverId, year, receiverName) {
+    fetch(`/participant/view_message/${receiverId}/${year}`)
+        .then(response => response.json())
+        .then(data => {
+            var modalTitle = document.getElementById("modalTitle");
+            var modalMessage = document.getElementById("modalMessage");
+            
+            modalTitle.textContent = `Nachricht von ${receiverName} (${year})`;
+            
+            if (data.message) {
+                modalMessage.textContent = data.message;
+            } else {
+                modalMessage.textContent = 'Keine Nachricht für diesen Empfänger gefunden.';
+            }
+            
+            $('#messageModal').modal('show');
+        })
+        .catch(error => {
+            console.error('Fehler:', error);
+            alert('Beim Abrufen der Nachricht ist ein Fehler aufgetreten.');
+        });
+}
+</script>
+{% endblock %}

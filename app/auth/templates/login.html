@@ -1,16 +1,28 @@
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul>
-      {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% extends "base.html" %}
 
-<h2>Login</h2>
-<form action="{{ url_for('auth.login') }}" method="POST">
-    <input type="text" name="name" placeholder="Enter name" required oninput="this.value = this.value.toLowerCase()">
-    <input type="password" name="password" placeholder="Enter password" required>
-    <button type="submit">Login</button>
-</form>
+{% block title %}Login - My Application{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">Login</h2>
+        <form action="{{ url_for('auth.login') }}" method="POST" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Namen eingeben" required oninput="this.value = this.value.toLowerCase()">
+                <div class="invalid-feedback">
+                    Bitte geben Sie Ihren Namen ein.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Passwort eingeben" required>
+                <div class="invalid-feedback">
+                    Bitte geben Sie Ihr Passwort ein.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
