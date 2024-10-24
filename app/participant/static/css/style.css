@@ -1,0 +1,119 @@
+body {
+    background: url('../images/christmas_background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+}
+
+/* Add some festive colors */
+.header, .footer {
+    background-color: #8B0000; /* Dark red */
+    color: #fff;
+}
+
+.button {
+    background-color: #228B22; /* Forest green */
+    color: #fff;
+    border: 2px solid #fff;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #32CD32; /* Lime green */
+}
+
+/* Add some decorative elements */
+.snowflake {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.snowflake-item {
+    position: absolute;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* Align text and button on the same line */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Style the toggle button */
+.btn-link {
+    font-size: 1.5em; /* Adjust the size of the arrow */
+    color: inherit; /* Inherit text color from parent */
+    text-decoration: none; /* Remove underline */
+    padding: 0; /* Remove padding */
+    border: none; /* Remove border */
+    background: none; /* Remove background */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: transform 0.2s ease; /* Add a smooth transition */
+}
+
+.btn-link:hover {
+    transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+.list-group-item {
+    color: #000; /* Change text color to black for better visibility */
+    background-color: rgba(255, 255, 255, 0.8); /* Optional: Add a slight background color for contrast */
+}
+
+/* Ensure text is visible on the card body */
+.card-body {
+    color: #000; /* Set text color to black for better visibility */
+    background-color: rgba(255, 255, 255, 0.8); /* Add transparency to the card body */
+}
+
+.collapse.show .card-body {
+    background-color: rgba(255, 255, 255, 0.8); /* Add transparency to visible collapsible card bodies */
+}
+
+/* Optional: Style adjustments for the button */
+.btn-light {
+    color: #000; /* Ensure the text/icon color is visible */
+    background-color: rgba(255, 255, 255, 0.8); /* Match the card body transparency */
+    border: none; /* Remove border for a cleaner look */
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.btn-light:hover {
+    background-color: rgba(255, 255, 255, 1); /* Slightly less transparent on hover */
+}
+
+/* Christmas-themed card headers */
+.card-header.bg-primary {
+    background-color: #B22222; /* Firebrick red */
+}
+
+.card-header.bg-secondary {
+    background-color: #006400; /* Dark green */
+}
+
+.card-header.bg-success {
+    background-color: #FFD700; /* Gold */
+    color: #000; /* Dark text for contrast */
+}
+
+.card-header.bg-warning {
+    background-color: #FF4500; /* Orange red */
+    color: #fff; /* Light text for contrast */
+}

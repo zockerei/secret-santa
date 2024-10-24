@@ -1,8 +1,8 @@
 from flask import Flask, redirect, url_for
-from config.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from config import DevelopmentConfig, TestingConfig, ProductionConfig
 from app.models import Participant
 from app.extensions import db, login_manager, migrate
-from config.logging_config import setup_logging
+from config import setup_logging
 from app.initialization import initialize_admin
 from dotenv import load_dotenv
 import os

@@ -2,83 +2,110 @@
 
 {% block title %}Wichtel-Dashboard{% endblock %}
 
+{% block styles %}
+    <link href="{{ url_for('participant.static', filename='css/style.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Wichtel-Dashboard</h1>
+    <h1 class="text-center mb-4">🎄 Frohe Weihnachten! 🎄</h1> <!-- Christmas Greeting -->
+
+    <!-- Add a decorative snowflake element -->
+    <div class="snowflake"></div>
 
     <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             Aktueller Empfänger ({{ current_year }})
+            <button class="btn btn-light btn-sm" data-toggle="collapse" data-target="#currentReceiverCollapse" aria-expanded="true" aria-controls="currentReceiverCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
-        <div class="card-body">
-            {% if current_receiver %}
-                <p>Dein Wichtelpartner ist: <strong>{{ current_receiver.receiver_name }}</strong></p>
-                <h5>Nachricht von Deinem aktuellen Wichtelpartner</h5>
-                {% if current_receiver_message %}
-                    <p>{{ current_receiver_message }}</p>
+        <div id="currentReceiverCollapse" class="collapse show">
+            <div class="card-body">
+                {% if current_receiver %}
+                    <p>Dein Wichtelpartner ist: <strong>{{ current_receiver.receiver_name }}</strong></p>
+                    <h5>Nachricht von Deinem aktuellen Wichtelpartner</h5>
+                    {% if current_receiver_message %}
+                        <p>{{ current_receiver_message }}</p>
+                    {% else %}
+                        <p class="text-muted">Dein aktueller Wichtelpartner hat noch keine Nachricht geschrieben.</p>
+                    {% endif %}
                 {% else %}
-                    <p class="text-muted">Dein aktueller Wichtelpartner hat noch keine Nachricht geschrieben.</p>
+                    <p class="text-muted">Du hast für dieses Jahr noch keinen Wichtelpartner zugewiesen.</p>
                 {% endif %}
-            {% else %}
-                <p class="text-muted">Du hast für dieses Jahr noch keinen Wichtelpartner zugewiesen.</p>
-            {% endif %}
+            </div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             Frühere Wichtelpartner
+            <button class="btn btn-light btn-sm" data-toggle="collapse" data-target="#pastReceiversCollapse" aria-expanded="true" aria-controls="pastReceiversCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
-        <div class="card-body">
-            {% if past_receivers %}
-                <ul class="list-group">
-                    {% for receiver in past_receivers %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ receiver.receiver_name }} ({{ receiver.year }})
-                            <button class="btn btn-primary btn-sm" onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">Nachricht anzeigen</button>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">Keine früheren Wichtelpartner gefunden.</p>
-            {% endif %}
+        <div id="pastReceiversCollapse" class="collapse show">
+            <div class="card-body">
+                {% if past_receivers %}
+                    <ul class="list-group">
+                        {% for receiver in past_receivers %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ receiver.receiver_name }} ({{ receiver.year }})
+                                <button class="btn btn-primary btn-sm" onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">Nachricht anzeigen</button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Keine früheren Wichtelpartner gefunden.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header bg-success text-white">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             Schreiben Sie eine Nachricht für Deinen zukünftigen Wichtelpartner
+            <button class="btn btn-light btn-sm" data-toggle="collapse" data-target="#writeMessageCollapse" aria-expanded="true" aria-controls="writeMessageCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
-        <div class="card-body">
-            <form action="{{ url_for('participant.add_message') }}" method="POST">
-                <div class="form-group">
-                    <textarea class="form-control" name="message_text" rows="5" placeholder="Schreiben Sie hier Ihre Nachricht..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">Nachricht senden</button>
-            </form>
+        <div id="writeMessageCollapse" class="collapse show">
+            <div class="card-body">
+                <form action="{{ url_for('participant.add_message') }}" method="POST">
+                    <div class="form-group">
+                        <textarea class="form-control" name="message_text" rows="5" placeholder="Schreiben Sie hier Ihre Nachricht..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Nachricht senden</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
             Deine Nachricht für {{ current_year }}
+            <button class="btn btn-light btn-sm" data-toggle="collapse" data-target="#pendingMessagesCollapse" aria-expanded="true" aria-controls="pendingMessagesCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
-        <div class="card-body">
-            {% if pending_messages %}
-                <ul class="list-group">
-                    {% for message in pending_messages %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ message.message }} (Geschrieben für {{ message.year }})
-                            <div>
-                                <a href="{{ url_for('participant.edit_message', message_id=message.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
-                                <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ message.id }})">Löschen</button>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">Keine ausstehenden Nachrichten gefunden.</p>
-            {% endif %}
+        <div id="pendingMessagesCollapse" class="collapse show">
+            <div class="card-body">
+                {% if pending_messages %}
+                    <ul class="list-group">
+                        {% for message in pending_messages %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ message.message }} (Geschrieben für {{ message.year }})
+                                <div>
+                                    <a href="{{ url_for('participant.edit_message', message_id=message.id) }}" class="btn btn-warning btn-sm">Bearbeiten</a>
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ message.id }})">Löschen</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Keine ausstehenden Nachrichten gefunden.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -127,35 +154,8 @@
     </div>
 </div>
 
-<script>
-function viewMessage(receiverId, year, receiverName) {
-    fetch(`/participant/view_message/${receiverId}/${year}`)
-        .then(response => response.json())
-        .then(data => {
-            var modalTitle = document.getElementById("modalTitle");
-            var modalMessage = document.getElementById("modalMessage");
-            
-            modalTitle.textContent = `Nachricht von ${receiverName} (${year})`;
-            
-            if (data.message) {
-                modalMessage.textContent = data.message;
-            } else {
-                modalMessage.textContent = 'Keine Nachricht für diesen Empfänger gefunden.';
-            }
-            
-            $('#messageModal').modal('show');
-        })
-        .catch(error => {
-            console.error('Fehler:', error);
-            alert('Beim Abrufen der Nachricht ist ein Fehler aufgetreten.');
-        });
-}
+{% endblock %}
 
-function confirmDelete(messageId) {
-    var deleteForm = document.getElementById('deleteForm');
-    var baseUrl = "{{ url_for('participant.delete_message', message_id=0) }}";
-    deleteForm.action = baseUrl.replace('0', messageId);
-    $('#deleteModal').modal('show');
-}
-</script>
+{% block scripts %}
+    <script src="{{ url_for('participant.static', filename='js/script.js') }}"></script>
 {% endblock %}
