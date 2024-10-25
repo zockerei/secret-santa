@@ -140,23 +140,23 @@ body {
 
 /* Style specific card headers with semi-transparent Christmas colors and text colors */
 .card-header.bg-primary {
-    background-color: rgba(196, 30, 58, 0.9) !important; /* Christmas Red */
-    color: #fff !important; /* White text */
+    background-color: rgba(29, 59, 196, 0.9) !important; /* #1D3BC4 */
+    color: #fff !important;
 }
 
 .card-header.bg-secondary {
-    background-color: rgba(22, 91, 51, 0.9) !important; /* Christmas Green */
-    color: #fff !important; /* White text */
+    background-color: rgba(29, 196, 61, 0.9) !important; /* #1DC43D */
+    color: #fff !important;
 }
 
 .card-header.bg-success {
-    background-color: rgba(187, 148, 87, 0.9) !important; /* Gold/Brown */
-    color: #fff !important; /* Changed from black to white text */
+    background-color: rgba(196, 155, 29, 0.9) !important; /* #C49B1D */
+    color: #fff !important;
 }
 
 .card-header.bg-warning {
-    background-color: rgba(20, 107, 58, 0.9) !important; /* Another Christmas Green */
-    color: #fff !important; /* White text */
+    background-color: rgba(196, 29, 57, 0.9) !important; /* #C41D39 */
+    color: #fff !important;
 }
 
 /* Style the collapsible sections */
@@ -190,7 +190,7 @@ h1 {
 
 /* Festive logout button styling */
 .btn-christmas-logout {
-    background-color: rgba(196, 30, 58, 0.9); /* Christmas red with transparency */
+    background-color: rgba(196, 29, 57, 0.9); /* #C41D39 */
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.8);
     padding: 10px 30px;
@@ -202,7 +202,7 @@ h1 {
 }
 
 .btn-christmas-logout:hover {
-    background-color: rgba(196, 30, 58, 1);
+    background-color: rgba(196, 29, 57, 1);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
@@ -253,7 +253,7 @@ h1 {
 
 /* Christmas-styled view message button */
 .btn-view-message {
-    background-color: #c41e3ae6 !important; /* Christmas red */
+    background-color: rgba(29, 59, 196, 0.9) !important; /* #1D3BC4 */
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
     transition: all 0.3s ease;
@@ -262,7 +262,7 @@ h1 {
 }
 
 .btn-view-message:hover {
-    background-color: rgba(196, 30, 58, 1) !important;
+    background-color: rgba(29, 59, 196, 1) !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-color: white !important;
@@ -302,8 +302,8 @@ h1 {
     height: 28px; /* Adjusted height */
     border-radius: 50%;
     margin: 0 20px; /* Adjusted margin to center the lights */
-    background: rgba(0,247,165,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,247,165,1);
+    background: rgba(29, 59, 196, 1); /* #1D3BC4 */
+    box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 1);
     animation-name: flash-1;
     animation-duration: 2s;
     animation-fill-mode: both; 
@@ -312,15 +312,15 @@ h1 {
 }
 
 .lightrope li:nth-child(2n+1) {
-    background: rgba(0,255,255,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,255,255,0.5);
+    background: rgba(29, 196, 61, 1); /* #1DC43D */
+    box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 0.5);
     animation-name: flash-2;
     animation-duration: 0.4s;
 }
 
 .lightrope li:nth-child(4n+2) {
-    background: rgba(247,0,148,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(247,0,148,1);
+    background: rgba(196, 29, 57, 1); /* #C41D39 */
+    box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 1);
     animation-name: flash-3;
     animation-duration: 1.1s;
 }
@@ -364,23 +364,34 @@ h1 {
 }
 
 @keyframes flash-1 { 
-    0%, 100% { background: rgba(0,247,165,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,247,165,1);} 
-    50% { background: rgba(0,247,165,0.4);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,247,165,0.2);}
+    0%, 100% { 
+        background: rgba(29, 59, 196, 1);
+        box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 1);
+    } 
+    50% { 
+        background: rgba(29, 59, 196, 0.4);
+        box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 0.2);
+    }
 }
 
 @keyframes flash-2 { 
-    0%, 100% { background: rgba(0,255,255,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,255,255,1);} 
-    50% { background: rgba(0,255,255,0.4);
-    box-shadow: 0px 4.67px 24px 3px rgba(0,255,255,0.2);}
+    0%, 100% { 
+        background: rgba(29, 196, 61, 1);
+        box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 1);
+    } 
+    50% { 
+        background: rgba(29, 196, 61, 0.4);
+        box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 0.2);
+    }
 }
 
 @keyframes flash-3 { 
-    0%, 100% { background: rgba(247,0,148,1);
-    box-shadow: 0px 4.67px 24px 3px rgba(247,0,148,1);} 
-    50% { background: rgba(247,0,148,0.4);
-    box-shadow: 0px 4.67px 24px 3px rgba(247,0,148,0.2);}
+    0%, 100% { 
+        background: rgba(196, 29, 57, 1);
+        box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 1);
+    } 
+    50% { 
+        background: rgba(196, 29, 57, 0.4);
+        box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 0.2);
+    }
 }
-
