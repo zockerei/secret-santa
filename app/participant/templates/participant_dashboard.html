@@ -9,10 +9,24 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">🎄 Frohe Weihnachten! 🎄</h1> <!-- Christmas Greeting -->
+    <!-- Add left and right snowflake containers -->
+    <div class="snowflakes-left" aria-hidden="true">
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+    </div>
 
-    <!-- Add a decorative snowflake element -->
-    <div class="snowflake"></div>
+    <div class="snowflakes-right" aria-hidden="true">
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+    </div>
+
+    <h1 class="text-center mb-4">🎄 Frohe Weihnachten! 🎄</h1> <!-- Christmas Greeting -->
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -52,7 +66,9 @@
                         {% for receiver in past_receivers %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 {{ receiver.receiver_name }} ({{ receiver.year }})
-                                <button class="btn btn-primary btn-sm" onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">Nachricht anzeigen</button>
+                                <button class="btn btn-view-message btn-sm" onclick="viewMessage({{ receiver.receiver_id }}, {{ receiver.year }}, '{{ receiver.receiver_name }}')">
+                                    <i class="fas fa-envelope mr-1"></i>Nachricht anzeigen
+                                </button>
                             </li>
                         {% endfor %}
                     </ul>
@@ -76,7 +92,9 @@
                     <div class="form-group">
                         <textarea class="form-control" name="message_text" rows="5" placeholder="Schreiben Sie hier Ihre Nachricht..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success">Nachricht senden</button>
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-success">Nachricht senden</button>
+                    </div>
                 </form>
             </div>
         </div>
