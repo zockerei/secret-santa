@@ -4,7 +4,8 @@ from app.decorators import login_required
 from datetime import datetime
 import app.queries as sql_statements
 
-@participant.route('/participant')
+
+@participant.route('/participant_dashboard')
 @login_required(role='participant')
 def participant_dashboard():
     """Display the participant dashboard with past receivers and the current year's receiver."""
@@ -14,8 +15,8 @@ def participant_dashboard():
     # Get participant ID
     participant_id = sql_statements.get_participant_id(user)
     if participant_id is None:
-        flash('Participant not found. Contact administrator.', 'danger')
-        participant_logger.error(f'Participant "{user}" not found in the database.')
+        flash('Teilnehmer nicht gefunden.' 'danger')
+        participant_logger.error(f'Participant "{user}" not found in the .')
         return redirect(url_for('auth.logout'))
 
     # Fetch past receivers and current year receiver
@@ -42,6 +43,7 @@ def participant_dashboard():
         pending_messages=pending_messages,
         current_receiver_message=current_receiver_message
     )
+
 
 @participant.route('/add_message', methods=['POST'])
 @login_required(role='participant')
@@ -75,6 +77,7 @@ def add_message():
     participant_logger.info(f'Message added for user "{user}" for the year {current_year}.')
     return redirect(url_for('participant.participant_dashboard'))
 
+
 @participant.route('/edit_message/<int:message_id>', methods=['GET', 'POST'])
 @login_required(role='participant')
 def edit_message(message_id):
@@ -90,7 +93,8 @@ def edit_message(message_id):
     message = sql_statements.get_message_by_id(message_id, participant_id)
     if message is None:
         flash('Message not found or you do not have permission to edit it.', 'danger')
-        participant_logger.warning(f'User "{user}" attempted to edit a non-existent or unauthorized message ID {message_id}.')
+        participant_logger.warning(
+            f'User "{user}" attempted to edit a non-existent or unauthorized message ID {message_id}.')
         return redirect(url_for('participant.participant_dashboard'))
 
     if request.method == 'POST':
@@ -105,6 +109,7 @@ def edit_message(message_id):
             participant_logger.warning(f'User "{user}" attempted to update message ID {message_id} with empty text.')
 
     return render_template('edit_message.html', message=message)
+
 
 @participant.route('/delete_message/<int:message_id>', methods=['POST'])
 @login_required(role='participant')
@@ -121,7 +126,8 @@ def delete_message(message_id):
     message = sql_statements.get_message_by_id(message_id, participant_id)
     if message is None:
         flash('Message not found or you do not have permission to delete it.', 'danger')
-        participant_logger.warning(f'User "{user}" attempted to delete a non-existent or unauthorized message ID {message_id}.')
+        participant_logger.warning(
+            f'User "{user}" attempted to delete a non-existent or unauthorized message ID {message_id}.')
         return redirect(url_for('participant.participant_dashboard'))
 
     sql_statements.delete_message(message_id)
@@ -129,16 +135,19 @@ def delete_message(message_id):
     participant_logger.info(f'Message ID {message_id} deleted by user "{user}".')
     return redirect(url_for('participant.participant_dashboard'))
 
+
 @participant.route('/view_message/<int:receiver_id>/<int:year>')
 @login_required(role='participant')
 def view_message(receiver_id, year):
     user = session.get('user')
-    participant_logger.info(f'User "{user}" requested to view message for receiver ID {receiver_id} for the year {year}.')
+    participant_logger.info(
+        f'User "{user}" requested to view message for receiver ID {receiver_id} for the year {year}.')
 
     message = sql_statements.get_message_for_year(receiver_id, year)
     if message:
         participant_logger.info(f'Message for receiver ID {receiver_id} for the year {year} sent to user "{user}".')
         return jsonify({'message': message['message']})
     else:
-        participant_logger.warning(f'No message found for receiver ID {receiver_id} for the year {year} for user "{user}".')
+        participant_logger.warning(
+            f'No message found for receiver ID {receiver_id} for the year {year} for user "{user}".')
         return jsonify({'message': None})

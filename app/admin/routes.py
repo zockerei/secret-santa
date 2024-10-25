@@ -5,32 +5,17 @@ from app.decorators import login_required
 import app.queries as sql_statements
 import app.logic as logic
 
-@admin.route('/admin')
+
+@admin.route('/admin_dashboard')
 @login_required(role='admin')
 def admin_dashboard():
     """Display the admin dashboard."""
     participants = sql_statements.get_all_participants()
-    scoreboard = {}
-    if participants:
-        for participant in participants:
-            person_id = participant['id']
-            participant_name = participant['name']
-            
-            # Get all receivers (including both past receivers and assignments)
-            all_receivers = sql_statements.get_assignments_for_giver(person_id)
-            
-            # Sort by year in descending order
-            all_receivers.sort(key=lambda x: x['year'], reverse=True)
-            
-            scoreboard[participant_name] = {
-                'participant_id': person_id,
-                'all_receivers': all_receivers
-            }
     return render_template(
         'admin_dashboard.html',
         participants=participants,
-        scoreboard=scoreboard
     )
+
 
 @admin.route('/remove_assignment/<int:giver_id>/<int:receiver_id>/<int:year>', methods=['POST'])
 @login_required(role='admin')
@@ -39,7 +24,8 @@ def remove_assignment(giver_id, receiver_id, year):
     sql_statements.remove_receiver(giver_id, receiver_id, year)
     admin_logger.info(f'Removed assignment for giver ID "{giver_id}" and receiver ID "{receiver_id}" in year {year}.')
     flash(f'Assignment for year {year} removed successfully.', 'success')
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.scoreboard'))
+
 
 @admin.route('/add_participant', methods=['POST'])
 @login_required(role='admin')
@@ -56,6 +42,7 @@ def add_new_participant():
     admin_logger.info(f'Added new participant "{name}".')
     flash(f'Participant "{name}" added successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
 
 @admin.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
 @login_required(role='admin')
@@ -82,6 +69,7 @@ def edit_participant(participant_id):
             return redirect(url_for('admin.admin_dashboard'))
         return render_template('edit_participant.html', participant=participant)
 
+
 @admin.route('/remove_participant/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
 def remove_participant(person_id):
@@ -90,6 +78,7 @@ def remove_participant(person_id):
     admin_logger.info(f'Participant ID "{person_id}" removed.')
     flash('Participant removed successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
 
 @admin.route('/add_receiver/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
@@ -100,32 +89,33 @@ def add_receiver(person_id):
 
     if not receiver_name or not year_str:
         flash('Receiver name and year are required.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.scoreboard'))
 
     try:
         year = int(year_str)
     except ValueError:
         flash('Year must be a valid integer.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.scoreboard'))
 
     receiver_id = sql_statements.get_participant_id(receiver_name)
     if receiver_id is None:
         flash(f'Receiver "{receiver_name}" not found.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.scoreboard'))
 
     participant = sql_statements.get_participant_by_id(person_id)
     if participant and participant['name'].lower() == receiver_name.lower():
         flash('A participant cannot be their own past receiver.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.scoreboard'))
 
     if sql_statements.is_duplicate_assignment(person_id, year):
         flash(f'Error: A receiver for year {year} is already assigned.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.scoreboard'))
 
     sql_statements.add_or_assign_receiver(person_id, receiver_id, year)
     admin_logger.info(f'Added receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
     flash(f'Receiver "{receiver_name}" added for year {year}.', 'success')
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.scoreboard'))
+
 
 @admin.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
 @login_required(role='admin')
@@ -134,7 +124,8 @@ def remove_receiver(person_id, receiver_name, year):
     sql_statements.remove_receiver(person_id, receiver_name, year)
     admin_logger.info(f'Removed receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
     flash(f'Receiver "{receiver_name}" for year {year} removed successfully.', 'success')
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.scoreboard'))
+
 
 @admin.route('/start_new_run', methods=['POST'])
 @login_required(role='admin')
@@ -167,7 +158,7 @@ def start_new_run():
             return redirect(url_for('admin.admin_dashboard'))
 
     new_assignments = logic.generate_secret_santa(participants, sql_statements)
-    
+
     for giver_id, receiver_id in new_assignments:
         message = sql_statements.get_message_for_year(giver_id, year)
         message_id = message['id'] if message else None
@@ -177,3 +168,27 @@ def start_new_run():
     admin_logger.info(f'Secret Santa round started for year {year}.')
     flash('New Secret Santa round started successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
+
+@admin.route('/scoreboard')
+@login_required(role='admin')
+def scoreboard():
+    """Display the scoreboard page."""
+    participants = sql_statements.get_all_participants()
+    scoreboard = {}
+    if participants:
+        for participant in participants:
+            person_id = participant['id']
+            participant_name = participant['name']
+
+            # Get all receivers (including both past receivers and assignments)
+            all_receivers = sql_statements.get_assignments_for_giver(person_id)
+
+            # Sort by year in descending order
+            all_receivers.sort(key=lambda x: x['year'], reverse=True)
+
+            scoreboard[participant_name] = {
+                'participant_id': person_id,
+                'all_receivers': all_receivers
+            }
+    return render_template('scoreboard.html', scoreboard=scoreboard)

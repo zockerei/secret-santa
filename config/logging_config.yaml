@@ -16,7 +16,6 @@ handlers:
   rotating_file:
     class: logging.handlers.TimedRotatingFileHandler
     formatter: basic
-    filename: logs/app.log
     when: midnight
     interval: 1
     backupCount: 7
@@ -25,7 +24,6 @@ handlers:
   error_file:
     class: logging.FileHandler
     formatter: basic
-    filename: logs/error.log
     level: ERROR
     encoding: utf-8
 

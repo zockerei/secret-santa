@@ -1,8 +1,8 @@
 from flask import Flask, redirect, url_for
-from config.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from config import DevelopmentConfig, TestingConfig, ProductionConfig
 from app.models import Participant
 from app.extensions import db, login_manager, migrate
-from config.logging_config import setup_logging
+from config import setup_logging
 from app.initialization import initialize_admin
 from dotenv import load_dotenv
 import os
@@ -61,6 +61,9 @@ def create_app():
 
     from .errors import errors as errors_blueprint
     app.register_blueprint(errors_blueprint, url_prefix='/errors')
+
+    from .christmas import christmas as christmas_blueprint
+    app.register_blueprint(christmas_blueprint, url_prefix='/christmas')
 
     # Root route redirecting to login
     @app.route('/')
