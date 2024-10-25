@@ -62,6 +62,9 @@ def create_app():
     from .errors import errors as errors_blueprint
     app.register_blueprint(errors_blueprint, url_prefix='/errors')
 
+    from .christmas import christmas as christmas_blueprint
+    app.register_blueprint(christmas_blueprint, url_prefix='/christmas')
+
     # Root route redirecting to login
     @app.route('/')
     def index():

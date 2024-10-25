@@ -2,6 +2,7 @@ body {
     background: url('../images/christmas_background.jpg') no-repeat center center fixed;
     background-size: cover;
     color: #fff;
+    font-family: 'Nunito', sans-serif;
 }
 
 /* Add some festive colors */
@@ -51,9 +52,12 @@ body {
 
 /* Align text and button on the same line */
 .card-header {
+    background-color: transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
 }
 
 /* Style the toggle button */
@@ -72,15 +76,17 @@ body {
     transform: scale(1.1); /* Slightly enlarge on hover */
 }
 
+/* Style list group items to be semi-transparent */
 .list-group-item {
-    color: #000; /* Change text color to black for better visibility */
-    background-color: rgba(255, 255, 255, 0.8); /* Optional: Add a slight background color for contrast */
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.125);
 }
 
-/* Ensure text is visible on the card body */
+/* Style the card body with semi-transparent white background */
 .card-body {
-    color: #000; /* Set text color to black for better visibility */
-    background-color: rgba(255, 255, 255, 0.8); /* Add transparency to the card body */
+    background-color: rgba(255, 255, 255, 0.7); /* White with 70% opacity */
+    border-radius: 0 0 4px 4px; /* Optional: round bottom corners */
+    color: #000; /* Black text for better contrast */
 }
 
 .collapse.show .card-body {
@@ -99,21 +105,115 @@ body {
     background-color: rgba(255, 255, 255, 1); /* Slightly less transparent on hover */
 }
 
-/* Christmas-themed card headers */
+/* Style specific card headers with semi-transparent Christmas colors and text colors */
 .card-header.bg-primary {
-    background-color: #B22222; /* Firebrick red */
+    background-color: rgba(196, 30, 58, 0.9) !important; /* Christmas Red */
+    color: #fff !important; /* White text */
 }
 
 .card-header.bg-secondary {
-    background-color: #006400; /* Dark green */
+    background-color: rgba(22, 91, 51, 0.9) !important; /* Christmas Green */
+    color: #fff !important; /* White text */
 }
 
 .card-header.bg-success {
-    background-color: #FFD700; /* Gold */
-    color: #000; /* Dark text for contrast */
+    background-color: rgba(187, 148, 87, 0.9) !important; /* Gold/Brown */
+    color: #fff !important; /* Changed from black to white text */
 }
 
 .card-header.bg-warning {
-    background-color: #FF4500; /* Orange red */
-    color: #fff; /* Light text for contrast */
+    background-color: rgba(20, 107, 58, 0.9) !important; /* Another Christmas Green */
+    color: #fff !important; /* White text */
+}
+
+/* Style the collapsible sections */
+.card {
+    background-color: transparent; /* Make the card background transparent */
+}
+
+h1 {
+    font-family: 'Mountains of Christmas', cursive;
+    font-weight: 700;
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Style the card body text */
+.card-body {
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #000; /* Black text for better contrast */
+}
+
+/* Style list group items */
+.list-group-item {
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #000; /* Black text */
+}
+
+/* Style muted text to be darker for better visibility */
+.text-muted {
+    color: #505050 !important; /* Darker gray instead of default muted */
+}
+
+/* Festive logout button styling */
+.btn-christmas-logout {
+    background-color: rgba(196, 30, 58, 0.9); /* Christmas red with transparency */
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-christmas-logout:hover {
+    background-color: rgba(196, 30, 58, 1);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    border-color: white;
+}
+
+.btn-christmas-logout:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logout-form {
+    margin-top: 2rem;
+}
+
+/* Style the modal */
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(196, 30, 58, 0.9); /* Christmas red border */
+}
+
+.modal-header {
+    background-color: rgba(196, 30, 58, 0.9); /* Christmas red */
+    color: white;
+    border-bottom: none;
+}
+
+.modal-body {
+    color: #000; /* Black text */
+    font-family: 'Nunito', sans-serif;
+}
+
+.modal-footer {
+    border-top: none;
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Style the close button */
+.modal .close {
+    color: white;
+    text-shadow: none;
+    opacity: 1;
+}
+
+.modal .close:hover {
+    color: rgba(255, 255, 255, 0.8);
 }
