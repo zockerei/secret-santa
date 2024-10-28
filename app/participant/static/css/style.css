@@ -131,22 +131,22 @@ body {
 }
 
 .card-header.bg-primary {
-    background-color: rgba(29, 59, 196, 0.9) !important;
+    background-color: #1d3bc4e6 !important;
     color: #fff !important;
 }
 
 .card-header.bg-secondary {
-    background-color: rgba(29, 196, 61, 0.9) !important;
+    background-color: #1dc43de6 !important;
     color: #fff !important;
 }
 
 .card-header.bg-success {
-    background-color: rgba(196, 155, 29, 0.9) !important;
+    background-color: #c49b1de6 !important;
     color: #fff !important;
 }
 
 .card-header.bg-warning {
-    background-color: rgba(196, 29, 57, 0.9) !important;
+    background-color: #c41d39e6 !important;
     color: #fff !important;
 }
 
