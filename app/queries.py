@@ -77,7 +77,6 @@ def verify_participant(name: str, password: str) -> Optional[Participant]:
         queries_logger.debug(f"Attempting to verify participant: {name}")
         participant = Participant.query.filter_by(name=name).first()
         if participant and participant.check_password(password):
-            queries_logger.info(f"Participant {name} verified successfully.")
             return participant
         queries_logger.warning(f"Verification failed for participant: {name}")
         return None
@@ -89,7 +88,6 @@ def get_messages_for_participant(participant_id: int, year: int) -> List[Dict[st
     try:
         queries_logger.debug(f"Fetching messages for participant ID {participant_id} in year {year}")
         messages = Message.query.filter_by(participant_id=participant_id, year=year).all()
-        queries_logger.info(f"Fetched {len(messages)} messages for participant ID {participant_id} in year {year}")
         return [{'id': msg.id, 'message': msg.message, 'year': msg.year} for msg in messages]
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch messages for participant ID {participant_id} in year {year}: {e}")
@@ -318,3 +316,4 @@ def get_admin() -> Optional[Dict[str, Any]]:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch admin user: {e}")
         raise DatabaseError("Failed to fetch admin user", e)
+

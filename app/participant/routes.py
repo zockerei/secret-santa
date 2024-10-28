@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, session, jsonify
+from flask import render_template, redirect, url_for, flash, request, session
 from . import participant, participant_logger
 from app.decorators import login_required
 from datetime import datetime
@@ -70,8 +70,12 @@ def manage_message():
             sql_statements.delete_message(message_id)
             flash('Nachricht erfolgreich gelöscht!', 'success')
             participant_logger.info(f'Message ID {message_id} deleted by user "{user}".')
+        else:
+            participant_logger.warning(f'User "{user}" attempted to delete message without message_id')
+            flash('Keine Nachricht zum Löschen gefunden.', 'danger')
     else:  # save action
         if not message_text:
+            participant_logger.warning(f'User "{user}" attempted to save empty message')
             flash('Die Nachricht darf nicht leer sein.', 'danger')
             return redirect(url_for('participant.participant_dashboard'))
 
@@ -83,6 +87,7 @@ def manage_message():
             # Check for existing message this year
             existing_message = sql_statements.get_message_for_year(participant_id, current_year)
             if existing_message:
+                participant_logger.warning(f'User "{user}" attempted to add second message for year {current_year}')
                 flash('Du hast bereits eine Nachricht für dieses Jahr geschrieben.', 'warning')
                 return redirect(url_for('participant.participant_dashboard'))
             
@@ -96,33 +101,36 @@ def manage_message():
 @participant.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
 @login_required(role='participant')
 def edit_participant(participant_id):
-    user = session.get('user')  # Add this line to get current user
+    user = session.get('user')
 
     # Verify this participant is editing their own data
-    if participant_id != sql_statements.get_participant_id(user):
+    user_id = sql_statements.get_participant_id(user)
+    if participant_id != user_id:
+        participant_logger.warning(f'User "{user}" attempted to edit participant {participant_id} (unauthorized)')
         flash('Du kannst nur deine eigenen Informationen bearbeiten.', 'danger')
         return redirect(url_for('participant.participant_dashboard'))
-
 
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         password = request.form.get('password', '').strip()
 
         if not name:
+            participant_logger.warning(f'User "{user}" attempted to update profile with empty name')
             flash('Der Name ist erforderlich, um Ihre Informationen zu aktualisieren.', 'warning')
             return redirect(url_for('participant.participant_dashboard'))
 
         if password:
             sql_statements.update_participant(participant_id, name, password)
+            participant_logger.info(f'User "{user}" updated their name and password')
         else:
             sql_statements.update_participant_name(participant_id, name)
+            participant_logger.info(f'User "{user}" updated their name to "{name}"')
 
         # Update the session with the new name if it changed
-        session['user'] = name  # Add this line to update session
+        session['user'] = name
         
-        participant_logger.info(f'Participant ID "{participant_id}" updated to name "{name}".')
         flash(f'Profil wurde erfolgreich aktualisiert.', 'success')
         return redirect(url_for('participant.participant_dashboard'))
     
-    # For GET requests, just redirect back to dashboard
+    participant_logger.debug(f'User "{user}" accessed edit profile page')
     return redirect(url_for('participant.participant_dashboard'))

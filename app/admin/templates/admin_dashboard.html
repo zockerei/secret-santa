@@ -49,7 +49,7 @@
                             {{ participant.name }}
                             <div>
                                 <a href="{{ url_for('admin.edit_participant', participant_id=participant.id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ url_for('admin.remove_participant', person_id=participant.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this participant?');">
+                                <form action="{{ url_for('admin.remove_participant', person_id=participant.id) }}" method="POST" class="d-inline delete-participant-form">
                                     <button type="submit" class="btn btn-sm btn-danger">Remove</button>
                                 </form>
                             </div>
@@ -98,4 +98,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('admin.static', filename='js/script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}

@@ -16,7 +16,6 @@ def admin_dashboard():
         participants=participants,
     )
 
-
 @admin.route('/remove_assignment/<int:giver_id>/<int:receiver_id>/<int:year>', methods=['POST'])
 @login_required(role='admin')
 def remove_assignment(giver_id, receiver_id, year):
@@ -26,7 +25,6 @@ def remove_assignment(giver_id, receiver_id, year):
     flash(f'Assignment for year {year} removed successfully.', 'success')
     return redirect(url_for('admin.scoreboard'))
 
-
 @admin.route('/add_participant', methods=['POST'])
 @login_required(role='admin')
 def add_new_participant():
@@ -35,6 +33,7 @@ def add_new_participant():
     password = request.form.get('password', '').strip()
 
     if not name or not password:
+        admin_logger.warning(f'Failed to add participant: missing required fields')
         flash('All fields are required to add a participant.', 'warning')
         return redirect(url_for('admin.admin_dashboard'))
 
@@ -42,7 +41,6 @@ def add_new_participant():
     admin_logger.info(f'Added new participant "{name}".')
     flash(f'Participant "{name}" added successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
-
 
 @admin.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
 @login_required(role='admin')
@@ -52,23 +50,25 @@ def edit_participant(participant_id):
         password = request.form.get('password', '').strip()
 
         if not name:
+            admin_logger.warning(f'Failed to update participant {participant_id}: missing name')
             flash('Name is required to update a participant.', 'warning')
             return redirect(url_for('admin.edit_participant', participant_id=participant_id))
 
         if password:
             sql_statements.update_participant(participant_id, name, password)
+            admin_logger.info(f'Updated participant ID "{participant_id}" name and password')
         else:
             sql_statements.update_participant_name(participant_id, name)
-        admin_logger.info(f'Participant ID "{participant_id}" updated to name "{name}".')
+            admin_logger.info(f'Updated participant ID "{participant_id}" name only')
         flash(f'Participant "{name}" updated successfully.', 'success')
         return redirect(url_for('admin.admin_dashboard'))
     else:
         participant = sql_statements.get_participant_by_id(participant_id)
         if participant is None:
+            admin_logger.warning(f'Attempted to edit non-existent participant ID: {participant_id}')
             flash('Participant not found.', 'warning')
             return redirect(url_for('admin.admin_dashboard'))
         return render_template('edit_participant.html', participant=participant)
-
 
 @admin.route('/remove_participant/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
@@ -79,7 +79,6 @@ def remove_participant(person_id):
     flash('Participant removed successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
 
-
 @admin.route('/add_receiver/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
 def add_receiver(person_id):
@@ -88,17 +87,20 @@ def add_receiver(person_id):
     year_str = request.form.get('year', '').strip()
 
     if not receiver_name or not year_str:
+        admin_logger.warning(f'Failed to add receiver for participant {person_id}: missing required fields')
         flash('Receiver name and year are required.', 'warning')
         return redirect(url_for('admin.scoreboard'))
 
     try:
         year = int(year_str)
     except ValueError:
+        admin_logger.warning(f'Failed to add receiver: invalid year format "{year_str}"')
         flash('Year must be a valid integer.', 'warning')
         return redirect(url_for('admin.scoreboard'))
 
     receiver_id = sql_statements.get_participant_id(receiver_name)
     if receiver_id is None:
+        admin_logger.warning(f'Failed to add receiver: receiver "{receiver_name}" not found')
         flash(f'Receiver "{receiver_name}" not found.', 'warning')
         return redirect(url_for('admin.scoreboard'))
 
@@ -116,7 +118,6 @@ def add_receiver(person_id):
     flash(f'Receiver "{receiver_name}" added for year {year}.', 'success')
     return redirect(url_for('admin.scoreboard'))
 
-
 @admin.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
 @login_required(role='admin')
 def remove_receiver(person_id, receiver_name, year):
@@ -125,7 +126,6 @@ def remove_receiver(person_id, receiver_name, year):
     admin_logger.info(f'Removed receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
     flash(f'Receiver "{receiver_name}" for year {year} removed successfully.', 'success')
     return redirect(url_for('admin.scoreboard'))
-
 
 @admin.route('/start_new_run', methods=['POST'])
 @login_required(role='admin')
@@ -178,7 +178,6 @@ def start_new_run():
     flash('New Secret Santa round started successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
 
-
 @admin.route('/scoreboard')
 @login_required(role='admin')
 def scoreboard():
@@ -190,10 +189,7 @@ def scoreboard():
             person_id = participant['id']
             participant_name = participant['name']
 
-            # Get all receivers (including both past receivers and assignments)
             all_receivers = sql_statements.get_assignments_for_giver(person_id)
-
-            # Sort by year in descending order
             all_receivers.sort(key=lambda x: x['year'], reverse=True)
 
             scoreboard[participant_name] = {
@@ -201,7 +197,6 @@ def scoreboard():
                 'all_receivers': all_receivers
             }
     return render_template('scoreboard.html', scoreboard=scoreboard)
-
 
 @admin.route('/edit_admin', methods=['GET', 'POST'])
 @login_required(role='admin')
@@ -225,6 +220,5 @@ def edit_admin():
         flash('Admin details updated successfully.', 'success')
         return redirect(url_for('admin.admin_dashboard'))
     else:
-        # Get the admin user using the queries module
-        admin = sql_statements.get_admin()  # We need to add this function
+        admin = sql_statements.get_admin()
         return render_template('edit_admin.html', admin=admin)
