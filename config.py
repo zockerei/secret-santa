@@ -13,6 +13,7 @@ LOG_FOLDER_PATH.mkdir(parents=True, exist_ok=True)
 class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PORT = int(os.environ.get('FLASK_RUN_PORT', 5000))
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
