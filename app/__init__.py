@@ -8,16 +8,18 @@ from dotenv import load_dotenv
 import os
 
 def create_app():
+    try:
+        load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'), override=True)
+    except Exception as e:
+        print(f"Error loading .env file: {e}")
+
     # Adjust the path to the logging configuration file
     setup_logging(default_path=os.path.join(os.path.dirname(__file__), '..', 'config', 'logging_config.yaml'))
-
-    # Load environment variables from .env file
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'))
 
     app = Flask(__name__)
 
     # Determine the configuration mode
-    config_mode = os.getenv('FLASK_CONFIG', 'development').lower()
+    config_mode = os.getenv('FLASK_ENV', 'development').lower()
 
     if config_mode == 'development':
         app.config.from_object(DevelopmentConfig)
@@ -26,7 +28,7 @@ def create_app():
     elif config_mode == 'production':
         app.config.from_object(ProductionConfig)
     else:
-        raise ValueError(f"Invalid FLASK_CONFIG value: {config_mode}")
+        raise ValueError(f"Invalid FLASK_ENV value: {config_mode}")
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
