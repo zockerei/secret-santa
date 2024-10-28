@@ -139,16 +139,24 @@
                     <div class="form-group">
                         <textarea class="form-control" name="message_text" rows="5" {% if current_receiver %}readonly{% else %}required{% endif %}>{{ pending_messages[0].message if pending_messages else '' }}</textarea>
                     </div>
-                    {% if pending_messages and not current_receiver %}
-                        <input type="hidden" name="message_id" value="{{ pending_messages[0].id }}">
-                        <div class="text-right">
-                            <button type="submit" name="action" value="save" class="btn btn-success">
-                                Nachricht aktualisieren
-                            </button>
-                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
-                                Löschen
-                            </button>
-                        </div>
+                    {% if not current_receiver %}
+                        {% if pending_messages %}
+                            <input type="hidden" name="message_id" value="{{ pending_messages[0].id }}">
+                            <div class="text-right">
+                                <button type="submit" name="action" value="save" class="btn btn-success">
+                                    Nachricht aktualisieren
+                                </button>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                                    Löschen
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="text-right">
+                                <button type="submit" name="action" value="save" class="btn btn-success">
+                                    Nachricht speichern
+                                </button>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </form>
             </div>
@@ -214,7 +222,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
-                    <form id="deleteForm" action="" method="POST" style="display:inline;">
+                    <form action="{{ url_for('participant.manage_message') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="message_id" value="{{ pending_messages[0].id if pending_messages else '' }}">
+                        <input type="hidden" name="action" value="delete">
                         <button type="submit" class="btn btn-danger">Löschen</button>
                     </form>
                 </div>
