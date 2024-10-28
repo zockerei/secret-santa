@@ -23,8 +23,12 @@ function viewMessage(receiverId, year, receiverName) {
 }
 
 // Function to confirm delete
-function confirmDelete(messageId) {
-    var deleteForm = document.getElementById('deleteForm');
-    deleteForm.action = `/participant/delete_message/${messageId}`;
-    $('#deleteModal').modal('show');
+function confirmDelete() {
+    const form = document.getElementById('messageForm');
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'delete';
+    form.appendChild(actionInput);
+    form.submit();
 }
