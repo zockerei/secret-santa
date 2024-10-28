@@ -48,7 +48,6 @@
     <li></li>
     <li></li>
     <li></li>
-    <li></li>
 </ul>
 {% endblock %}
 
@@ -93,7 +92,7 @@
                         <p class="text-muted">Dein aktueller Wichtelpartner hat noch keine Nachricht geschrieben.</p>
                     {% endif %}
                 {% else %}
-                    <p class="text-muted">Du hast für dieses Jahr noch keinen Wichtelpartner zugewiesen.</p>
+                    <p class="text-muted">Du hast für dieses Jahr noch keinen Wichtelpartner.</p>
                 {% endif %}
             </div>
         </div>
@@ -138,21 +137,19 @@
             <div class="card-body">
                 <form action="{{ url_for('participant.manage_message') }}" method="POST" id="messageForm">
                     <div class="form-group">
-                        <textarea class="form-control" name="message_text" rows="5" required>{{ pending_messages[0].message if pending_messages else '' }}</textarea>
+                        <textarea class="form-control" name="message_text" rows="5" {% if current_receiver %}readonly{% else %}required{% endif %}>{{ pending_messages[0].message if pending_messages else '' }}</textarea>
                     </div>
-                    {% if pending_messages %}
+                    {% if pending_messages and not current_receiver %}
                         <input type="hidden" name="message_id" value="{{ pending_messages[0].id }}">
-                    {% endif %}
-                    <div class="text-right">
-                        <button type="submit" name="action" value="save" class="btn btn-success">
-                            {% if pending_messages %}Nachricht aktualisieren{% else %}Nachricht senden{% endif %}
-                        </button>
-                        {% if pending_messages %}
+                        <div class="text-right">
+                            <button type="submit" name="action" value="save" class="btn btn-success">
+                                Nachricht aktualisieren
+                            </button>
                             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
                                 Löschen
                             </button>
-                        {% endif %}
-                    </div>
+                        </div>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -213,11 +210,13 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Möchtest du diese Nachricht wirklich löschen?</p>
+                    <p>Sind Sie sicher, dass Sie diese Nachricht löschen möchten?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Löschen</button>
+                    <form id="deleteForm" action="" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Löschen</button>
+                    </form>
                 </div>
             </div>
         </div>
