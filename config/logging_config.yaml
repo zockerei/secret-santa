@@ -16,16 +16,19 @@ handlers:
   rotating_file:
     class: logging.handlers.TimedRotatingFileHandler
     formatter: basic
-    when: midnight
+    encoding: utf-8
+    when: 'W0'
     interval: 1
     backupCount: 7
-    encoding: utf-8
 
   error_file:
-    class: logging.FileHandler
+    class: logging.handlers.TimedRotatingFileHandler
     formatter: basic
     level: ERROR
     encoding: utf-8
+    when: 'W0'
+    interval: 1
+    backupCount: 52
 
 loggers:
   app:
