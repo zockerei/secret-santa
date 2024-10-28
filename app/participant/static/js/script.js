@@ -28,6 +28,3 @@ function confirmDelete(messageId) {
     deleteForm.action = `/participant/delete_message/${messageId}`;
     $('#deleteModal').modal('show');
 }
-
-// Add this to your script.js
-console.log("JavaScript file is loaded!");

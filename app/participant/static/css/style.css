@@ -11,7 +11,7 @@ body {
 }
 
 .button {
-    background-color: #228B22;
+    background-color: #1DC43D;
     color: #fff;
     border: 2px solid #fff;
     transition: background-color 0.3s ease;
@@ -166,7 +166,7 @@ h1 {
 }
 
 .btn-christmas-logout {
-    background-color: rgba(196, 29, 57, 0.9);
+    background-color: #c41d39e6;
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.8);
     padding: 10px 30px;

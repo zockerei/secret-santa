@@ -1,30 +1,14 @@
-
-
 let showGuides = false;
 
 // 👆 change to true to see the physics objects
 
-let extraBounce = 0.1;
+let extraBounce = 0.2;
 
 // 👆 change to 1 for bouncey fun! Change to 2 for everything to bounce out of existence!
 
-let powerMultiplier = 1.2   ;
+let powerMultiplier = 1.4   ;
 
 // 👆 increase for more POWER!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import { 
     TextureLoader, RepeatWrapping,
