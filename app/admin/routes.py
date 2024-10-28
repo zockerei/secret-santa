@@ -132,6 +132,7 @@ def remove_receiver(person_id, receiver_name, year):
 def start_new_run():
     """Start a new Secret Santa round."""
     year_str = request.form.get('year', '').strip()
+    require_messages = request.form.get('require_messages') == 'on'
 
     if not year_str:
         flash('Year is required to start a new run.', 'warning')
@@ -148,6 +149,14 @@ def start_new_run():
     if not participants:
         flash('No participants available to start a new run.', 'warning')
         return redirect(url_for('admin.admin_dashboard'))
+
+    # Check if all participants have messages if required
+    if require_messages:
+        for participant in participants:
+            message = sql_statements.get_message_for_year(participant['id'], year)
+            if not message:
+                flash(f"Participant '{participant['name']}' hasn't written a message for {year}.", "warning")
+                return redirect(url_for('admin.admin_dashboard'))
 
     for participant in participants:
         person_id = participant['id']
