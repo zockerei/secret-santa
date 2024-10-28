@@ -48,7 +48,6 @@
     <li></li>
     <li></li>
     <li></li>
-    <li></li>
 </ul>
 {% endblock %}
 
@@ -173,52 +172,79 @@
         </div>
     </div>
 
+    <!-- New section for editing participant information -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            Bearbeiten Sie Ihre Informationen
+            <button class="btn btn-light btn-sm" data-toggle="collapse" data-target="#editParticipantCollapse" aria-expanded="true" aria-controls="editParticipantCollapse">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div id="editParticipantCollapse" class="collapse show">
+            <div class="card-body">
+                <form action="{{ url_for('participant.edit_participant', participant_id=participant.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" name="name" id="name" value="{{ participant.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Passwort</label>
+                        <input type="password" class="form-control" name="password" id="password">
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-info">Aktualisieren</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nachricht Modal -->
+    <div id="messageModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nachricht löschen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Sind Sie sicher, dass Sie diese Nachricht löschen möchten?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                    <form id="deleteForm" action="" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Löschen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="text-center mb-5">
         <form action="{{ url_for('auth.logout') }}" method="POST" class="logout-form">
             <button type="submit" class="btn btn-christmas-logout">
                 <i class="fas fa-sign-out-alt mr-2"></i>Abmelden
             </button>
         </form>
-    </div>
-</div>
-
-<!-- Nachricht Modal -->
-<div id="messageModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle"></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p id="modalMessage"></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nachricht löschen</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Sind Sie sicher, dass Sie diese Nachricht löschen möchten?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
-                <form id="deleteForm" action="" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-danger">Löschen</button>
-                </form>
-            </div>
-        </div>
     </div>
 </div>
 
