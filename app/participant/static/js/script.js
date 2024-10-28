@@ -9,9 +9,20 @@ function viewMessage(receiverId, year, receiverName) {
             modalTitle.textContent = `Nachricht von ${receiverName} (${year})`;
             
             if (data.message) {
-                modalMessage.textContent = data.message;
+                // Wrap the message in a card with the same styling as other messages
+                modalMessage.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-text" style="white-space: pre-wrap;">${data.message}</p>
+                        </div>
+                    </div>`;
             } else {
-                modalMessage.textContent = 'Keine Nachricht für diesen Empfänger gefunden.';
+                modalMessage.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-text">Keine Nachricht für diesen Empfänger gefunden.</p>
+                        </div>
+                    </div>`;
             }
             
             $('#messageModal').modal('show');

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request, session, jsonify
 from . import participant, participant_logger
 from app.decorators import login_required
 from datetime import datetime
@@ -134,3 +134,16 @@ def edit_participant(participant_id):
     
     participant_logger.debug(f'User "{user}" accessed edit profile page')
     return redirect(url_for('participant.participant_dashboard'))
+
+
+@participant.route('/view_message/<int:receiver_id>/<int:year>')
+@login_required(role='participant')
+def view_message(receiver_id, year):
+    """Fetch a specific message for a receiver and year."""
+    user = session.get('user')
+    participant_logger.info(f'User "{user}" requested to view message from receiver {receiver_id} for year {year}')
+    
+    message = sql_statements.get_message_for_year(receiver_id, year)
+    return jsonify({
+        'message': message['message'] if message else None
+    })
