@@ -305,3 +305,16 @@ def add_message(participant_id: int, message_text: str, year: int):
         db.session.rollback()
         queries_logger.error(f"Failed to add message for participant ID {participant_id} for year {year}: {e}")
         raise DatabaseError("Failed to add message", e)
+
+def get_admin() -> Optional[Dict[str, Any]]:
+    try:
+        queries_logger.debug("Fetching admin user")
+        admin = Participant.query.filter_by(is_admin=True).first()
+        if admin:
+            queries_logger.info(f"Fetched admin user: {admin.name}")
+            return {'id': admin.id, 'name': admin.name}
+        queries_logger.warning("No admin user found")
+        return None
+    except SQLAlchemyError as e:
+        queries_logger.error(f"Failed to fetch admin user: {e}")
+        raise DatabaseError("Failed to fetch admin user", e)

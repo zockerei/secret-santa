@@ -13,8 +13,8 @@ def initialize_admin(app):
             admin_exists = db.session.query(Participant).filter_by(is_admin=True).first() is not None
             
             if not admin_exists:
-                admin_name = os.environ.get('ADMIN_NAME', 'santa')
-                admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+                admin_name = os.environ.get('ADMIN_NAME')
+                admin_password = os.environ.get('ADMIN_PASSWORD')
                 
                 # Create admin user
                 new_admin = Participant(name=admin_name, is_admin=True)

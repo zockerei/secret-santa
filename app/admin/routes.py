@@ -192,3 +192,30 @@ def scoreboard():
                 'all_receivers': all_receivers
             }
     return render_template('scoreboard.html', scoreboard=scoreboard)
+
+
+@admin.route('/edit_admin', methods=['GET', 'POST'])
+@login_required(role='admin')
+def edit_admin():
+    """Handle editing admin details."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        password = request.form.get('password', '').strip()
+        admin_id = request.form.get('admin_id')
+
+        if not name:
+            flash('Name is required.', 'warning')
+            return redirect(url_for('admin.admin_dashboard'))
+
+        if password:
+            sql_statements.update_participant(admin_id, name, password)
+        else:
+            sql_statements.update_participant_name(admin_id, name)
+            
+        admin_logger.info('Admin details updated.')
+        flash('Admin details updated successfully.', 'success')
+        return redirect(url_for('admin.admin_dashboard'))
+    else:
+        # Get the admin user using the queries module
+        admin = sql_statements.get_admin()  # We need to add this function
+        return render_template('edit_admin.html', admin=admin)

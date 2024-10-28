@@ -7,9 +7,12 @@
     <h1 class="mb-4">Admin Dashboard</h1>
 
     <!-- Logout Button -->
-    <form action="{{ url_for('auth.logout') }}" method="POST" class="mb-4">
-        <button type="submit" class="btn btn-danger">Logout</button>
-    </form>
+    <div class="mb-4">
+        <a href="{{ url_for('admin.edit_admin') }}" class="btn btn-warning me-2">Edit Admin</a>
+        <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
+    </div>
 
     <div class="row">
         <!-- Add Participant Section -->
