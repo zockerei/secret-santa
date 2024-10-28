@@ -48,6 +48,7 @@
     <li></li>
     <li></li>
     <li></li>
+    <li></li>
 </ul>
 {% endblock %}
 
@@ -135,7 +136,7 @@
         </div>
         <div id="messageCollapse" class="collapse show">
             <div class="card-body">
-                <form action="{{ url_for('participant.manage_message') }}" method="POST">
+                <form action="{{ url_for('participant.manage_message') }}" method="POST" id="messageForm">
                     <div class="form-group">
                         <textarea class="form-control" name="message_text" rows="5" required>{{ pending_messages[0].message if pending_messages else '' }}</textarea>
                     </div>
@@ -147,8 +148,7 @@
                             {% if pending_messages %}Nachricht aktualisieren{% else %}Nachricht senden{% endif %}
                         </button>
                         {% if pending_messages %}
-                            <button type="submit" name="action" value="delete" class="btn btn-danger" 
-                                    onclick="return confirm('Sind Sie sicher, dass Sie diese Nachricht löschen möchten?')">
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
                                 Löschen
                             </button>
                         {% endif %}
@@ -213,13 +213,11 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Sind Sie sicher, dass Sie diese Nachricht löschen möchten?</p>
+                    <p>Möchtest du diese Nachricht wirklich löschen?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
-                    <form id="deleteForm" action="" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">Löschen</button>
-                    </form>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Löschen</button>
                 </div>
             </div>
         </div>
