@@ -6,12 +6,12 @@ body {
 }
 
 .header, .footer {
-    background-color: #8B0000;
+    background-color: #c41d39e6;
     color: #fff;
 }
 
 .button {
-    background-color: #1DC43D;
+    background-color: #1dc43de6;
     color: #fff;
     border: 2px solid #fff;
     transition: background-color 0.3s ease;
@@ -141,12 +141,12 @@ body {
 }
 
 .card-header.bg-success {
-    background-color: #c49b1de6 !important;
+    background-color: #c41d39e6 !important;
     color: #fff !important;
 }
 
-.card-header.bg-warning {
-    background-color: #c41d39e6 !important;
+.card-header.bg-info {
+    background-color: #c49b1de6 !important;
     color: #fff !important;
 }
 
@@ -178,7 +178,7 @@ h1 {
 }
 
 .btn-christmas-logout:hover {
-    background-color: rgba(196, 29, 57, 1);
+    background-color: #c41d39e6;
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
@@ -200,7 +200,7 @@ h1 {
 }
 
 .modal-header {
-    background-color: rgba(196, 30, 58, 0.9);
+    background-color: #c41d39e6;
     color: white;
     border-bottom: none;
 }
@@ -226,7 +226,7 @@ h1 {
 }
 
 .btn-view-message {
-    background-color: rgba(29, 59, 196, 0.9) !important;
+    background-color: #1d3bc4e6 !important;
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
     transition: all 0.3s ease;
@@ -235,7 +235,7 @@ h1 {
 }
 
 .btn-view-message:hover {
-    background-color: rgba(29, 59, 196, 1) !important;
+    background-color: #1d3bc4e6 !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-color: white !important;
@@ -273,8 +273,8 @@ h1 {
     height: 28px;
     border-radius: 50%;
     margin: 0 20px;
-    background: rgba(29, 59, 196, 1);
-    box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 1);
+    background: #1d3bc4e6;
+    box-shadow: 0px 4.67px 24px 3px #1d3bc4e6;
     animation-name: flash-1;
     animation-duration: 2s;
     animation-fill-mode: both; 
@@ -283,15 +283,15 @@ h1 {
 }
 
 .lightrope li:nth-child(2n+1) {
-    background: rgba(29, 196, 61, 1);
-    box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 0.5);
+    background: #1dc43de6;
+    box-shadow: 0px 4.67px 24px 3px #1dc43de6;
     animation-name: flash-2;
     animation-duration: 0.4s;
 }
 
 .lightrope li:nth-child(4n+2) {
-    background: rgba(196, 29, 57, 1);
-    box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 1);
+    background: #c41d39e6;
+    box-shadow: 0px 4.67px 24px 3px #c41d39e6;
     animation-name: flash-3;
     animation-duration: 1.1s;
 }
@@ -336,33 +336,33 @@ h1 {
 
 @keyframes flash-1 { 
     0%, 100% { 
-        background: rgba(29, 59, 196, 1);
-        box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 1);
+        background: #1d3bc4e6;
+        box-shadow: 0px 4.67px 24px 3px #1d3bc4e6;
     } 
     50% { 
-        background: rgba(29, 59, 196, 0.4);
+        background: #1d3bc4e6;
         box-shadow: 0px 4.67px 24px 3px rgba(29, 59, 196, 0.2);
     }
 }
 
 @keyframes flash-2 { 
     0%, 100% { 
-        background: rgba(29, 196, 61, 1);
-        box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 1);
+        background: #1dc43de6;
+        box-shadow: 0px 4.67px 24px 3px #1dc43de6;
     } 
     50% { 
-        background: rgba(29, 196, 61, 0.4);
+        background: #1dc43de6;
         box-shadow: 0px 4.67px 24px 3px rgba(29, 196, 61, 0.2);
     }
 }
 
 @keyframes flash-3 { 
     0%, 100% { 
-        background: rgba(196, 29, 57, 1);
-        box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 1);
+        background: #c41d39e6;
+        box-shadow: 0px 4.67px 24px 3px #c41d39e6;
     } 
     50% { 
-        background: rgba(196, 29, 57, 0.4);
+        background: #c41d39e6;
         box-shadow: 0px 4.67px 24px 3px rgba(196, 29, 57, 0.2);
     }
 }
