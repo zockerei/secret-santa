@@ -70,7 +70,11 @@
         <div class="snowflake">❆</div>
     </div>
 
-    <h1 class="text-center mb-4">🎄 Frohe Weihnachten! 🎄</h1> <!-- Christmas Greeting -->
+    <h1 class="text-center mb-4">
+        <a href="{{ url_for('christmas.christmas') }}" class="text-decoration-none" style="color: white;">
+            🎄 Frohe Weihnachten! 🎄
+        </a>
+    </h1>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">

@@ -91,14 +91,9 @@ class Stage
         
 		Cache.enabled = true;
 		
-		// SCENE
-		
 		this.scene = new Scene();
 		this.scene.background = new Color( 0x424874 );
 		this.scene.fog = new Fog(0x424874, 100, 200);
-		// this.scene.add(new AxisHelper());
-		
-		// LIGHTS
 		
 		this.scene.add( new HemisphereLight(0xfefeff, 0xeeeeff, 0.4 ));
 		
@@ -122,8 +117,6 @@ class Stage
 		this.cannonLight.shadow.mapSize.height = 256;
 		this.scene.add( this.cannonLight );
 		
-		// FLOOR
-		
 		this.plane = new Mesh(
 			new PlaneBufferGeometry( 1000 * this.scale, 1000  * this.scale ),
 			new MeshPhongMaterial  ( { color: 0xDCD6F7} )
@@ -132,44 +125,23 @@ class Stage
 		this.plane.receiveShadow = true;
 		this.plane.rotation.x = -Math.PI / 2;
         this.scene.add( this.plane );
-
-		// RENDERER
 		
 		this.renderer = new WebGLRenderer( { antialias: true } );
 		console.log('pixel ratio:', window.devicePixelRatio)
-		// this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = PCFSoftShadowMap;
-
-		// CONTAINER
 		
 		this.container = document.getElementById( 'canvas-container' );
 		this.container.appendChild( this.renderer.domElement );
 		if(this.showStats) this.container.appendChild( this.stats.dom );
 
-		// CAMERA
-
 		this.camera = new PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 5, 400  );
 		this.camera.position.set(55, 15, 55);
 		this.cameraTarget = new Vector3( 0, -22, 0 );
-		// this.camera.position.set(65, -20, 20);
-		// this.cameraTarget = new Vector3( 30, -25, 30 );
         
         let center = new Vector3((this.stageSize.left + (this.stageSize.width / 2)) * scale, (this.stageSize.top - (this.stageSize.height / 2)) * scale, 0)
         const previewCameraDistance = 70 * scale;
-
-        // this.lookAtHelper = this.createBall(0.5, new Color(0xffffff));
-
-			// let stageSizeHelper = new Mesh(
-			// new PlaneBufferGeometry( this.stageSize.width * this.scale, this.stageSize.height * this.scale, Math.floor(this.stageSize.width / 5), Math.floor(this.stageSize.height / 5) ),
-			// new MeshPhongMaterial ( { color: 0xaaddff, wireframe: false} )
-			// );
-        // stageSizeHelper.position.set(this.stageSize.left * this.scale, this.stageSize.top * this.scale, 0);
-        // stageSizeHelper.applyMatrix4( new THREE.Matrix4().makeTranslation( (this.stageSize.width / 2), -this.stageSize.height / 2, 0 ) );
-        // this.scene.add( stageSizeHelper );
-		
-		// ROOM
 
 		this.lights = [];
 
@@ -182,7 +154,6 @@ class Stage
 
 			let color = colors[Math.floor(Math.random() * colors.length)];
 			let light = new PointLight(color, 0.5, 50, 1.7 );
-			// gsap.timeline({ repeat: -1}).to(light, {intensity: 0.7, duration: 0.2}).to(light, {intensity: 0.5, duration: 0.2}).to(light, {intensity: 0.8, duration: 0.2})
 			group.add(light);
 			
 			let geometry = new IcosahedronBufferGeometry(0.5, 4);
@@ -194,12 +165,6 @@ class Stage
 			this.scene.add(group);
 			this.lights.push(group);
 		}
-
-
-		///=================
-		//    SOFA
-		///=================
-		
 		let sofaGroup = new Group();
 		sofaGroup.position.y = 1000;
 		this.scene.add(sofaGroup);
@@ -222,18 +187,13 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.sofa = sofaGroup;
 		});
-
-		///=================
-		//    TREE
-		///=================
-
 		let treeGroup = new Group();
 		treeGroup.position.y = 1000;
 		this.scene.add( treeGroup );
@@ -258,18 +218,11 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
-
 			} );
-
 			this.models.tree = treeGroup;
 		});
-
-		///=================
-		//    FIREPLACE
-		///=================
-
 		let fireplaceGroup = new Group();
 		this.scene.add( fireplaceGroup );
 		
@@ -293,18 +246,13 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.fireplace = fireplaceGroup;
 		});
-
-		///=================
-		//    TABLE
-		///=================
-
 		let tableGroup = new Group();
 		tableGroup.position.y = 1000;
 		this.scene.add( tableGroup );
@@ -327,18 +275,10 @@ class Stage
 				else if(child.isLight)
 				{
 					child.visible = false;
-					// child.intensity = 0;
 				}
-
 			} );
-
 			this.models.table = tableGroup;
 		});
-
-		///=================
-		//    TV STAND
-		///=================
-
 		let standGroup = new Group();
 		standGroup.position.y = 1000;
 		this.scene.add( standGroup );
@@ -359,18 +299,13 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.stand = standGroup;
 		});
-		
-		///=================
-		//    TV
-		///=================
-
 		let tvGroup = new Group();
 		tvGroup.position.y = 1000;
 		this.scene.add( tvGroup );
@@ -392,18 +327,13 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.tv = tvGroup;
 		});
-
-		///=================
-		//    POT
-		///=================
-
 		let potGroup = new Group();
 		potGroup.position.y = 1000;
 		this.scene.add( potGroup );
@@ -426,18 +356,13 @@ class Stage
 				}
 				else if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.pot = potGroup;
 		});
-
-		///=================
-		//    CANNON
-		///=================
-
 		let cannonGroup = new Group();
 		this.scene.add( cannonGroup );
 		
@@ -456,19 +381,13 @@ class Stage
 				}
 				if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.cannon = cannonGroup;
 		});
-
-
-		///=================
-		//    SNOWMAN
-		///=================
-
 		let snowmanGroup = new Group();
 		snowmanGroup.position.y = 1000;
 		this.scene.add( snowmanGroup );
@@ -476,9 +395,7 @@ class Stage
 		var snowmanLoader = new GLTFLoader(manager);
 		snowmanLoader.load("https://assets.codepen.io/557388/snowman.gltf", object => {
 
-			//object.scene.position.set(30, -30, 30);
 			object.scene.scale.set(2.5, 2.5, 2.5);
-			// object.scene.rotation.y = Math.PI * 1.25;
 		  	snowmanGroup.add( object.scene );
 			
 			object.scene.traverse( function( child ) { 
@@ -488,17 +405,13 @@ class Stage
 				}
 				if(child.isLight)
 				{
-					child.visible = false;//child.intensity = 0;
+					child.visible = false;
 				}
 
 			} );
 
 			this.models.snowman = snowmanGroup;
 		});
-
-		///=================
-		//    STAR
-		///=================
 
 		let starGroup = new Group();
 		starGroup.position.y = 1000;
@@ -520,17 +433,10 @@ class Stage
 				if(child.isLight)
 				{
 					child.visible = false;
-					// child.intensity = 0;
-					
 				}
-
 			} );
-
 			this.models.star = starGroup;
 		});
-
-		
-
 		this.onResize();
 	}
 	
@@ -563,9 +469,6 @@ class Stage
 	
 	createBox(width, height, depth, color = 0xffffff, present = false)
 	{
-		//let geometry = new BoxBufferGeometry( width * this.scale, height * this.scale, depth * this.scale );
-		//let texture = present ? this.presentTextures[Math.floor(Math.random() * this.presentTextures.length)] : null;
-		//let material = new MeshPhongMaterial( { color: color, shininess: present ? 100 : 30, map: texture } );
 		let material = present ? 
 			this.presentMaterials[Math.floor(Math.random() * this.presentMaterials.length)]
 			: this.greyMaterial
@@ -590,7 +493,6 @@ class Stage
 
 	createBall(size, color, light = false)
 	{
-		
 		if(light && this.lights.length)
 		{
 			return this.lights.shift();
@@ -624,14 +526,11 @@ class Stage
 		const geometry = new CylinderBufferGeometry( radiusTop, radiusBottom,  height, numSegments );
 		const material = new MeshPhongMaterial( { color: 0xff0000 } );
 		const cylinder = new Mesh( geometry, material );
-		// cylinder.position.set(x, y, z
 		cylinder.rotation.x = Math.PI * 0.5;
 		group.add(cylinder);
 		this.scene.add(group);
 		return group;
 	}
-	
-	
 }
 
 const PHYSICS_MATERIAL = {
@@ -659,8 +558,6 @@ class Physics
 		this.materials[PHYSICS_MATERIAL.normalBounce] = new CANNON.ContactMaterial(mainMaterial, mainMaterial, {friction: 2, restitution: 0 + extraBounce });
 		this.materials[PHYSICS_MATERIAL.highBounce] = new CANNON.ContactMaterial(mainMaterial, mainMaterial, {friction: 2, restitution: 1.5 + extraBounce });
 
-		// WORLD
-
 		this.world = new CANNON.World();
 		this.world.gravity.set(0, -60 * this.scale, 0);
 		this.world.broadphase = new CANNON.SAPBroadphase(this.world);
@@ -671,8 +568,6 @@ class Physics
 		this.world.addContactMaterial(this.materials[PHYSICS_MATERIAL.normalBounce]); 
 		this.world.addContactMaterial(this.materials[PHYSICS_MATERIAL.highBounce]); 
 
-		// GROUND
-		
 		this.groundBody = new CANNON.Body({mass: 0, material: mainMaterial});
 		let groundShape = new CANNON.Plane();
 		this.groundBody.addShape(groundShape);
@@ -716,23 +611,6 @@ class Physics
 		return new CANNON.Sphere(radius);
 	}
 
-	// createCylinder(x, y, z, radiusTop, radiusBottom,  height, numSegments)
-	// {
-	// 	let shape = new CANNON.Cylinder(radiusTop, radiusBottom,  height, numSegments);
-            
-	// 	let body = new CANNON.Body({
-	// 		material: this.materials[PHYSICS_MATERIAL.normalBounce],
-	// 		mass: 15 * this.scale,
-	// 		position: new CANNON.Vec3(x * this.scale, y * this.scale, z * this.scale), // m
-	// 	});
-	// 	body.addShape(shape);
-	// 	this.setAngle(body, -Math.PI * 0.5, 'x');
-
-	// 	this.world.addBody(body);
-
-	// 	return body;
-	// }
-	
 	createBox(width, height, depth, x, y, z, mass = 0, rotation = 0, trigger)
 	{
 		let shape = new CANNON.Box(new CANNON.Vec3(width / 2 * this.scale, height / 2 * this.scale, depth / 2 * this.scale));
@@ -809,7 +687,6 @@ class Physics
 		this.world.step(1/60, delta, 3);
 	}
 }
-
 
 console.clear();
 
@@ -980,25 +857,24 @@ function endMessage()
 	textEl.addEventListener('click', (event) => {
 		event.stopPropagation();
 		startGame();
-		// window.open('https://www.twitter.com/steeevg/','_blank');
 	})
 
-	// steveEl.setAttribute('src', 'https://assets.codepen.io/557388/snowman.svg');
 	textEl.innerHTML = `Yay! So much better.`
-
-
-// Be sure to send a screenshot to <a href="https://twitter.com/steeevg/" target="_blank">@steeevg</a>, he’d love to see it!`;
 	textHighlightEl.textContent = "Merry Christmas!";
+	
+	// Add return button
+	const returnButton = document.createElement('button');
+	returnButton.textContent = 'Return to Dashboard';
+	returnButton.style.marginTop = '10px';
+	returnButton.addEventListener('click', () => {
+		window.location.href = '/participant/participant_dashboard';
+	});
+	textEl.appendChild(returnButton);
 
 	let roomTL = gsap.timeline();
 	setTimeout(() => playSound('bing'),700);
 	roomTL.to('#steve', {y: 0, rotation: 0, scale: 1, ease: 'power4.out', duration: 0.6})
 	roomTL.fromTo('#bubble', {autoAlpha: 0, y: 0,  x:'+=50', rotation: 5, scale: 0.9}, {autoAlpha: 1, rotation: 0, scale: 1, x:0, ease: 'elastic', duration: 1})
-}
-
-function hideEndMessage() 
-{
-	
 }
 
 function playSound(name)
@@ -1055,20 +931,18 @@ function fire(coords)
 
 	if(count === 50) item = createSnowman();
 	else if(count === 10) item = createTree();
-	else if(stars.length && Math.random() > 0.8) item = createStar(); //randomItems[Math.floor(Math.random() * randomItems.length)]();
+	else if(stars.length && Math.random() > 0.8) item = createStar();
 	else item = addBall();
 
-	if(count === 100)
+	if(count === 80)
 	{
 		setTimeout(() => endMessage(), 1000);
 	}
 
 	playSound('fire');
-	// if(Math.random() > 0.8) playSound('bells');
 
 	let range = stage.height * 0.4;
 	let x = -60;
-	// let y = 20;
 	let z = -60;
 
 	let xStart = (stage.width / 2) - range;
@@ -1082,8 +956,7 @@ function fire(coords)
 			x = -20 + ((range - r) / range) * -40;
 		}
 	}
-	
-	// let yStart = (stage.width / 2);
+
 	if(coords.x < stage.width / 2)
 	{
 		if(coords.x < xStart) z = -20;
@@ -1111,8 +984,6 @@ function fire(coords)
 
 function onReady()
 {
-	// createTree();
-
 	setState(GAME_STATE.intro);
 
 	cannonFlash = gsap.timeline();
@@ -1120,7 +991,6 @@ function onReady()
 
 	cannonRecoil = gsap.timeline();
 	cannonRecoil.to(stage.models.cannon.position, {x: '+=3', z: '+=3', duration: 0.1, ease: 'Power2.out'}).to(stage.models.cannon.position, {x: '-=3', z: '-=3', duration: 0.4})
-	// cannonFlash.stop();
 
 	for (let i = 0; i < 20; i++) {
 		let star = stage.models.star.clone();
@@ -1141,10 +1011,6 @@ function onReady()
 
 function addBall()
 {		
-	// gsap.to(stage.cameraTarget, {x: stageSize.left + (stageSize.width * 0.5), ease: 'Power4.inOut', duration: 1})
-
-	
-	
 	let x = 35;
 	let y = -15;
 	let z = 35;
@@ -1165,35 +1031,13 @@ function addBall()
 		rotation: 0,
 		rotationVelocity: 0
 	}
-	
-	// physicsItem.physics.velocity.set(-20 - (Math.random() * 50), 1 + (Math.random() * 10), -20 - (Math.random() * 50))
-
-
-	// -60 => -20
-
-	// 10 => 30
-
-	// -20 => -60
-
-	// physicsItem.physics.velocity.set(-60, 10, -60)
-	// const angularRandomness = 10;
-	// physicsItem.physics.angularVelocity.set(
-	// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-	// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-	// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-	// physicsItem.physics.angularDamping = 0.8;
-	
 	physicsItems.push(physicsItem);
 
 	return physicsItem;
-
-	// if(pauseTimer) clearTimeout(pauseTimer);
-	// pauseTimer = setTimeout( _ => doPhysics = false, 7000);
 }
 
 function createStaticBox(settings)
 {
-	// const z = 1;
 	var physicsItem = { 
 		mesh: settings.show ? stage.createBox(settings.width, settings.height, settings.depth, settings.color) : null,
 		physics: physics.createBox(settings.width, settings.height, settings.depth, settings.x, settings.y, settings.z, 0, settings.rotation, settings.trigger),
@@ -1226,9 +1070,7 @@ function animate()
 		}
 		
 	}
-
 	stage.render();
-
 	requestAnimationFrame( animate );
 }
 
@@ -1251,9 +1093,6 @@ function init()
 	physics = new Physics(worldScale, stageSize);
 	
 	window.addEventListener( 'resize', () => { stage.onResize() }, false );
-
-
-
 
 	let staticItems = [
 		{
@@ -1339,13 +1178,6 @@ function init()
 	staticItems.forEach(settings => {
 		createStaticBox(settings);
 	})
-
-	
-
-	
-
-	
-	// addBall();
 }
 
 function createSofa()
@@ -1429,13 +1261,6 @@ function createSofa()
 		}
 		
 		physicsItem.physics.velocity.set(0, -20, 0)
-		// const angularRandomness = 10;
-		// physicsItem.physics.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// physicsItem.physics.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 	}
 
@@ -1517,13 +1342,6 @@ function createSofa()
 		}
 		
 		physicsItem.physics.velocity.set(0, -20, 0)
-		// const angularRandomness = 10;
-		// physicsItem.physics.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// physicsItem.physics.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 	}
 	
@@ -1570,13 +1388,6 @@ function createSofa()
 		}
 		
 		physicsItem.physics.velocity.set(0, -20, 0)
-		// const angularRandomness = 10;
-		// physicsItem.physics.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// physicsItem.physics.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 	}
 	
@@ -1632,13 +1443,6 @@ function createSofa()
 		}
 		
 		physicsItem.physics.velocity.set(0, -20, 0)
-		// const angularRandomness = 10;
-		// physicsItem.physics.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// physicsItem.physics.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 	}
 	
@@ -1702,15 +1506,6 @@ function createSofa()
 			mesh: treeGroup,
 			physics: body,
 		}
-		
-		// body.velocity.set(-40, 30, -40)
-		// const angularRandomness = 5;
-		// body.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// body.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 
 		return physicsItem;
@@ -1718,7 +1513,6 @@ function createSofa()
 
 	function createSnowman()
 	{
-		// let body = physics.createBody(10, {x: 30, y: -10, z: 30}, {y: -Math.PI * 0.001, x: Math.PI * 0.001}, PHYSICS_MATERIAL.lowBounce);
 		let body = physics.createBody(10, {x: 30, y: -10, z: 30}, {y: 0, x: Math.PI * .5}, PHYSICS_MATERIAL.normalBounce);
 		physics.setAngle(body, -Math.PI * 0.5, 'x');
 		let shapes = [
@@ -1766,15 +1560,6 @@ function createSofa()
 			mesh: snowmanGroup,
 			physics: body,
 		}
-		
-		// body.velocity.set(-40, 30, -40)
-		// const angularRandomness = 5;
-		// body.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// body.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 
 		return physicsItem;
@@ -1782,11 +1567,7 @@ function createSofa()
 
 	function createStar()
 	{
-
-		
-		// let body = physics.createBody(10, {x: 30, y: -10, z: 30}, {y: -Math.PI * 0.001, x: Math.PI * 0.001}, PHYSICS_MATERIAL.lowBounce);
 		let body = physics.createBody(1, {x: 30, y: -10, z: 30}, {y: 0, x: Math.PI * .5}, PHYSICS_MATERIAL.normalBounce);
-		// physics.setAngle(body, -Math.PI * 0.5, 'x');
 		let shapes = [
 			{
 				x: 0,
@@ -1824,15 +1605,6 @@ function createSofa()
 			mesh: star,
 			physics: body,
 		}
-		
-		// body.velocity.set(-40, 30, -40)
-		// const angularRandomness = 5;
-		// body.angularVelocity.set(
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)),
-		// 	((Math.random() * angularRandomness) - (angularRandomness/2)))
-		// body.angularDamping = 0.8;
-		
 		physicsItems.push(physicsItem);
 
 		return physicsItem;

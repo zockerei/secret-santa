@@ -1,3 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Christmas Game{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('christmas.static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
 <base target="_parent">
 
 <div id="canvas-container"></div>
@@ -12,8 +21,12 @@
             </div>
         </div>
 
-            <img id="steve" src="https://assets.codepen.io/557388/sad.svg" alt="Steve">
-
+        <img id="steve" src="https://assets.codepen.io/557388/sad.svg" alt="Steve">
     </div>
 </div>
 <div id="loading">Loading</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('christmas.static', filename='js/script.js') }}"></script>
+{% endblock %}

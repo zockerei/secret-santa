@@ -1,6 +1,5 @@
 from flask import Blueprint
-import logging
 
-christmas = Blueprint('christmas', __name__, template_folder='templates')
+christmas = Blueprint('christmas', __name__, template_folder='templates', static_folder='static')
 
 from . import routes
