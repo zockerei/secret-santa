@@ -28,6 +28,8 @@ def create_app():
     else:
         raise ValueError(f"Invalid FLASK_ENV value: {config_mode}")
 
+    app_logger.debug(f'Configuration: {app.config}')
+
     # Initialize SQLAlchemy with the app
     db.init_app(app)
 
