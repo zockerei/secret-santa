@@ -23,17 +23,17 @@ class BaseConfig:
 
 
 class DevelopmentConfig(BaseConfig):
-    DEBUG = True
+    DEBUG = 1
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_dev.db')
 
 
 class TestingConfig(BaseConfig):
-    DEBUG = True
+    DEBUG = 1
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_test.db')
 
 
 class ProductionConfig(BaseConfig):
-    DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1'
+    DEBUG = 0
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa.db')
 
 
