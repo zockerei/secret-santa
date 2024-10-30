@@ -16,6 +16,7 @@ def admin_dashboard():
         participants=participants,
     )
 
+
 @admin.route('/remove_assignment/<int:giver_id>/<int:receiver_id>/<int:year>', methods=['POST'])
 @login_required(role='admin')
 def remove_assignment(giver_id, receiver_id, year):
@@ -25,6 +26,7 @@ def remove_assignment(giver_id, receiver_id, year):
     flash(f'Assignment for year {year} removed successfully.', 'success')
     return redirect(url_for('admin.scoreboard'))
 
+
 @admin.route('/add_participant', methods=['POST'])
 @login_required(role='admin')
 def add_new_participant():
@@ -33,7 +35,7 @@ def add_new_participant():
     password = request.form.get('password', '').strip()
 
     if not name or not password:
-        admin_logger.warning(f'Failed to add participant: missing required fields')
+        admin_logger.warning('Failed to add participant: missing required fields')
         flash('All fields are required to add a participant.', 'warning')
         return redirect(url_for('admin.admin_dashboard'))
 
@@ -41,6 +43,7 @@ def add_new_participant():
     admin_logger.info(f'Added new participant "{name}".')
     flash(f'Participant "{name}" added successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
 
 @admin.route('/edit_participant/<int:participant_id>', methods=['GET', 'POST'])
 @login_required(role='admin')
@@ -70,6 +73,7 @@ def edit_participant(participant_id):
             return redirect(url_for('admin.admin_dashboard'))
         return render_template('edit_participant.html', participant=participant)
 
+
 @admin.route('/remove_participant/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
 def remove_participant(person_id):
@@ -78,6 +82,7 @@ def remove_participant(person_id):
     admin_logger.info(f'Participant ID "{person_id}" removed.')
     flash('Participant removed successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
 
 @admin.route('/add_receiver/<int:person_id>', methods=['POST'])
 @login_required(role='admin')
@@ -118,6 +123,7 @@ def add_receiver(person_id):
     flash(f'Receiver "{receiver_name}" added for year {year}.', 'success')
     return redirect(url_for('admin.scoreboard'))
 
+
 @admin.route('/remove_receiver/<int:person_id>/<string:receiver_name>/<int:year>', methods=['POST'])
 @login_required(role='admin')
 def remove_receiver(person_id, receiver_name, year):
@@ -126,6 +132,7 @@ def remove_receiver(person_id, receiver_name, year):
     admin_logger.info(f'Removed receiver "{receiver_name}" for participant ID "{person_id}" in year {year}.')
     flash(f'Receiver "{receiver_name}" for year {year} removed successfully.', 'success')
     return redirect(url_for('admin.scoreboard'))
+
 
 @admin.route('/start_new_run', methods=['POST'])
 @login_required(role='admin')
@@ -178,6 +185,7 @@ def start_new_run():
     flash('New Secret Santa round started successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
 
+
 @admin.route('/scoreboard')
 @login_required(role='admin')
 def scoreboard():
@@ -198,6 +206,7 @@ def scoreboard():
             }
     return render_template('scoreboard.html', scoreboard=scoreboard)
 
+
 @admin.route('/edit_admin', methods=['GET', 'POST'])
 @login_required(role='admin')
 def edit_admin():
@@ -215,7 +224,7 @@ def edit_admin():
             sql_statements.update_participant(admin_id, name, password)
         else:
             sql_statements.update_participant_name(admin_id, name)
-            
+
         admin_logger.info('Admin details updated.')
         flash('Admin details updated successfully.', 'success')
         return redirect(url_for('admin.admin_dashboard'))

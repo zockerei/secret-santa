@@ -6,6 +6,7 @@ import logging
 # Use the specific logger for the decorators
 decorators_logger = logging.getLogger('app.decorators')
 
+
 def login_required(role: Optional[str] = None):
     """
     Decorator to ensure that the user is logged in and has the appropriate role.

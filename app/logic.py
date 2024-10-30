@@ -13,9 +13,12 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
     with a recipient they had in the last two years or themselves.
 
     Parameters:
-        assignments (dict): Mapping of givers to recipients (giver_id -> recipient_id).
-        past_receivers (dict): Mapping of givers to their past recipients over the years (giver_id -> [recipient_name1, recipient_name2,...]).
-        participants (List[Dict[str, Any]]): List of participant dictionaries with 'id' and 'name' keys.
+        assignments (dict): Mapping of givers to recipients
+            (giver_id -> recipient_id).
+        past_receivers (dict): Mapping of givers to their past recipients
+            over the years (giver_id -> [recipient_name1, recipient_name2,...]).
+        participants (List[Dict[str, Any]]): List of participant dictionaries
+            with 'id' and 'name' keys.
 
     Returns:
         bool: True if pairings are valid, False otherwise.
@@ -23,10 +26,10 @@ def is_valid_pairing(assignments: dict, past_receivers: dict, participants: List
     for giver_id, recipient_id in assignments.items():
         if giver_id == recipient_id:
             return False
-        
+
         # Get the recipient's name
         recipient_name = next((p['name'] for p in participants if p['id'] == recipient_id), None)
-        
+
         if recipient_name in past_receivers.get(giver_id, []):
             return False
     return True
@@ -56,7 +59,7 @@ def generate_secret_santa(participants: List[Dict[str, Any]], sql_statements) ->
 
         # Check if the assignment is valid
         if is_valid_pairing(dict(candidate_assignment), past_receivers, participants):
-            _logic_logger.info(f'Successful Secret Santa pairings generated.')
+            _logic_logger.info('Successful Secret Santa pairings generated.')
             return candidate_assignment
 
     _logic_logger.error(f'Failed to generate valid Secret Santa pairings after {attempts} attempts.')

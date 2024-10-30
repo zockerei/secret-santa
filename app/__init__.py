@@ -7,6 +7,7 @@ from app.initialization import initialize_admin
 from dotenv import load_dotenv
 import os
 
+
 def create_app():
     try:
         load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'), override=True)

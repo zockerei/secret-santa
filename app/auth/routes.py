@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, session, current_app
+from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required
 from . import auth
 from . import auth_logger
@@ -18,17 +18,17 @@ def login():
 
         auth_logger.info(f"Login attempt for user: {name}")
         participant = verify_participant(name, password)
-        
+
         if participant:
             login_user(participant)
             role = get_role(name)
             auth_logger.debug(f"Retrieved role for user {name}: {role}")
-            
+
             session['user'] = name
             session['role'] = role
-            
+
             auth_logger.info(f"User {name} logged in successfully with role {role}")
-            
+
             if role == 'admin':
                 auth_logger.debug(f'Redirecting admin user {name} to admin dashboard')
                 return redirect(url_for('admin.admin_dashboard'))
@@ -38,7 +38,7 @@ def login():
         else:
             auth_logger.warning(f"Failed login attempt for user: {name} (invalid credentials)")
             flash('Ungültiger Name oder Passwort.', 'danger')
-            
+
     auth_logger.debug("Displaying login page")
     return render_template('login.html')
 
@@ -48,15 +48,15 @@ def login():
 def logout():
     user = session.get('user')
     role = session.get('role')
-    
+
     if user:
         auth_logger.info(f"User {user} ({role}) logged out")
     else:
         auth_logger.warning("Logout called with no user in session")
-    
+
     session.clear()
     logout_user()
-    
+
     flash('Sie wurden abgemeldet.', 'success')
     auth_logger.debug("Redirecting to login page after logout")
     return redirect(url_for('auth.login'))
