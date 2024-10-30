@@ -4,23 +4,20 @@ from app.models import Participant
 from app.extensions import db, login_manager, migrate
 from config import setup_logging
 from app.initialization import initialize_admin
-from dotenv import load_dotenv
 import os
+import logging
+
+app_logger = logging.getLogger('app')
 
 
 def create_app():
-    try:
-        load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'), override=True)
-    except Exception as e:
-        print(f"Error loading .env file: {e}")
-
-    # Adjust the path to the logging configuration file
     setup_logging(default_path=os.path.join(os.path.dirname(__file__), '..', 'config', 'logging_config.yaml'))
 
     app = Flask(__name__)
+    app_logger.info('Flask app created.')
 
     # Determine the configuration mode
-    config_mode = os.getenv('FLASK_ENV', 'development').lower()
+    config_mode = os.getenv('FLASK_ENV').lower()
 
     if config_mode == 'development':
         app.config.from_object(DevelopmentConfig)

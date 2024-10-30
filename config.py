@@ -2,6 +2,10 @@ import os
 import logging.config
 import yaml
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / 'instance' / '.env', override=True)
 
 # Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent
@@ -14,7 +18,8 @@ LOG_FOLDER_PATH.mkdir(parents=True, exist_ok=True)
 class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PORT = int(os.environ.get('FLASK_RUN_PORT', 5000))
+    PORT = os.environ.get('PORT')
+    HOST = os.environ.get('HOST')
 
 
 class DevelopmentConfig(BaseConfig):
