@@ -4,20 +4,20 @@ from app.models import Participant
 from app.extensions import db, login_manager, migrate
 from config import setup_logging
 from app.initialization import initialize_admin
-from dotenv import load_dotenv
 import os
+import logging
+
+app_logger = logging.getLogger('app')
+
 
 def create_app():
-    # Adjust the path to the logging configuration file
     setup_logging(default_path=os.path.join(os.path.dirname(__file__), '..', 'config', 'logging_config.yaml'))
 
-    # Load environment variables from .env file
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'instance', '.env'))
-
     app = Flask(__name__)
+    app_logger.info('Flask app created.')
 
     # Determine the configuration mode
-    config_mode = os.getenv('FLASK_CONFIG', 'development').lower()
+    config_mode = os.getenv('FLASK_ENV').lower()
 
     if config_mode == 'development':
         app.config.from_object(DevelopmentConfig)
@@ -26,7 +26,7 @@ def create_app():
     elif config_mode == 'production':
         app.config.from_object(ProductionConfig)
     else:
-        raise ValueError(f"Invalid FLASK_CONFIG value: {config_mode}")
+        raise ValueError(f"Invalid FLASK_ENV value: {config_mode}")
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)

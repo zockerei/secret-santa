@@ -8,11 +8,13 @@ import logging
 
 queries_logger = logging.getLogger('app.queries')
 
+
 class DatabaseError(Exception):
     def __init__(self, message: str, original_exception: Optional[Exception] = None):
         self.message = message
         self.original_exception = original_exception
         super().__init__(self.message)
+
 
 def add_participant(name: str, password: str, role: str = "participant"):
     try:
@@ -26,6 +28,7 @@ def add_participant(name: str, password: str, role: str = "participant"):
         db.session.rollback()
         queries_logger.error(f"Failed to add participant {name}: {e}")
         raise DatabaseError("Failed to add participant", e)
+
 
 def remove_participant(participant_id: int):
     try:
@@ -42,12 +45,22 @@ def remove_participant(participant_id: int):
         queries_logger.error(f"Failed to remove participant with ID {participant_id}: {e}")
         raise DatabaseError("Failed to remove participant", e)
 
+
 def add_or_assign_receiver(giver_id: int, receiver_id: int, year: int, message_id: Optional[int] = None):
     try:
-        queries_logger.debug(f"Attempting to assign receiver {receiver_id} to giver {giver_id} for year {year}")
-        if db.session.query(exists().where(Assignment.receiver_id == receiver_id).where(Assignment.year == year)).scalar():
-            queries_logger.warning(f"Receiver {receiver_id} is already assigned for year {year}")
-            raise DatabaseError(f"Receiver {receiver_id} is already assigned for year {year}")
+        queries_logger.debug(
+            f"Attempting to assign receiver {receiver_id} to giver {giver_id} for year {year}"
+        )
+        if db.session.query(
+            exists().where(Assignment.receiver_id == receiver_id)
+            .where(Assignment.year == year)
+        ).scalar():
+            queries_logger.warning(
+                f"Receiver {receiver_id} is already assigned for year {year}"
+            )
+            raise DatabaseError(
+                f"Receiver {receiver_id} is already assigned for year {year}"
+            )
         new_assignment = Assignment(giver_id=giver_id, receiver_id=receiver_id, message_id=message_id, year=year)
         db.session.add(new_assignment)
         db.session.commit()
@@ -57,9 +70,12 @@ def add_or_assign_receiver(giver_id: int, receiver_id: int, year: int, message_i
         queries_logger.error(f"Failed to assign receiver {receiver_id} to giver {giver_id} for year {year}: {e}")
         raise DatabaseError("Failed to create assignment", e)
 
+
 def remove_receiver(person_id: int, receiver_name: str, year: int):
     try:
-        queries_logger.debug(f"Attempting to remove receiver {receiver_name} for participant {person_id} in year {year}")
+        queries_logger.debug(
+            f"Attempting to remove receiver {receiver_name} for participant {person_id} in year {year}"
+        )
         receiver = Participant.query.filter_by(name=receiver_name).first()
         if receiver:
             Assignment.query.filter_by(giver_id=person_id, receiver_id=receiver.id, year=year).delete()
@@ -69,8 +85,11 @@ def remove_receiver(person_id: int, receiver_name: str, year: int):
             queries_logger.warning(f"Receiver {receiver_name} not found for participant {person_id} in year {year}")
     except SQLAlchemyError as e:
         db.session.rollback()
-        queries_logger.error(f"Failed to remove receiver {receiver_name} for participant {person_id} in year {year}: {e}")
+        queries_logger.error(
+            f"Failed to remove receiver {receiver_name} for participant {person_id} in year {year}: {e}"
+        )
         raise DatabaseError("Failed to remove receiver", e)
+
 
 def verify_participant(name: str, password: str) -> Optional[Participant]:
     try:
@@ -84,6 +103,7 @@ def verify_participant(name: str, password: str) -> Optional[Participant]:
         queries_logger.error(f"Failed to verify participant {name}: {e}")
         raise DatabaseError("Failed to verify participant", e)
 
+
 def get_messages_for_participant(participant_id: int, year: int) -> List[Dict[str, Any]]:
     try:
         queries_logger.debug(f"Fetching messages for participant ID {participant_id} in year {year}")
@@ -92,6 +112,7 @@ def get_messages_for_participant(participant_id: int, year: int) -> List[Dict[st
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch messages for participant ID {participant_id} in year {year}: {e}")
         raise DatabaseError("Failed to fetch messages", e)
+
 
 def get_role(name: str) -> Optional[str]:
     try:
@@ -107,6 +128,7 @@ def get_role(name: str) -> Optional[str]:
         queries_logger.error(f"Failed to fetch role for participant {name}: {e}")
         raise DatabaseError("Failed to fetch role", e)
 
+
 def get_all_participants() -> List[Dict[str, Any]]:
     try:
         queries_logger.debug("Fetching all non-admin participants")
@@ -116,6 +138,7 @@ def get_all_participants() -> List[Dict[str, Any]]:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch participants: {e}")
         raise DatabaseError("Failed to fetch participants", e)
+
 
 def get_assignments_for_giver(giver_id: int) -> List[Dict[str, Any]]:
     try:
@@ -129,6 +152,7 @@ def get_assignments_for_giver(giver_id: int) -> List[Dict[str, Any]]:
         queries_logger.error(f"Failed to fetch assignments for giver ID {giver_id}: {e}")
         raise DatabaseError("Failed to fetch assignments", e)
 
+
 def get_participants_count() -> int:
     try:
         queries_logger.debug("Counting all participants")
@@ -138,6 +162,7 @@ def get_participants_count() -> int:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to get participants count: {e}")
         raise DatabaseError("Failed to get participants count", e)
+
 
 def get_current_receiver(giver_id: int, year: int) -> Optional[Dict[str, Any]]:
     try:
@@ -154,6 +179,7 @@ def get_current_receiver(giver_id: int, year: int) -> Optional[Dict[str, Any]]:
         queries_logger.error(f"Failed to fetch current receiver for giver ID {giver_id} in year {year}: {e}")
         raise DatabaseError("Failed to fetch current receiver", e)
 
+
 def get_participant_id(name: str) -> Optional[int]:
     try:
         queries_logger.debug(f"Fetching participant ID for name: {name}")
@@ -167,6 +193,7 @@ def get_participant_id(name: str) -> Optional[int]:
         queries_logger.error(f"Failed to fetch participant ID for {name}: {e}")
         raise DatabaseError("Failed to fetch participant ID", e)
 
+
 def get_participant_by_id(person_id: int) -> Optional[Dict[str, Any]]:
     try:
         queries_logger.debug(f"Fetching participant by ID: {person_id}")
@@ -179,6 +206,7 @@ def get_participant_by_id(person_id: int) -> Optional[Dict[str, Any]]:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch participant with ID {person_id}: {e}")
         raise DatabaseError("Failed to fetch participant", e)
+
 
 def update_participant(participant_id: int, name: str, password: str):
     try:
@@ -196,15 +224,17 @@ def update_participant(participant_id: int, name: str, password: str):
         queries_logger.error(f"Failed to update participant ID {participant_id}: {e}")
         raise DatabaseError("Failed to update participant", e)
 
+
 def admin_exists() -> bool:
     try:
         queries_logger.debug("Checking if any admin exists")
-        exists = db.session.query(exists().where(Participant.is_admin == True)).scalar()
-        queries_logger.info(f"Admin exists: {exists}")
-        return exists
+        admin_exists = db.session.query(exists().where(Participant.is_admin)).scalar()
+        queries_logger.info(f"Admin exists: {admin_exists}")
+        return admin_exists
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to check for admin existence: {e}")
         raise DatabaseError("Failed to check for admin", e)
+
 
 def update_participant_name(participant_id: int, name: str):
     try:
@@ -221,6 +251,7 @@ def update_participant_name(participant_id: int, name: str):
         queries_logger.error(f"Failed to update name for participant ID {participant_id}: {e}")
         raise DatabaseError("Failed to update participant name", e)
 
+
 def get_message_by_id(message_id: int, participant_id: int) -> Optional[Dict[str, Any]]:
     try:
         queries_logger.debug(f"Fetching message ID {message_id} for participant ID {participant_id}")
@@ -233,6 +264,7 @@ def get_message_by_id(message_id: int, participant_id: int) -> Optional[Dict[str
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch message ID {message_id} for participant ID {participant_id}: {e}")
         raise DatabaseError("Failed to fetch message", e)
+
 
 def update_message(message_id: int, new_message_text: str):
     try:
@@ -249,6 +281,7 @@ def update_message(message_id: int, new_message_text: str):
         queries_logger.error(f"Failed to update message ID {message_id}: {e}")
         raise DatabaseError("Failed to update message", e)
 
+
 def delete_message(message_id: int):
     try:
         queries_logger.debug(f"Deleting message ID {message_id}")
@@ -264,6 +297,7 @@ def delete_message(message_id: int):
         queries_logger.error(f"Failed to delete message ID {message_id}: {e}")
         raise DatabaseError("Failed to delete message", e)
 
+
 def get_message_for_year(participant_id: int, year: int) -> Optional[Dict[str, Any]]:
     try:
         queries_logger.debug(f"Fetching message for participant ID {participant_id} in year {year}")
@@ -276,6 +310,7 @@ def get_message_for_year(participant_id: int, year: int) -> Optional[Dict[str, A
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch message for participant ID {participant_id} in year {year}: {e}")
         raise DatabaseError("Failed to fetch message for year", e)
+
 
 def is_duplicate_assignment(giver_id: int, year: int) -> bool:
     try:
@@ -292,6 +327,7 @@ def is_duplicate_assignment(giver_id: int, year: int) -> bool:
         queries_logger.error(f"Failed to check for duplicate assignment for giver ID {giver_id} in year {year}: {e}")
         raise DatabaseError("Failed to check for duplicate assignment", e)
 
+
 def add_message(participant_id: int, message_text: str, year: int):
     try:
         queries_logger.debug(f"Attempting to add message for participant ID {participant_id} for year {year}")
@@ -303,6 +339,7 @@ def add_message(participant_id: int, message_text: str, year: int):
         db.session.rollback()
         queries_logger.error(f"Failed to add message for participant ID {participant_id} for year {year}: {e}")
         raise DatabaseError("Failed to add message", e)
+
 
 def get_admin() -> Optional[Dict[str, Any]]:
     try:
@@ -316,4 +353,3 @@ def get_admin() -> Optional[Dict[str, Any]]:
     except SQLAlchemyError as e:
         queries_logger.error(f"Failed to fetch admin user: {e}")
         raise DatabaseError("Failed to fetch admin user", e)
-

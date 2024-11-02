@@ -2,6 +2,10 @@ import os
 import logging.config
 import yaml
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / 'instance' / '.env', override=True)
 
 # Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent
@@ -10,24 +14,28 @@ BASE_DIR = Path(__file__).resolve().parent
 LOG_FOLDER_PATH = BASE_DIR / 'logs'
 LOG_FOLDER_PATH.mkdir(parents=True, exist_ok=True)
 
+
 class BaseConfig:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'A SECRET KEY'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PORT = os.environ.get('PORT')
+    HOST = os.environ.get('HOST')
+
 
 class DevelopmentConfig(BaseConfig):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEVELOPMENT_DATABASE_URI') or  \
-        'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_dev.db')
-    
+    DEBUG = 1
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_dev.db')
+
+
 class TestingConfig(BaseConfig):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TESTING_DATABASE_URI') or \
-        'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_test.db')
+    DEBUG = 1
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa_test.db')
+
 
 class ProductionConfig(BaseConfig):
-    DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or  \
-        'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa.db')
+    DEBUG = 0
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'secret_santa.db')
+
 
 def setup_logging(default_path='config/logging_config.yaml'):
     """Setup logging configuration"""

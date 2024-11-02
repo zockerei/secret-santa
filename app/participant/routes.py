@@ -90,7 +90,7 @@ def manage_message():
                 participant_logger.warning(f'User "{user}" attempted to add second message for year {current_year}')
                 flash('Du hast bereits eine Nachricht für dieses Jahr geschrieben.', 'warning')
                 return redirect(url_for('participant.participant_dashboard'))
-            
+
             sql_statements.add_message(participant_id, message_text, current_year)
             flash('Nachricht erfolgreich hinzugefügt!', 'success')
             participant_logger.info(f'New message added for user "{user}" for year {current_year}.')
@@ -128,10 +128,10 @@ def edit_participant(participant_id):
 
         # Update the session with the new name if it changed
         session['user'] = name
-        
-        flash(f'Profil wurde erfolgreich aktualisiert.', 'success')
+
+        flash('Profil wurde erfolgreich aktualisiert.', 'success')
         return redirect(url_for('participant.participant_dashboard'))
-    
+
     participant_logger.debug(f'User "{user}" accessed edit profile page')
     return redirect(url_for('participant.participant_dashboard'))
 
@@ -142,7 +142,7 @@ def view_message(receiver_id, year):
     """Fetch a specific message for a receiver and year."""
     user = session.get('user')
     participant_logger.info(f'User "{user}" requested to view message from receiver {receiver_id} for year {year}')
-    
+
     message = sql_statements.get_message_for_year(receiver_id, year)
     return jsonify({
         'message': message['message'] if message else None

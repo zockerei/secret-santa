@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app.extensions import db
 
+
 class Participant(db.Model, UserMixin):
     __tablename__ = 'participants'
     id = db.Column(db.Integer, primary_key=True)
@@ -23,6 +24,7 @@ class Participant(db.Model, UserMixin):
     def get_id(self):
         return str(self.id)
 
+
 class Message(db.Model):
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
@@ -31,6 +33,7 @@ class Message(db.Model):
     year = db.Column(db.Integer, nullable=False, index=True)
 
     __table_args__ = (UniqueConstraint('participant_id', 'year', name='uq_participant_year_message'),)
+
 
 class Assignment(db.Model):
     __tablename__ = 'assignments'
