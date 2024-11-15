@@ -180,7 +180,7 @@
                 <form action="{{ url_for('participant.edit_participant', participant_id=participant.id) }}" method="POST">
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" value="{{ participant.name }}" required>
+                        <input type="text" class="form-control" name="name" id="name" value="{{ participant.name }}" required oninput="this.value = this.value.toLowerCase()">
                     </div>
                     <div class="form-group">
                         <label for="password">Passwort</label>
