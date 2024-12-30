@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from database import create_db_and_tables
+from fastapi.responses import RedirectResponse
+from app.database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
+    await init_db()
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -13,4 +14,4 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return RedirectResponse(url="/docs")
